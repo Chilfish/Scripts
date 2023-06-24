@@ -1,8 +1,9 @@
-$startup = "C:\Users\Organic_Fish\AppData\Roaming\Microsoft\Windows\Start Menu\Programs\Startup"
+$mem = "D:\APP\Tools\Mem Reduct\memreduct.exe"
+$sync = "D:\Scoop\apps\syncthing\current\syncthing.exe"
+$aria2 = "D:\Scoop\apps\aria2\current\aria2.exe"
 
-if ($args[0]) {
-	subl $startup\startup.ps1
-} else {
-	explorer $startup
-}
+Start-Process $sync  -WindowStyle Hidden
+Start-Process $mem   -WindowStyle Hidden
+Start-Process $aria2 -WindowStyle Hidden
 
+mongod --port 27017

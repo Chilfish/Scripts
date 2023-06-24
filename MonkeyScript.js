@@ -1,10 +1,7 @@
 // ==UserScript==
 // @name         FishScript
-// @version      0.3.1
+// @version      0.3.2
 // @author       Chill Fish
-// @updateURL    https://raw.fastgit.org/Chilfish/FishCode/main/Web/MonkeyScript.js
-// @downloadURL  https://raw.fastgit.org/Chilfish/FishCode/main/Web/MonkeyScript.js
-// @icon         https://raw.fastgit.org/Chilfish/FishCode/main/Web/static/img/fish.png
 // @match        *://*/*
 // @grant        GM_addStyle
 // @run-at       document-idle
@@ -38,7 +35,21 @@
   else if (url.includes('twitter.com')) {
     css += `[aria-label="Home timeline"]>div.r-gtdqiz{position:relative}`;
   }
+  // 必应搜索的图片结果
+  else if (url.includes('bing.com/search')) {
+    css += `.b_imgans{display:none;}`;
 
+    $('.b_ad').style.display = 'none';
+    [...$$('.b_algo')].forEach((ele) => {
+      if (ele.children[0].tagName === 'H2') {
+        ele.style.display = 'none';
+      }
+    });
+  }
+  // 微博 字体
+  else if (url.includes('weibo.com')){
+      css += `div,p,li,a,span{font-size:12.5px !important;}`;
+  }
   // 全局：细滚动条
   css += `*::-webkit-scrollbar {width: 8px;height: 8px;}
     *::-webkit-scrollbar-track {border-radius: 8px;background-color: transparent;}
