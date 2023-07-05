@@ -2,7 +2,7 @@
 
 # 由 GPT 将原文的 CMD 转成 powershell
 
-$prefix = "$env:userprofile\AppData\Roaming\Code\"
+$prefix = "$env:userprofile\AppData\Roaming\Code - Insiders\"
 
 $dirsToDelete = @(
     "CachedExtensionVSIXs\",

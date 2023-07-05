@@ -1,4 +1,4 @@
-$Path = "C:/Users/Organic_Fish/Desktop/battery-report.html"
+$Path = "D:/battery-report.html"
 
 powercfg /batteryreport /output $Path
 
