@@ -1,14 +1,14 @@
 // ==UserScript==
 // @name         Chill Script
 // @description  Hello! MyScript
-// @version      0.3.4
+// @version      0.3.5
 // @author       Chill Fish
 // @match        *://*/*
 // @grant        GM_addStyle
 // @run-at       document-end
 // @homepageURL  https://github.com/Chilfish
-// @updateURL    https://raw.fastgit.ixmu.net/Chilfish/Scripts/main/MonkeyScript.js
-// @downloadURL  https://raw.fastgit.ixmu.net/Chilfish/Scripts/main/MonkeyScript.js
+// @updateURL    https://raw.githubusercontent.com/Chilfish/Scripts/main/MonkeyScript.js
+// @downloadURL  https://raw.githubusercontent.com/Chilfish/Scripts/main/MonkeyScript.js
 // @license      MIT
 // ==/UserScript==
 
@@ -21,8 +21,7 @@ window.onload = function () {
 
   // 禁止外链跳转
   const rm301 = (links, rule = /.+target=/gm) => {
-    if (!links[0].href)
-      return
+    if (!links[0].href) return
     links.forEach((e) => {
       e.href = decodeURIComponent(e.href).replace(rule, '')
     })
@@ -63,7 +62,8 @@ window.onload = function () {
   else if (url.includes('weibo.com')) {
     css += 'div,p,li,a,span{font-size:12.5px !important;}'
   }
-  else if (url.includes('juejin.cn')) {
+  // 询问是否要跳转
+  else if (!!url.match(/(juejin.cn|zhihu.com)/gm)) {
     const a = [...$('.markdown-body').querySelectorAll('a')]
     rm301(a)
   }
