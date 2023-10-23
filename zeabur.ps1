@@ -1,0 +1,1 @@
+tsx D:\Chilling\Server\node\src\zeabur.ts

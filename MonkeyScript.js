@@ -1,3 +1,4 @@
+
 // ==UserScript==
 // @name         Chill Script
 // @description  Hello! MyScript

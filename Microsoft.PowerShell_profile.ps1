@@ -1,9 +1,6 @@
 # Import-Module oh-my-posh 
-oh-my-posh init pwsh --config "~\AppData\Local\Programs\oh-my-posh\themes\amro.omp.json" | Invoke-Expression 
+# oh-my-posh init pwsh --config "~\AppData\Local\Programs\oh-my-posh\themes\amro.omp.json" | Invoke-Expression 
 
-fnm env --use-on-cd | Out-String | Invoke-Expression
-
-# PSReadLine 补全模块
 Set-PSReadLineOption -PredictionSource History
 Set-PSReadlineKeyHandler -Key Tab -Function MenuComplete
 Set-PSReadLineKeyHandler -Chord Tab -Function MenuComplete
@@ -16,12 +13,8 @@ Set-PSReadLineKeyHandler -Key DownArrow -ScriptBlock {
     [Microsoft.PowerShell.PSConsoleReadLine]::EndOfLine()
 }
 
-# 路径补全
-# https://github.com/vors/ZLocation
-
-# openAI
-$openAPI = ''
-$openKEY = ''
+New-Alias git hub
+New-Alias Set-LocationWithFnm z
 
 # github-copilot-cli aliases
 function ?? {
@@ -64,3 +57,41 @@ function du($dir = ".") {
   sort Sum -desc |
   format-table -Property Name,"Sum (MB)", Sum -autosize
 }
+
+function gc1 {
+  param(
+      [Parameter(Mandatory=$true)]
+      [string]$user,
+      [Parameter(Mandatory=$true)]
+      [string]$repo,
+      
+      [string]$dir=$repo
+  )
+  try {
+    git clone --depth=1 "https://ghproxy.com/https://github.com/$user/$repo.git" $dir
+    cd $dir
+  } catch {
+    Write-Host "Git clone failed. Exiting..."
+    return  
+  }
+  Remove-Item -Recurse -Force .git
+
+  git init; gum use Chill; git add .
+}
+
+function cp1 {
+    param(
+        [Parameter(Mandatory=$true)]
+        [string]$From,
+        
+        [Parameter(Mandatory=$true)]
+        [string]$To
+    )
+
+    # 复制并覆盖文件夹
+    Copy-Item -Path $From -Destination $To -Recurse -Force -Exclude node_modules, .git, out
+}
+
+Invoke-Expression (&starship init powershell)
+Invoke-Expression (& { (zoxide init powershell | Out-String) })
+fnm env --use-on-cd | Out-String | Invoke-Expression
