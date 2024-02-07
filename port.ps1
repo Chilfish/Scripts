@@ -33,8 +33,8 @@ if ($isSet -eq 'add') {
   Write-Output "Port forwarding to $port"
 }
 elseif ($isSet -eq 'rm') {
-  netsh interface portproxy delete v4tov4`
-  listenport=$port listenaddress=0.0.0.0
+  netsh interface portproxy delete v4tov4 listenport=$port listenaddress=0.0.0.0
+
   Write-Output "rm $port"
 }
 elseif ($isSet -eq 'ls') {

@@ -1,7 +1,7 @@
 # 指定目录的路径
-$sourcePath = "D:/videos/bili"
+$sourcePath = "D:\Download\20231001前版本"
 # 指定目标目录的路径
-$destinationPath = "D:/videos/bili/"
+$destinationPath = "D:\Download\20231001前版本"
 
 # 获取指定目录下的文件夹
 $folders = Get-ChildItem -Path $sourcePath -Directory

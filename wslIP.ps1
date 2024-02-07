@@ -1,11 +1,43 @@
-if (-NOT ([Security.Principal.WindowsPrincipal][Security.Principal.WindowsIdentity]::GetCurrent()).IsInRole([Security.Principal.WindowsBuiltInRole] "Administrator")) {
-  $arguments = "& '" +$myinvocation.mycommand.definition + "'"
-  Start-Process powershell -Verb runAs -ArgumentList $arguments -WindowStyle Hidden
-  Break
+# 检查是否以管理员权限运行
+if (-not ([Security.Principal.WindowsPrincipal][Security.Principal.WindowsIdentity]::GetCurrent()).IsInRole([Security.Principal.WindowsBuiltInRole]::Administrator)) {
+    # 重新启动脚本以获取管理员权限
+    Start-Process powershell.exe "-NoProfile -ExecutionPolicy Bypass -File `"$PSCommandPath`"" -Verb RunAs -WindowStyle Hidden
+    exit
 }
 
-wsl -u root /etc/init.wsl start
 
-wsl -d Ubuntu-22.04 -u root ip addr add 192.168.1.1/24 broadcast 192.168.1.255 dev eth0 label eth0:1
+$file = "C:\Windows\System32\drivers\etc\hosts"
+$wsl_ip = (wsl hostname -I).trim().split(' ')[0]
 
-netsh interface ip add address "vEthernet (WSL)" 192.168.1.2 255.255.255.0
+function add-host([string]$filename, [string]$hostname, [string]$ip) {
+    remove-host $filename $hostname
+    $ip + "`t`t" + $hostname | Out-File -encoding ASCII -append $filename
+}
+
+function remove-host([string]$filename, [string]$hostname) {
+    $c = Get-Content $filename
+    $newLines = @()
+
+    foreach ($line in $c) {
+        $bits = [regex]::Split($line, "\t+")
+        if ($bits.count -eq 2) {
+            if ($bits[1] -ne $hostname) {
+                $newLines += $line
+            }
+        } else {
+            $newLines += $line
+        }
+    }
+
+    # 写入文件
+    Clear-Content $filename
+    foreach ($line in $newLines) {
+        $line | Out-File -encoding ASCII -append $filename
+    }
+}
+
+try {
+    add-host $file 'wsl' $wsl_ip
+} catch  {
+    Write-Host "error to write hosts: " $error[0]
+}
