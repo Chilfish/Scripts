@@ -1,1 +1,0 @@
-Start-Process "wsa://com.android.settings"
