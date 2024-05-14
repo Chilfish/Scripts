@@ -8,17 +8,15 @@
 // @description:zh-cn 一键保存视频/图片
 // @description:zh-tw 一鍵保存視頻/圖片
 // @version     1.29
-// @author      AMANE
+// @author      AMANE, Chilfish
 // @namespace   none
 // @match       https://twitter.com/*
-// @match       https://mobile.twitter.com/*
-// @grant       GM_registerMenuCommand
 // @grant       GM_setValue
 // @grant       GM_getValue
 // @grant       GM_download
 // @license     MIT
-// @downloadURL https://update.greasyfork.org/scripts/423001/Twitter%20Media%20Downloader.user.js
-// @updateURL https://update.greasyfork.org/scripts/423001/Twitter%20Media%20Downloader.meta.js
+// @downloadURL https://github.com/Chilfish/Scripts/raw/main/monkey/twitter-media.user.js
+// @updateURL   https://github.com/Chilfish/Scripts/raw/main/monkey/meta/twitter-media.meta.js
 // ==/UserScript==
 /* jshint esversion: 8 */
 
