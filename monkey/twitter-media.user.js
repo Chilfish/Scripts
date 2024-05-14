@@ -21,6 +21,8 @@
 // @updateURL https://update.greasyfork.org/scripts/423001/Twitter%20Media%20Downloader.meta.js
 // ==/UserScript==
 /* jshint esversion: 8 */
+/* eslint-disable regexp/no-unused-capturing-group */
+/* eslint-disable style/no-mixed-operators */
 
 const filename = 'twitter_{user-name}(@{user-id})_{date-time}_{status-id}_{file-type}'
 
@@ -247,17 +249,17 @@ async function click(btn, status_id, is_exist, index) {
   const tweet = json.legacy
   const user = json.core.user_results.result.legacy
   const invalid_chars = { '\\': '＼', '\/': '／', '\|': '｜', '<': '＜', '>': '＞', ':': '：', '*': '＊', '?': '？', '"': '＂', '\u200B': '', '\u200C': '', '\u200D': '', '\u2060': '', '\uFEFF': '', '🔞': '' }
-  const datetime = out.match(/{date-time(-local)?:[^{}]+}/) ? out.match(/{date-time(?:-local)?:([^{}]+)}/)[1].replace(/[\\/|<>*?:"]/g, v => invalid_chars[v]) : 'YYYYMMDD-hhmmss'
+  const datetime = out.match(/\{date-time(-local)?:[^{}]+\}/) ? out.match(/\{date-time(?:-local)?:([^{}]+)\}/)[1].replace(/[\\/|<>*?:"]/g, v => invalid_chars[v]) : 'YYYYMMDD-hhmmss'
   const info = {}
   info['status-id'] = status_id
-  info['user-name'] = user.name.replace(/([\\/|*?:"]|[\u200B-\u200D\u2060\uFEFF]|🔞)/g, v => invalid_chars[v])
+  info['user-name'] = user.name.replace(/([\\/|*?:"\u200B-\u200D\u2060\uFEFF]|🔞)/g, v => invalid_chars[v])
   info['user-id'] = user.screen_name
   info['date-time'] = formatDate(tweet.created_at, datetime)
   info['date-time-local'] = formatDate(tweet.created_at, datetime, true)
   info['full-text'] = tweet.full_text
     .split('\n').join(' ')
     .replace(/\s*https:\/\/t\.co\/\w+/g, '')
-    .replace(/[\\/|<>*?:"]|[\u200B-\u200D\u2060\uFEFF]/g, v => invalid_chars[v])
+    .replace(/[\\/|<>*?:"\u200B-\u200D\u2060\uFEFF]/g, v => invalid_chars[v])
 
   let medias = tweet.extended_entities && tweet.extended_entities.media
 
@@ -277,8 +279,9 @@ async function click(btn, status_id, is_exist, index) {
     info['file-ext'] = info.file.split('.').pop()
     info['file-type'] = media.type.replace('animated_', '')
 
-    info.out = (`${out.replace(/\.?{file-ext}/, '') + ((medias.length > 1 || index) && out.match('{file-name}') ? '' : `-${index ? index - 1 : i}`)}.{file-ext}`)
-      .replace(/{([^{}:]+)(:[^{}]+)?}/g, (match, name) => info[name])
+    info.out = (`${out.replace(/\.?\{file-ext\}/, '') + ((medias.length > 1 || index) && out.match('{file-name}') ? '' : `-${index ? index - 1 : i}`)}.{file-ext}`)
+    // eslin
+      .replace(/\{([^{}:]+)(:[^{}]+)?\}/g, (_match, name) => info[name])
 
     downloader().add({
       url: info.url,

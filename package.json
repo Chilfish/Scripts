@@ -1,19 +1,29 @@
 {
-  "name": "katakana-terminator",
+  "name": "chilfish-scipts",
   "type": "module",
   "version": "2024.05.13",
   "private": true,
+  "author": {
+    "name": "Chilfish",
+    "email": "chill4fish@gmail.com"
+  },
   "license": "MIT",
   "scripts": {
+    "dev:hello": "pnpm -F hello dev",
+    "build:hello": "pnpm -F hello build",
     "lint": "eslint .",
     "postinstall": "simple-git-hooks"
   },
   "devDependencies": {
-    "@antfu/eslint-config": "^2.17.0",
+    "@antfu/eslint-config": "^2.18.0",
+    "@types/node": "^20.12.11",
     "eslint-plugin-format": "^0.1.1",
     "lint-staged": "^15.2.2",
     "pnpm": "^9.1.1",
-    "simple-git-hooks": "^2.11.1"
+    "simple-git-hooks": "^2.11.1",
+    "typescript": "^5.4.5",
+    "vite": "^5.2.11",
+    "vite-plugin-monkey": "^3.5.2"
   },
   "simple-git-hooks": {
     "pre-commit": "pnpm lint-staged"
