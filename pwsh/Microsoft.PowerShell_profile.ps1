@@ -113,7 +113,7 @@ function gc1 {
       [string]$dir=$repo
   )
   try {
-    git clone --depth=1 "https://ghproxy.com/https://github.com/$user/$repo.git" $dir
+    git clone --depth=1 "https://github.com/$user/$repo.git" $dir
     cd $dir
   } catch {
     Write-Host "Git clone failed. Exiting..."
