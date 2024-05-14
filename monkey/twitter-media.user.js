@@ -500,7 +500,7 @@ function formatDate(i, o, tz) {
     h2: d.getUTCHours() % 12,
     ap: d.getUTCHours() < 12 ? 'AM' : 'PM',
   }
-  return o.replace(/(YY(YY)?|MMM?|DD|hh|mm|ss|h2|ap)/g, n => (`0${v[n]}`).substr(-n.length))
+  return o.replace(/(YY(YY)?|MMM?|DD|hh|mm|ss|h2|ap)/g, n => (`0${v[n]}`).substring(-n.length))
 }
 
 function downloader() {
