@@ -9,7 +9,6 @@
     "module": "ESNext",
     "moduleResolution": "Bundler",
     "paths": {
-      "@shared/*": ["packages/shared/src/*"]
     },
     "types": [
       "vite/client"
@@ -22,8 +21,6 @@
     "skipLibCheck": true
   },
   "include": [
-    "apps",
-    "packages",
     "*.ts",
     "*.tsx",
     "*.d.ts"
