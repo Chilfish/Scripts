@@ -25,8 +25,8 @@
 // @connect     translate.google.cn
 // @connect     translate.google.com
 // @connect     translate.googleapis.com
-// @downloadURL  https://github.com/Chilfish/katakana-terminator/raw/master/katakana-terminator.user.js
-// @updateURL    https://github.com/Chilfish/katakana-terminator/raw/master/katakana-terminator.meta.js
+// @downloadURL  https://github.com/Chilfish/Scripts/raw/main/monkey/katakana-terminator.user.js
+// @updateURL    https://github.com/Chilfish/Scripts/raw/main/monkey/meta/katakana-terminator.meta.js
 // ==/UserScript==
 
 // define some shorthands
