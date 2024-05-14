@@ -7,7 +7,7 @@
 // @description:ja ワンクリックで動画・画像を保存する。
 // @description:zh-cn 一键保存视频/图片
 // @description:zh-tw 一鍵保存視頻/圖片
-// @version     1.29
+// @version     1.30
 // @author      AMANE, Chilfish
 // @namespace   none
 // @match       https://twitter.com/*
@@ -19,7 +19,6 @@
 // @updateURL   https://github.com/Chilfish/Scripts/raw/main/monkey/meta/twitter-media.meta.js
 // ==/UserScript==
 /* jshint esversion: 8 */
-
 /* eslint-disable style/no-mixed-operators */
 
 const filename = 'twitter_{user-name}(@{user-id})_{date-time}_{status-id}_{file-type}'
@@ -362,17 +361,6 @@ async function useHistory(value) {
 }
 
 /**
- * get the download history from the localStorage and remove it
- */
-function storage_obsolete(is_remove) {
-  const data = JSON.parse(localStorage.getItem('history') || '[]')
-  if (is_remove)
-    localStorage.removeItem('history')
-  else
-    return data
-}
-
-/**
  * Format the date string as YYYYMMDD-hhmmss
  */
 function formatDate(i, tz) {
@@ -393,15 +381,8 @@ function formatDate(i, tz) {
 
 window.onload = async function () {
   is_tweetdeck = location.hostname.includes('tweetdeck')
-  history = storage_obsolete()
+  history = await useHistory()
 
-  if (history.length) {
-    useHistory(history)
-    storage_obsolete(true)
-  }
-  else {
-    history = await useHistory()
-  }
   const observer = new MutationObserver(ms =>
     ms.forEach(m => m.addedNodes.forEach(node => detect(node))),
   )
