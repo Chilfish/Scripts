@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Chill Script
 // @description  Hello! MyScript
-// @version      2024.05.15
+// @version      2024.05.16
 // @author       Chilfish
 // @match        *://*/*
 // @grant        GM_addStyle
@@ -16,7 +16,7 @@ const $ = e => document.querySelector(e)
 const $$ = e => Array.from(document.querySelectorAll(e))
 const css = String.raw
 
-let CSS = css`
+let _css = css`
   *::-webkit-scrollbar {
     width: 8px;height: 8px;
   }
@@ -33,7 +33,7 @@ let CSS = css`
     outline:none;
     box-shadow:none;
   }
-  body { 
+  body {
     overflow-anchor: none;
   }
 `
@@ -46,7 +46,7 @@ const urlActions = [
   {
     pattern: /zhihu\.com/,
     action: () => {
-      CSS += css`
+      _css += css`
         .VideoAnswerPlayer, .ZVideoItem, .ZVideoItem-video {
           display: none;
         }
@@ -63,7 +63,7 @@ const urlActions = [
   {
     pattern: /weibo\.com/,
     action: () => {
-      CSS += css` 
+      _css += css`
         div, p, li, a, span {
           font-size:12.5px !important;
         }
@@ -73,7 +73,8 @@ const urlActions = [
   {
     pattern: /twitter\.com/,
     action: () => {
-      CSS += css`
+      $('link[rel=\'shortcut icon\']').href = 'https://abs.twimg.com/favicons/twitter.ico'
+      _css += css`
         div, span {
           font-size: 14px !important;
         }
@@ -83,8 +84,10 @@ const urlActions = [
         .css-175oi2r.r-15zivkp.r-1bymd8e.r-13qz1uu {
           max-width: fit-content !important; /* left nav label */
         }
-        .css-175oi2r.r-184id4b {
-          display: none !important; /* left profile avatar */
+        .css-175oi2r.r-184id4b,
+        a[aria-label="Premium"],
+        a[aria-label="Grok"] {
+          display: none !important;
         }
       `
     },
@@ -100,5 +103,5 @@ window.onload = async function () {
       action()
   })
 
-  GM_addStyle(CSS)
+  GM_addStyle(_css)
 }

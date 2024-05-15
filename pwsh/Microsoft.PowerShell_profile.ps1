@@ -42,7 +42,7 @@ function nest-gen($name) {
 }
 
 function yt {
-   python D:/Codes/Python/learn-python/video-dlp.py $args
+   python D:/Codes/Scripts/python/video-dlp.py $args
 }
 
 function wb {
@@ -87,21 +87,6 @@ function mem {
   echo ("{0:N3} MB" -f $res)
 }
 
-function dirr{
-  mkdir $args
-  cd $args
-}
-
-function du($dir = ".") {
-  gci $dir -e .git, node_modules | 
-  %{$f=$_; gci -r $_.Name -e .git, node_modules | 
-    measure-object -property length -sum |
-    select  @{Name="Name"; Expression={$f}}, 
-            @{Name="Sum (MB)"; 
-            Expression={"{0:N3}" -f ($_.sum / 1MB) }}, Sum } |
-  sort Sum -desc |
-  format-table -Property Name,"Sum (MB)", Sum -autosize
-}
 
 function gc1 {
   param(
@@ -123,25 +108,6 @@ function gc1 {
 
   git init
   git add .
-}
-
-function cp1 {
-    param(
-        [Parameter(Mandatory=$true)]
-        [string]$From,
-        
-        [Parameter(Mandatory=$true)]
-        [string]$To
-    )
-
-    # 复制并覆盖文件夹
-    Copy-Item -Path $From -Destination $To -Recurse -Force -Exclude node_modules, .git, out
-}
-
-function pyDep {
-  $list = pipdeptree --python=.venv/scripts/python.exe -l -d=0
-  echo $list
-  echo $list > requirements.txt
 }
 
 Invoke-Expression (&starship init powershell)
