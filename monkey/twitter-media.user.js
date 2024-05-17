@@ -7,10 +7,11 @@
 // @description:ja ワンクリックで動画・画像を保存する。
 // @description:zh-cn 一键保存视频/图片
 // @description:zh-tw 一鍵保存視頻/圖片
-// @version     1.30
+// @version     1.31
 // @author      AMANE, Chilfish
 // @namespace   none
 // @match       https://twitter.com/*
+// @match       https://x.com/*
 // @grant       GM_setValue
 // @grant       GM_getValue
 // @grant       GM_download

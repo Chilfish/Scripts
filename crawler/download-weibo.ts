@@ -1,5 +1,3 @@
-import { execSync } from 'node:child_process'
-import { promisify } from 'node:util'
 import { defineCommand, runMain } from 'citty'
 import { ofetch } from 'ofetch'
 import { consola } from 'consola'
@@ -8,8 +6,7 @@ import {
   getWeiboAnonToken,
   prompt,
 } from '../utils'
-
-const exec = (cmd: string) => promisify(() => execSync(cmd, { stdio: 'inherit' }))()
+import { exec } from '../utils/node'
 
 interface PicInfo {
   largest: {
@@ -58,11 +55,8 @@ const main = defineCommand({
       },
     })
 
-    if (data.url_struct?.[0].long_url.includes('video.weibo.com')) {
+    if (data.url_struct?.[0].long_url.includes('video.weibo.com'))
       await exec(`yt-dlp --cookies-from-browser chrome -P D:/downloads ${url}`)
-        .catch(consola.error)
-      // return
-    }
 
     console.log(token)
 
