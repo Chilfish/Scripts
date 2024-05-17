@@ -21,7 +21,7 @@ const main = defineCommand({
     if (!name)
       name = await prompt('Enter Twitter name: ')
 
-    const url = `https://twitter.com/${name}`
+    const url = `https://x.com/${name}`
     const scriptSelector = 'script[data-testid="UserProfileSchema-test"]'
 
     const browser = await puppeteer.launch()
@@ -57,7 +57,7 @@ const main = defineCommand({
 
 runMain(main)
 
-// const url = 'https://twitter.com/i/api/graphql/qW5u-DAuXpMEG0zA1F7UGQ/UserByScreenName'
+// const url = 'https://x.com/i/api/graphql/qW5u-DAuXpMEG0zA1F7UGQ/UserByScreenName'
 // const variables = { screen_name, withSafetyModeUserFields: true }
 // const features = { hidden_profile_likes_enabled: true, hidden_profile_subscriptions_enabled: true, rweb_tipjar_consumption_enabled: true, responsive_web_graphql_exclude_directive_enabled: true, verified_phone_label_enabled: false, subscriptions_verification_info_is_identity_verified_enabled: true, subscriptions_verification_info_verified_since_enabled: true, highlights_tweets_tab_ui_enabled: true, responsive_web_twitter_article_notes_tab_enabled: true, creator_subscriptions_tweet_preview_api_enabled: true, responsive_web_graphql_skip_user_profile_image_extensions_enabled: false, responsive_web_graphql_timeline_navigation_enabled: true }
 
