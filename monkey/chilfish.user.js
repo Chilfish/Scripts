@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Chill Script
 // @description  Hello! MyScript
-// @version      2024.05.17
+// @version      2024.05.19
 // @author       Chilfish
 // @match        *://*/*
 // @grant        GM_addStyle
@@ -71,7 +71,7 @@ const urlActions = [
     },
   },
   {
-    pattern: /(twitter|x)\.com/,
+    pattern: /https:\/\/(twitter|x)\.com/,
     action: () => {
       $('link[rel=\'shortcut icon\']').href = 'https://abs.twimg.com/favicons/twitter.ico'
       _css += css`

@@ -1,6 +1,8 @@
 import { writeFile } from 'node:fs/promises'
+import path from 'node:path'
 import { Buffer } from 'node:buffer'
 import { ofetch } from 'ofetch'
+import { consola } from 'consola'
 
 export async function downloadImage(
   _url: string,
@@ -9,9 +11,9 @@ export async function downloadImage(
   const url = _url.replace('-scaled', '') // -scaled
     .replace(/-\d+x\d+/, '') // remove size suffix: -300x300
     .replace(/-\d+px/, '') // remove size suffix: -300px
-    .replace(/[?@].+/, '') // remove query string
+    .replace('?format=jpg&name=small', '?format=png&name=large')
 
-  console.log(`downloading ${url}`)
+  consola.info(`downloading ${url}`)
 
   let name = url.split('/').pop() || 'image.jpg'
   if (!name.includes('.'))
@@ -27,11 +29,15 @@ export async function downloadImage(
       throw new Error('Not an image')
 
     const buffer = await res.arrayBuffer()
-    await writeFile(`D:/downloads/${name}`, Buffer.from(buffer))
+    const filepath = path.resolve('D:/downloads', name)
+
+    await writeFile(filepath, Buffer.from(buffer))
+
+    consola.success(`成功：${filepath}`)
     return true
   }
   catch (e) {
-    console.error(`失败：${url}, ${e}`)
+    consola.error(`失败：${url}, ${e}`)
     return false
   }
 }

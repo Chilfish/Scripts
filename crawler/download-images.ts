@@ -1,9 +1,9 @@
-import puppeteer from 'puppeteer'
+import puppeteer, { type Page } from 'puppeteer'
 import { defineCommand, runMain } from 'citty'
 import { consola } from 'consola'
-import { downloadImage, prompt } from '../utils'
+import { devices, downloadImage, prompt } from '../utils'
 
-const main = defineCommand({
+runMain(defineCommand({
   meta: {
     name: 'download-images',
     description: 'Download images from a webpage via css selector',
@@ -17,32 +17,65 @@ const main = defineCommand({
       type: 'string',
       description: 'CSS selector of the images',
     },
+    mobile: {
+      type: 'boolean',
+      description: 'use mobile window size',
+      default: false,
+    },
   },
   run: async ({ args }) => {
-    let { url, selector } = args
+    let { url, selector, mobile } = args
     if (!url)
       url = await prompt('Enter URL: ')
     if (!selector)
       selector = await consola.prompt('Enter selector: ') as string
-    if (!selector.trim())
+    if (!selector?.trim())
       selector = 'body'
 
-    await run(url, selector)
-  },
-})
+    consola.info(`fetching images from ${url} via ${selector}`)
 
-async function run(url: string, selector: string) {
-  const { hostname } = new URL(url)
+    await run(url, selector, mobile)
+
+    consola.success('all done')
+  },
+}))
+
+async function run(
+  url: string,
+  selector: string,
+  isMobile: boolean,
+) {
+  const device = devices[isMobile ? 'mobile' : 'desktop']
+  const { ua, width, height } = device
 
   const imageSelector = `${selector} img`
 
   const browser = await puppeteer.launch()
   const page = await browser.newPage()
 
-  await page.goto(url)
-  await page.setViewport({ width: 1080, height: 1024 })
+  await page.setViewport({
+    width,
+    height,
+    isMobile,
+  })
+  await page.setUserAgent(ua)
 
+  consola.info(`page info`, page.viewport())
+
+  await page.goto(url)
   await page.waitForSelector(imageSelector)
+
+  await downImage(page, imageSelector, url)
+
+  await browser.close()
+}
+
+async function downImage(
+  page: Page,
+  imageSelector: string,
+  url: string,
+) {
+  const { hostname } = new URL(url)
 
   const imgs: string[] = await page.evaluate((selector) => {
     const elements = Array.from(document.querySelectorAll(selector)) as HTMLImageElement[]
@@ -60,8 +93,7 @@ async function run(url: string, selector: string) {
         return src
       }),
     )
-
-  console.log(`共有 ${imgs.length} 条`)
+  consola.info(`共有 ${imgs.length} 条`)
 
   let cnt = 0
 
@@ -70,9 +102,5 @@ async function run(url: string, selector: string) {
     res && cnt++
   }
 
-  console.log(`已下载 ${cnt}`)
-
-  await browser.close()
+  consola.success(`已下载 ${cnt}`)
 }
-
-runMain(main)

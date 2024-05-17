@@ -14,9 +14,12 @@ Set-PSReadLineKeyHandler -Key DownArrow -ScriptBlock {
 
 New-Alias git hub
 New-Alias Set-LocationWithFnm z
+New-Alias Get-Content bat
+New-Alias which Get-Command
+
 New-Alias code code-insiders
 New-Alias curl D:/Scoop/shims/curl.exe
-New-Alias which Get-Command
+
 New-Alias pnpm  D:\Dev\Node\pnpm\pnpm.CMD
 New-Alias pnpx  D:\Dev\Node\pnpm\pnpx.CMD
 Remove-Item Alias:ni -Force -ErrorAction Ignore
@@ -32,25 +35,30 @@ function wsll {
 }
 
 function code-count {
-    tokei -s lines -e pnpm-lock.yaml $args . 
+  # https://github.com/xampprocky/tokei
+  tokei -s lines -e pnpm-lock.yaml $args . 
 }
 
 function nest-gen($name) {
+  # nestjs/cli
   nest g mo $name modules
   nest g co $name modules --no-spec 
   nest g s $name modules --no-spec 
 }
 
 function yt {
-   python D:/Codes/Scripts/python/video-dlp.py $args
+  # https://github.com/Chilfish/Scripts/blob/main/python/video-dlp.py
+  python D:/Codes/Scripts/python/video-dlp.py $args
 }
 
 function wb {
+  # https://github.com/Chilfish/Weibo-archiver/blob/main/scripts/server.mjs
   $cwd = "D:/Backups/Weibo"
   node "$cwd/server.mjs" $cwd
 }
 
 function danmu {
+  # https://github.com/nilaoda/BBDown
   bbdown $args --danmaku-only --work-dir=D:/videos
   rm -r D:/videos/*.xml
 }
@@ -66,6 +74,7 @@ function ya {
 }
 
 function lss {
+  # https://github.com/eza-community/eza
   eza -lnhaa --time-style "+%m-%d %H:%m" --no-quotes --sort type $args
 }
 
@@ -87,7 +96,7 @@ function mem {
   echo ("{0:N3} MB" -f $res)
 }
 
-
+# clone a repo and init it
 function gc1 {
   param(
       [Parameter(Mandatory=$true)]
@@ -100,14 +109,14 @@ function gc1 {
   try {
     git clone --depth=1 "https://github.com/$user/$repo.git" $dir
     cd $dir
+    Remove-Item -Recurse -Force .git
+
+    git init
+    git add .
   } catch {
     Write-Host "Git clone failed. Exiting..."
     return  
   }
-  Remove-Item -Recurse -Force .git
-
-  git init
-  git add .
 }
 
 Invoke-Expression (&starship init powershell)
