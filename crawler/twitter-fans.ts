@@ -1,11 +1,8 @@
 import { consola } from 'consola'
-
 import { defineCommand, runMain } from 'citty'
+import { fetchIntercept, newBrowser, prompt } from '../utils'
 
-import puppeteer from 'puppeteer'
-import { prompt } from '../utils'
-
-const main = defineCommand({
+runMain(defineCommand({
   meta: {
     name: 'twitter-fans',
     description: 'get twitter fans of a user',
@@ -22,40 +19,20 @@ const main = defineCommand({
       name = await prompt('Enter Twitter name: ')
 
     const url = `https://x.com/${name}`
-    const scriptSelector = 'script[data-testid="UserProfileSchema-test"]'
+    const apiMatch = '/UserByScreenName'
 
-    const browser = await puppeteer.launch()
-    const page = await browser.newPage()
+    const browser = await newBrowser()
+    const data = await fetchIntercept(browser, url, apiMatch)
+      .then(res => res.data.user.result.legacy)
 
-    await page.goto(url)
-    await page.setViewport({ width: 1080, height: 1024 })
-
-    await page.waitForSelector(scriptSelector)
-
-    const data = await page.evaluate((selector) => {
-      const script = document.querySelector(selector)
-      if (!script)
-        return null
-
-      return JSON.parse(script.innerHTML)
-    }, scriptSelector)
-
-    if (!data) {
-      consola.error('Failed to fetch twitter fans')
-      await browser.close()
-      return
-    }
-
-    const displyName = data.author.givenName
-    const followers = data.author.interactionStatistic[0].userInteractionCount
+    const displyName = data.name
+    const followers = data.normal_followers_count
 
     consola.info(`Twitter fans of ${displyName}: ${followers}`)
 
     await browser.close()
   },
-})
-
-runMain(main)
+}))
 
 // const url = 'https://x.com/i/api/graphql/qW5u-DAuXpMEG0zA1F7UGQ/UserByScreenName'
 // const variables = { screen_name, withSafetyModeUserFields: true }

@@ -1,8 +1,8 @@
 import path from 'node:path'
-import puppeteer, { type Page } from 'puppeteer'
+import type { Page } from 'puppeteer'
 import { consola } from 'consola'
 import { defineCommand, runMain } from 'citty'
-import { cookieToRecord, devices, prompt } from '../utils'
+import { cookieToRecord, devices, newBrowser, prompt } from '../utils'
 
 const app = defineCommand({
   meta: {
@@ -93,9 +93,7 @@ export default async function main(
   consola.info(`url: ${url}, selector: ${selector}, element: ${element}`)
   consola.info(`device: `, { ua, width, height })
 
-  const browser = await puppeteer.launch({
-    headless: 'shell',
-  })
+  const browser = await newBrowser()
   const page = await browser.newPage()
 
   await page.setUserAgent(ua)

@@ -1,7 +1,7 @@
-import puppeteer, { type Page } from 'puppeteer'
+import type { Page } from 'puppeteer'
 import { defineCommand, runMain } from 'citty'
 import { consola } from 'consola'
-import { devices, downloadImage, prompt } from '../utils'
+import { devices, downloadImage, newBrowser, prompt } from '../utils'
 
 runMain(defineCommand({
   meta: {
@@ -50,7 +50,7 @@ async function run(
 
   const imageSelector = `${selector} img`
 
-  const browser = await puppeteer.launch()
+  const browser = await newBrowser()
   const page = await browser.newPage()
 
   await page.setViewport({
