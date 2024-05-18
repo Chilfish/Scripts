@@ -2,10 +2,9 @@ import path from 'node:path'
 import puppeteer, { type Page } from 'puppeteer'
 import { consola } from 'consola'
 import { defineCommand, runMain } from 'citty'
+import { cookieToRecord, devices, prompt } from '../utils'
 
-import { devices, prompt } from '../utils'
-
-runMain(defineCommand({
+const app = defineCommand({
   meta: {
     name: 'screenshoot',
     description: 'take a screenshot of a page',
@@ -45,43 +44,80 @@ runMain(defineCommand({
     if (!url?.trim())
       url = await prompt('Enter URL: ')
 
-    const device = devices[mobile ? 'mobile' : 'desktop']
-    let { ua, width, height } = device
-    if (size) {
-      const [w, h] = size.split('x').map(Number)
-      if (w && h) {
-        width = w
-        height = h
-      }
-    }
-
-    consola.info(`device: `, { ua, width, height })
-
-    const browser = await puppeteer.launch()
-    const page = await browser.newPage()
-
-    await page.setUserAgent(ua)
-    await page.setViewport({
-      width,
-      height,
+    await main({
+      url,
+      selector,
+      element,
       isMobile: mobile,
+      fullscreen,
+      size,
+      useCookie: false,
     })
-    await page.emulateMediaFeatures([{
-      name: 'prefers-color-scheme',
-      value: 'light',
-    }])
-
-    await page.goto(url)
-    await page.waitForSelector(selector)
-
-    if (element !== 'body')
-      await page.waitForSelector(element)
-
-    await screenshot(page, url, element, fullscreen)
-
-    await browser.close()
   },
-}))
+})
+
+interface ScreenshootOptions {
+  url: string
+  selector: string
+  element: string
+  isMobile: boolean
+  fullscreen: boolean
+  size: string
+  useCookie: boolean
+}
+
+/**
+ * take a screenshot of a page
+ * @param url the url of the page
+ * @param selector the element to be waited for, default to `img`
+ * @param element the element to be screenshotted, default to `body`
+ * @param isMobile use mobile window size, default to `false`
+ * @param fullscreen take a fullscreen screenshot, default to `false`
+ * @param size the size of the screenshot, e.g. `1920x1080`
+ */
+export default async function main(
+  options: ScreenshootOptions,
+) {
+  const { url, selector, element, isMobile, fullscreen, size, useCookie } = options
+
+  const device = devices[isMobile ? 'mobile' : 'desktop']
+  let { ua, width, height } = device
+  if (size) {
+    const [w, h] = size.split('x').map(Number)
+    if (w && h) {
+      width = w
+      height = h
+    }
+  }
+
+  consola.info(`url: ${url}, selector: ${selector}, element: ${element}`)
+  consola.info(`device: `, { ua, width, height })
+
+  const browser = await puppeteer.launch({
+    headless: 'shell',
+  })
+  const page = await browser.newPage()
+
+  await page.setUserAgent(ua)
+  await page.setViewport({
+    width,
+    height,
+    isMobile,
+  })
+
+  if (useCookie) {
+    const cookie = cookieToRecord(await prompt('Enter cookie: '), url)
+    await page.setCookie(...cookie)
+  }
+
+  await page.goto(url, {
+    waitUntil: 'networkidle0',
+  })
+  await page.waitForSelector(selector)
+
+  await screenshot(page, url, element, fullscreen)
+  await browser.close()
+}
 
 async function screenshot(
   page: Page,
@@ -99,28 +135,18 @@ async function screenshot(
     return
   }
 
-  const el = await page.$(element)
+  const el = await page.waitForSelector(element)
   if (!el) {
-    consola.error('element not found')
+    consola.error(`element ${element} not found`)
     return
   }
 
-  const box = await el.boundingBox()
-  if (!box) {
-    consola.error('element has no box')
-    return
-  }
-
-  const { x, y, width, height } = box
-  await page.screenshot({
+  await el.screenshot({
     path: filename,
-    clip: {
-      x,
-      y,
-      width,
-      height,
-    },
   })
 
   consola.success(`screenshot saved as ${filename}`)
 }
+
+if (process.argv[1] === import.meta.filename)
+  runMain(app)
