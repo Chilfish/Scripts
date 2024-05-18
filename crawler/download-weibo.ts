@@ -58,8 +58,6 @@ const main = defineCommand({
     if (data.url_struct?.[0].long_url.includes('video.weibo.com'))
       await exec(`yt-dlp --cookies-from-browser chrome -P D:/downloads ${url}`)
 
-    console.log(token)
-
     if (!data.pic_infos || data.pic_num < 1) {
       consola.error('No images found in the post')
       return

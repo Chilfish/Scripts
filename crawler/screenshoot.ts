@@ -24,6 +24,10 @@ const app = defineCommand({
       description: 'the element to be screenshotted',
       default: 'body',
     },
+    hidden: {
+      type: 'string',
+      description: 'the element to be hidden, e.g. .header',
+    },
     mobile: {
       type: 'boolean',
       description: 'use mobile window size',
@@ -38,9 +42,14 @@ const app = defineCommand({
       type: 'string',
       description: 'the size of the screenshot, e.g. 1920x1080',
     },
+    cookie: {
+      type: 'boolean',
+      description: 'use cookie',
+      default: false,
+    },
   },
   run: async ({ args }) => {
-    let { url, selector, element, mobile, fullscreen, size } = args
+    let { url, selector, element, mobile, fullscreen, size, hidden, cookie } = args
     if (!url?.trim())
       url = await prompt('Enter URL: ')
 
@@ -51,7 +60,8 @@ const app = defineCommand({
       isMobile: mobile,
       fullscreen,
       size,
-      useCookie: false,
+      useCookie: cookie,
+      hidden,
     })
   },
 })
@@ -64,21 +74,13 @@ interface ScreenshootOptions {
   fullscreen: boolean
   size: string
   useCookie: boolean
+  hidden?: string
 }
 
-/**
- * take a screenshot of a page
- * @param url the url of the page
- * @param selector the element to be waited for, default to `img`
- * @param element the element to be screenshotted, default to `body`
- * @param isMobile use mobile window size, default to `false`
- * @param fullscreen take a fullscreen screenshot, default to `false`
- * @param size the size of the screenshot, e.g. `1920x1080`
- */
 export default async function main(
   options: ScreenshootOptions,
 ) {
-  const { url, selector, element, isMobile, fullscreen, size, useCookie } = options
+  const { url, selector, element, isMobile, fullscreen, size, useCookie, hidden } = options
 
   const device = devices[isMobile ? 'mobile' : 'desktop']
   let { ua, width, height } = device
@@ -101,11 +103,17 @@ export default async function main(
     width,
     height,
     isMobile,
+    deviceScaleFactor: 2,
   })
 
   if (useCookie) {
     const cookie = cookieToRecord(await prompt('Enter cookie: '), url)
     await page.setCookie(...cookie)
+  }
+  if (hidden) {
+    await page.addStyleTag({
+      content: `${hidden} { display: none !important; }`,
+    })
   }
 
   await page.goto(url, {

@@ -1,27 +1,75 @@
-import puppeteer from 'puppeteer'
-import { chromePath } from '../utils'
+import { writeFile } from 'node:fs/promises'
+import { fetchIntercept, newBrowser } from '../utils'
 
-const url = 'https://x.com/aoki__hina'
-const apiMatch = '/UserByScreenName'
+const name = process.argv[2] || 'elonmusk'
+const url = `https://x.com/${name}`
 
-const browser = await puppeteer.launch({
-  headless: 'shell',
-  executablePath: chromePath,
-  args: ['--no-sandbox', '--disable-setuid-sandbox'],
-})
-const page = await browser.newPage()
-await page.goto(url, {
-  waitUntil: 'domcontentloaded',
-})
+console.log(`Crawling ${url}...`)
 
-const data = await page.waitForResponse(response =>
-  // FIX ProtocolError: Could not load body for this request. This might happen if the request is a preflight request.
-  response.request().method().toUpperCase() !== 'OPTIONS'
-  && response.url().includes(apiMatch),
-)
-  .then(response => response.json())
+const browser = await newBrowser()
+const data = await fetchIntercept(browser, url, '/UserTweets')
+  .then(res => res.data.user.result.timeline_v2.timeline.instructions[2].entries)
+  .finally(() => browser.close())
 
-console.log(data.data.user.result.legacy)
+console.log(`Fetched ${data.length} tweets`)
 
-await page.close()
-await browser.close()
+interface User {
+  id: string
+  name: string
+  screenName: string
+  avatar: string
+}
+
+interface UserInfo extends User {
+  bio: string
+  location: string
+  url: string
+  joinDate: string
+  followers: number
+  following: number
+  tweets: number
+}
+
+interface Tweet {
+  id: string
+  text: string
+  media: string[]
+  date: string
+}
+
+function parseTweet(data: any): Tweet {
+  const tweetData = data.content.itemContent.tweet_results.result.legacy
+
+  return {
+    id: tweetData.id_str,
+    date: tweetData.created_at,
+    text: tweetData.full_text,
+    media: tweetData.entities.media?.map((media: any) => media.media_url_https) || [],
+  }
+}
+
+function parseUser(data: any): UserInfo {
+  let userData = data.content.itemContent.tweet_results.result.core.user_results.result
+
+  const uid = userData.rest_id
+  userData = userData.legacy
+
+  return {
+    id: uid,
+    name: userData.name,
+    screenName: userData.screen_name,
+    avatar: userData.profile_image_url_https,
+    bio: userData.description,
+    location: userData.location,
+    url: userData.url,
+    joinDate: userData.created_at,
+    followers: userData.followers_count,
+    following: userData.friends_count,
+    tweets: userData.statuses_count,
+  }
+}
+
+const tweets = data.map(parseTweet).sort((a, b) => a.date.localeCompare(b.date))
+const user = parseUser(data[0])
+
+await writeFile('data.json', JSON.stringify({ tweets, user }, null, 2))
