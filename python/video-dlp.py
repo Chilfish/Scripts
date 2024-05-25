@@ -23,6 +23,8 @@ ydl_opts = {
         "home": out_dir,
         "temp": out_dir
     },
+    # 多线程
+    "n_thread": 4,
 }
 
 # 视频链接

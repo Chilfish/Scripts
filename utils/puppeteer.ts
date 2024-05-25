@@ -4,7 +4,7 @@ import { chromePath } from './index'
 
 export async function newBrowser() {
   return await puppeteer.launch({
-    headless: 'shell',
+    // headless: 'shell',
     // headless: false,
     executablePath: chromePath,
     args: ['--no-sandbox', '--disable-setuid-sandbox'],

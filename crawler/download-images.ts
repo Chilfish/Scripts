@@ -22,11 +22,24 @@ runMain(defineCommand({
       description: 'use mobile window size',
       default: false,
     },
+    fetch: {
+      type: 'boolean',
+      description: 'use fetch instead of puppeteer',
+      default: false,
+    },
   },
   run: async ({ args }) => {
-    let { url, selector, mobile } = args
+    let { url, selector, mobile, fetch } = args
     if (!url)
       url = await prompt('Enter URL: ')
+
+    if (fetch) {
+      const urls = url.split(', ')
+      for (const url of urls)
+        await downloadImage(url)
+      return
+    }
+
     if (!selector)
       selector = await consola.prompt('Enter selector: ') as string
     if (!selector?.trim())
