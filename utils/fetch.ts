@@ -16,7 +16,7 @@ export async function downloadImage(
     .replace(/-\d+px/, '') // remove size suffix: -300px
 
   if (!name.trim())
-    name = url.split('/').pop() || 'image.jpg'
+    name = new URL(url).pathname.split('/').pop() || 'image.jpg'
 
   if (!name.includes('.'))
     name = `${name}.jpg`

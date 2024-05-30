@@ -1,5 +1,20 @@
+export const $ = <T = HTMLElement>(selector: string, root: any = document) => root?.querySelector(selector) as T | null
+
+export const $$ = <T = HTMLElement>(selector: string, root: any = document) => Array.from(root?.querySelectorAll(selector) || []) as T[]
+
+export const dealy = (ms: number) => new Promise(resolve => setTimeout(resolve, ms))
+
+export function saveBlobUrl(url: string, filename: string) {
+  console.log(`Downloaded: ${filename} (${url})`)
+  const a = document.createElement('a')
+  a.href = url
+  a.download = filename
+  a.click()
+  a.remove()
+}
+
 export function saveAs(
-  data: string | object,
+  data: string | object | Blob,
   filename: string,
   inline = false,
 ) {
@@ -7,6 +22,9 @@ export function saveAs(
 
   if (typeof data === 'string') {
     blob = new Blob([data], { type: 'text/plain' })
+  }
+  else if (data instanceof Blob) {
+    blob = data
   }
   else {
     blob = new Blob(
@@ -16,29 +34,20 @@ export function saveAs(
   }
 
   const url = URL.createObjectURL(blob)
-  const a = document.createElement('a')
-  a.href = url
-  a.download = filename
-  a.click()
+  saveBlobUrl(url, filename)
   URL.revokeObjectURL(url)
-  a.remove()
 }
+
 export function formatTime(
   time: string | number | Date,
   fmt = 'YYYY-MM-DD HH:mm:ss',
 ) {
-  if (typeof time === 'string')
-    time = Number.parseInt(time)
-  else if (time instanceof Date)
-    time = time.getTime()
-
-  if (Number.isNaN(time))
-    return ''
-
-  if (time < 1e12)
+  if (typeof time === 'number' && time < 1e12)
     time *= 1000
 
   const date = new Date(time)
+  if (Number.isNaN(date.getTime()))
+    return ''
 
   const year = date.getFullYear().toString()
   const month = (date.getMonth() + 1).toString()
