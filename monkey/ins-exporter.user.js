@@ -44,6 +44,24 @@
     URL.revokeObjectURL(url)
     a.remove()
   }
+  function formatTime(time, fmt = 'YYYY-MM-DD HH:mm:ss') {
+    if (typeof time === 'string')
+      time = Number.parseInt(time)
+    else if (time instanceof Date)
+      time = time.getTime()
+    if (Number.isNaN(time))
+      return ''
+    if (time < 1e12)
+      time *= 1e3
+    const date = new Date(time)
+    const year = date.getFullYear().toString()
+    const month = (date.getMonth() + 1).toString()
+    const day = date.getDate().toString()
+    const hour = date.getHours().toString()
+    const minute = date.getMinutes().toString()
+    const second = date.getSeconds().toString()
+    return fmt.replace('YYYY', year).replace('MM', month.padStart(2, '0')).replace('DD', day.padStart(2, '0')).replace('HH', hour.padStart(2, '0')).replace('mm', minute.padStart(2, '0')).replace('ss', second.padStart(2, '0'))
+  }
   function parseJson(json) {
     try {
       return JSON.parse(json)
@@ -87,7 +105,7 @@
         return {
           id: code,
           text: caption.text,
-          created_at: caption.created_at,
+          created_at: formatTime(caption.created_at),
           images,
         }
       }).filter(Boolean),
