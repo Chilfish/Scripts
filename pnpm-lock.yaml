@@ -23,9 +23,6 @@ importers:
       std-env:
         specifier: ^3.7.0
         version: 3.7.0
-      xhook:
-        specifier: ^1.6.2
-        version: 1.6.2
     devDependencies:
       '@antfu/eslint-config':
         specifier: ^2.18.0
@@ -2335,9 +2332,6 @@ packages:
         optional: true
       utf-8-validate:
         optional: true
-
-  xhook@1.6.2:
-    resolution: {integrity: sha512-kmOpJ5SyqpubjIgVXWIdTWYqZmTr3mlqaCa8ISg2IirkpvUOfbWeQbJICqVjQ8fo5tkG3FsKi/Pb2TvUOlMuMQ==}
 
   xml-name-validator@4.0.0:
     resolution: {integrity: sha512-ICP2e+jsHvAj2E2lIHxa5tjXRlKDJo4IdvPvCXbXQGdzSfmSpNVyIKMvoZHjDY9DP0zV17iI85o90vRFXNccRw==}
@@ -4748,8 +4742,6 @@ snapshots:
   wrappy@1.0.2: {}
 
   ws@8.17.0: {}
-
-  xhook@1.6.2: {}
 
   xml-name-validator@4.0.0: {}
 

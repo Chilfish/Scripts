@@ -24,13 +24,12 @@ runMain(defineCommand({
     const browser = await newBrowser()
     const data = await fetchIntercept(browser, url, apiMatch)
       .then(res => res.data.user.result.legacy)
+      .finally(() => browser.close())
 
     const displyName = data.name
     const followers = data.normal_followers_count
 
     consola.info(`Twitter fans of ${displyName}: ${followers}`)
-
-    await browser.close()
   },
 }))
 

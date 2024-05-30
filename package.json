@@ -9,6 +9,8 @@
   },
   "license": "MIT",
   "scripts": {
+    "dev:ins": "cd monkey/ins-export && vite dev",
+    "build:ins": "cd monkey/ins-export && vite build",
     "lint": "eslint .",
     "postinstall": "simple-git-hooks"
   },
@@ -17,8 +19,7 @@
     "consola": "^3.2.3",
     "ofetch": "^1.3.4",
     "puppeteer": "^22.8.2",
-    "std-env": "^3.7.0",
-    "xhook": "^1.6.2"
+    "std-env": "^3.7.0"
   },
   "devDependencies": {
     "@antfu/eslint-config": "^2.18.0",

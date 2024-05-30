@@ -5,6 +5,12 @@ import monkey from 'vite-plugin-monkey'
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../../')
 
+const name = 'ins-exporter'
+
+const repo = 'https://github.com/Chilfish/Scripts/blob/monkey'
+const downloadURL = `${repo}/${name}.user.js`
+const updateURL = `${repo}/${name}.meta.js`
+
 // https://vitejs.dev/config/
 export default defineConfig({
   resolve: {
@@ -12,22 +18,30 @@ export default defineConfig({
       '~': `${root}`,
     },
   },
+  build: {
+    outDir: path.resolve(root, 'monkey'),
+  },
   plugins: [
-    // https://github.com/lisonge/vite-plugin-monkey/issues/1#issuecomment-1124478973
     monkey({
       entry: 'main.ts',
       userscript: {
-        name: 'ins-exporter',
+        name,
         description: 'Export Instagram posts',
         icon: 'https://www.instagram.com/static/images/ico/favicon-192.png/68d99ba29cc8.png',
         namespace: 'chilfish/monkey',
         match: [
           'https://www.instagram.com/*',
-          'https://www.instagram.com/*/*',
         ],
+        version: '2024.05.30',
+        downloadURL,
+        updateURL,
       },
       server: {
         open: false,
+      },
+      build: {
+        fileName: `${name}.user.js`,
+        metaFileName: true,
       },
     }),
   ],

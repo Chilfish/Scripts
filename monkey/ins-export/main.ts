@@ -1,3 +1,6 @@
-import { genToken } from '~/utils/math'
+import { httpHooks } from './utils/fetch'
+import { getTweets } from './modules/user-tweets'
 
-console.log(genToken('sk', 26))
+httpHooks([
+  getTweets,
+])
