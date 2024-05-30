@@ -7,7 +7,7 @@ const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../../'
 
 const name = 'ins-exporter'
 
-const repo = 'https://github.com/Chilfish/Scripts/blob/monkey'
+const repo = 'https://github.com/Chilfish/Scripts/raw/main/monkey'
 const downloadURL = `${repo}/${name}.user.js`
 const updateURL = `${repo}/${name}.meta.js`
 

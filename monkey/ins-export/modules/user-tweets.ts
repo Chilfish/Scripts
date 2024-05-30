@@ -1,5 +1,5 @@
 import type { Interceptor, Tweet, User, UserFeed } from '../types'
-import { parseJson, saveAs } from '../utils'
+import { formatTime, parseJson, saveAs } from '../utils'
 
 const urlMatch = 'graphql/query'
 let user: User | undefined
@@ -45,7 +45,7 @@ export const getTweets: Interceptor = (request, response) => {
     return {
       id: code,
       text: caption.text,
-      created_at: caption.created_at,
+      created_at: formatTime(caption.created_at),
       images,
     }
   })
