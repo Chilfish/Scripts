@@ -245,7 +245,7 @@ async function click(btn, status_id, is_exist, index) {
   const tasks_result = []
   medias.forEach((media, i) => {
     info.url = media.type === 'photo'
-      ? `${media.media_url_https}:orig`
+      ? `${media.media_url_https.replace('jpg', 'png')}:large`
       : media.video_info.variants
         .filter(n => n.content_type === 'video/mp4')
         .sort((a, b) => b.bitrate - a.bitrate)[0]

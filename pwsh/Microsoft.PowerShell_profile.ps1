@@ -119,6 +119,10 @@ function gc1 {
   }
 }
 
+function tomp4 {
+  ffmpeg -i $args -c copy "$args.mp4"
+}
+
 Invoke-Expression (&starship init powershell)
 Invoke-Expression (& { (zoxide init powershell | Out-String) })
 fnm env --use-on-cd | Out-String | Invoke-Expression

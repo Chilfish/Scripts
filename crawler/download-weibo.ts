@@ -66,6 +66,8 @@ const main = defineCommand({
     const imageList = Object.values(data.pic_infos).map((pic: any) => pic.largest.url)
     for (const imageUrl of imageList)
       await downloadImage(imageUrl, token)
+
+    consola.success('Downloaded all images', imageList.length)
   },
 })
 
