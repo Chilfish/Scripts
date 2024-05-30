@@ -18,7 +18,7 @@ out_dir = "D:/Downloads"
 
 # 设置下载参数
 ydl_opts = {
-    # "cookiesfrombrowser": ("chrome",),
+    "cookiesfrombrowser": ("chrome",),
     "paths": {
         "home": out_dir,
         "temp": out_dir
