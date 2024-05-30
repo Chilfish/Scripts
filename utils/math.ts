@@ -13,6 +13,14 @@ export function randomDate(start?: Date, end?: Date) {
   return new Date(start.getTime() + Math.random() * (end.getTime() - start.getTime()))
 }
 
+export function uniqueObj<T extends Record<string, unknown>>(arr: T[], key: string) {
+  const map = new Map()
+  arr.forEach((item) => {
+    map.set(item[key], item)
+  })
+  return Array.from(map.values()) as T[]
+}
+
 export function fmtFileSize(size: number) {
   const units = ['B', 'KB', 'MB', 'GB', 'TB']
   let i = 0
