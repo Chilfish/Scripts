@@ -377,7 +377,7 @@ function formatDate(i, tz) {
   const minutes = pad(date.getUTCMinutes())
   const seconds = pad(date.getUTCSeconds())
 
-  return `${year}${month}${day}-${hours}${minutes}${seconds}`
+  return `${year}${month}${day}_${hours}${minutes}${seconds}`
 }
 
 window.onload = async function () {

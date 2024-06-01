@@ -23,6 +23,8 @@ ydl_opts = {
         "home": out_dir,
         "temp": out_dir
     },
+    "concurrent_fragment_downloads": 16,
+    "format": "bestvideo+bestaudio",
 }
 
 # 视频链接
@@ -48,6 +50,8 @@ with yt_dlp.YoutubeDL(ydl_opts) as ydl:
 
     ydl_opts["outtmpl"]["default"] = f"{upload_date}_{title}.mp4"
     ydl.params.update(ydl_opts)
+
+    print(ydl_opts)
 
     if args.no_download:
         with open(f"{out_dir}/{title}.json", "w", encoding="utf-8") as file:
