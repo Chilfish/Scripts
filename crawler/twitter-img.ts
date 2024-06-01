@@ -4,8 +4,7 @@ import path from 'node:path'
 import PQueue from 'p-queue'
 import { consola } from 'consola'
 import {
-  downloadImage,
-  downloadvideo,
+  downloadBlob,
   root,
   updateProgress,
 } from '../utils'
@@ -23,17 +22,22 @@ const dest = path.resolve('D:/Downloads', name)
 if (!existsSync(dest))
   await mkdir(dest, { recursive: true })
 
-const queue = new PQueue({ concurrency: 8 })
+consola.info(`Start downloading ${imgs.length} to ${dest}`)
+
+const queue = new PQueue({ concurrency: 6 })
 let progress = 0
 imgs.forEach(({ name, url }) => {
-  const isVideo = url.includes('video.twimg.com')
+  if (name.endsWith('.png'))
+    url = `${url}&name=large`
 
   queue.add(async () => {
-    isVideo
-      ? await downloadvideo(url, name, dest)
-      : await downloadImage(`${url}&name=large`, name, undefined, dest)
+    await downloadBlob({ url, name, dest })
 
-    updateProgress(++progress, imgs.length, `Downloading ${url}`)
+    updateProgress({
+      current: ++progress,
+      total: imgs.length,
+      otherText: `Downloading ${url}...`,
+    })
   })
 })
 

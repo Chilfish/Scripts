@@ -1,21 +1,32 @@
-import { writeFile } from 'node:fs/promises'
 import { existsSync } from 'node:fs'
-import path from 'node:path'
+import { writeFile } from 'node:fs/promises'
 import { Buffer } from 'node:buffer'
+import path from 'node:path'
 import { ofetch } from 'ofetch'
-import { logger, runCommand } from '../utils'
+import { logger } from '../utils'
 
-export async function downloadImage(
-  _url: string,
-  name = '',
-  cookie = '',
-  dest = 'D:/downloads',
+export interface DownloadOptions {
+  url: string
+  dest?: string
+  name?: string
+  fetchOptions?: RequestInit
+}
+
+export async function downloadBlob(
+  options: DownloadOptions,
 ) {
-  const url = _url.replace('-scaled', '') // -scaled
+  let {
+    url,
+    name,
+    dest = 'D:/Downloads',
+    fetchOptions,
+  } = options
+
+  url = url.replace('-scaled', '') // -scaled
     .replace(/-\d+x\d+/, '') // remove size suffix: -300x300
     .replace(/-\d+px/, '') // remove size suffix: -300px
 
-  if (!name.trim())
+  if (!name?.trim())
     name = new URL(url).pathname.split('/').pop() || 'image.jpg'
 
   if (!name.includes('.'))
@@ -26,53 +37,19 @@ export async function downloadImage(
     return true
 
   try {
-    const res = await fetch(url, {
-      headers: {
-        cookie,
-      },
-    })
-    if (!res.ok)
-      throw new Error(`HTTP ${res.status}`)
+    const res = await fetch(url, fetchOptions)
+      .then(res => res.arrayBuffer())
 
-    if (!res.headers.get('content-type')?.startsWith('image'))
-      throw new Error('Not an image')
+    await writeFile(filename, Buffer.from(res))
 
-    const buffer = await res.arrayBuffer()
-    await writeFile(filename, Buffer.from(buffer))
+    logger(`Downloaded ${name}`, 'success')
 
-    logger(`成功：${filename}`, 'success')
     return true
   }
   catch (e) {
-    logger(`失败：${url}, ${e}`, 'error')
+    logger(`Failed to download ${name}`, 'error')
     return false
   }
-}
-export async function downloadvideo(
-  url: string,
-  name = '',
-  dest = 'D:/downloads',
-) {
-  if (!name.trim())
-    name = url.split('/').pop() || 'video.mp4'
-
-  if (!name.includes('.'))
-    name = `${name}.mp4`
-
-  const filename = path.resolve(`${dest}/${name}`)
-
-  if (existsSync(filename))
-    return true
-
-  return await runCommand(`yt-dlp --cookies-from-browser chrome "${url}" -o "${filename}"`)
-    .then(() => {
-      logger(`成功：${filename}`, 'success')
-      return true
-    })
-    .catch((err: any) => {
-      logger(`失败：${url}, ${err}`, 'error')
-      return false
-    })
 }
 
 export async function getWeiboAnonToken() {

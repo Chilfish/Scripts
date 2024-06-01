@@ -1,7 +1,7 @@
 import type { Page } from 'puppeteer'
 import { defineCommand, runMain } from 'citty'
 import { consola } from 'consola'
-import { devices, downloadImage, newBrowser, prompt } from '../utils'
+import { devices, downloadBlob, newBrowser, prompt } from '../utils'
 
 runMain(defineCommand({
   meta: {
@@ -36,7 +36,7 @@ runMain(defineCommand({
     if (fetch) {
       const urls = url.split(', ')
       for (const url of urls)
-        await downloadImage(url)
+        await downloadBlob({ url })
       return
     }
 
@@ -111,7 +111,7 @@ async function downImage(
   let cnt = 0
 
   for (const url of imgs) {
-    const res = await downloadImage(url)
+    const res = await downloadBlob({ url })
     res && cnt++
   }
 

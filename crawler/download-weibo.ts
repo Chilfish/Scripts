@@ -1,9 +1,8 @@
-import { writeFile } from 'node:fs/promises'
 import { defineCommand, runMain } from 'citty'
 import { ofetch } from 'ofetch'
 import { consola } from 'consola'
 import {
-  downloadImage,
+  downloadBlob,
   getWeiboAnonToken,
   prompt,
 } from '../utils'
@@ -37,7 +36,7 @@ interface PicData {
   }
 }
 
-const main = defineCommand({
+runMain(defineCommand({
   meta: {
     name: 'download-weibo',
     description: 'Download images/videos from a weibo post',
@@ -53,49 +52,60 @@ const main = defineCommand({
     if (!url)
       url = await prompt('Enter URL: ')
 
-    const pidMatch = url.match(/https:\/\/weibo\.com\/\d+\/([a-zA-Z0-9]+)\/?/)
-    if (!pidMatch) {
-      consola.error('Invalid Weibo URL format. Must be like: https://weibo.com/123456789/abcdefg')
-      return
-    }
+    await main(url)
+  },
+}))
 
-    const postId = pidMatch[1]
-    const api_url = `https://weibo.com/ajax/statuses/show?id=${postId}`
-    const token = await getWeiboAnonToken()
+async function main(url: string) {
+  const pidMatch = url.match(/https:\/\/weibo\.com\/\d+\/([a-zA-Z0-9]+)\/?/)
+  if (!pidMatch) {
+    consola.error('Invalid Weibo URL format. Must be like: https://weibo.com/123456789/abcdefg')
+    return
+  }
 
-    const data = await ofetch<PicData>(api_url, {
-      headers: {
-        cookie: token,
-      },
-    })
+  const postId = pidMatch[1]
+  const api_url = `https://weibo.com/ajax/statuses/show?id=${postId}`
+  const token = await getWeiboAnonToken()
 
-    if (data.mix_media_info) {
-      for (const item of data.mix_media_info.items) {
-        if (item.type === 'pic')
-          await downloadImage(item.data.largest.url, '', token)
-        else if (item.type === 'video')
-          await runCommand(`yt-dlp --cookies-from-browser chrome -P D:/downloads ${item.data.media_info.h5_url}`)
+  const data = await ofetch<PicData>(api_url, {
+    headers: {
+      cookie: token,
+    },
+  })
+
+  if (data.mix_media_info) {
+    for (const item of data.mix_media_info.items) {
+      if (item.type === 'pic') {
+        await downloadBlob({
+          url: item.data.largest.url,
+          fetchOptions: { headers: { cookie: token } },
+        })
       }
 
-      consola.success('Downloaded all images', data.mix_media_info.items.length)
-      return
+      else if (item.type === 'video') {
+        await runCommand(`yt-dlp --cookies-from-browser chrome -N 16 -P D:/downloads ${item.data.media_info.h5_url}`)
+      }
     }
 
-    if (data.url_struct?.[0].long_url.includes('video.weibo.com'))
-      await runCommand(`yt-dlp --cookies-from-browser chrome -P D:/downloads ${url}`)
+    consola.success('Downloaded all images', data.mix_media_info.items.length)
+    return
+  }
 
-    if (!data.pic_infos || data.pic_num < 1) {
-      consola.error('No images found in the post')
-      writeFile('weibo.json', JSON.stringify(data, null, 2))
-      return
-    }
+  if (data.url_struct?.[0].long_url.includes('video.weibo.com'))
+    await runCommand(`yt-dlp --cookies-from-browser chrome -P D:/downloads ${url}`)
 
-    const imageList = Object.values(data.pic_infos).map((pic: any) => pic.largest.url)
-    for (const imageUrl of imageList)
-      await downloadImage(imageUrl, '', token)
+  if (!data.pic_infos || data.pic_num < 1) {
+    consola.warn('No images found in the post')
+    return
+  }
 
-    consola.success('Downloaded all images', imageList.length)
-  },
-})
+  const imageList = Object.values(data.pic_infos).map((pic: any) => pic.largest.url)
+  for (const imageUrl of imageList) {
+    await downloadBlob({
+      url: imageUrl,
+      fetchOptions: { headers: { cookie: token } },
+    })
+  }
 
-runMain(main)
+  consola.success('Downloaded all images', imageList.length)
+}
