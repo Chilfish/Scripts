@@ -14,7 +14,7 @@ Set-PSReadLineKeyHandler -Key DownArrow -ScriptBlock {
 
 New-Alias git hub
 New-Alias Set-LocationWithFnm z
-New-Alias Get-Content bat
+# New-Alias Get-Content bat
 New-Alias which Get-Command
 
 New-Alias code code-insiders
@@ -32,6 +32,25 @@ $Env:OLLAMA_ORIGINS="https://chatkit.app"
 # wsl from ssh
 function wsll {
   & 'C:\Program Files\WSL\wsl.exe'
+}
+
+function wc {
+    param (
+        [Parameter(ValueFromPipeline=$true, ValueFromPipelineByPropertyName=$true)]
+        [string]$Text
+    )
+
+    begin {
+        $wordCount = 0
+    }
+
+    process {
+        $wordCount += ($Text -split '\s+' | Where-Object { $_ -ne '' }).Count
+    }
+
+    end {
+        $wordCount
+    }
 }
 
 function code-count {
@@ -120,7 +139,8 @@ function gc1 {
 }
 
 function tomp4 {
-  ffmpeg -i $args -c copy "$args.mp4"
+  $name = $args[0]
+  ffmpeg -i $name -c copy "$name.mp4"
 }
 
 Invoke-Expression (&starship init powershell)
