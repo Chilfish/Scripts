@@ -17,8 +17,6 @@
 // @grant       GM_xmlhttpRequest
 // @grant       GM_getValue
 // @grant       GM_setValue
-// @grant       GM_registerMenuCommand
-// @grant       GM_unregisterMenuCommand
 // @grant       GM_addStyle
 // @grant       unsafeWindow
 // @run-at      document-end
@@ -43,7 +41,6 @@ cachedTranslations = Object.keys(cachedTranslations)
 
 GM_setValue('cachedTranslations', cachedTranslations)
 
-const newNodes = [_.body]
 const apiList = [
   {
     // https://github.com/Arnie97/katakana-terminator/pull/8
@@ -252,27 +249,7 @@ function updateRubyByCachedTranslations(phrase) {
   delete queue[phrase]
 }
 
-// Watch newly added DOM nodes, and save them for later use
-function mutationHandler(mutationList) {
-  mutationList.forEach((mutationRecord) => {
-    mutationRecord.addedNodes.forEach((node) => {
-      newNodes.push(node)
-    })
-  })
-}
-
-function rescanTextNodes() {
-  const observer = new MutationObserver(mutationHandler)
-  observer.observe(_.body, { childList: true, subtree: true })
-  // Deplete buffered mutations
-  mutationHandler(observer.takeRecords())
-  if (!newNodes.length)
-    return
-
-  newNodes.forEach(scanTextNodes)
-  newNodes.length = 0
-  translateTextNodes()
-
+function toggleRubyVisibility() {
   // ruby hover 才显示
   _.querySelectorAll('ruby').forEach((ruby) => {
     const rt = ruby.querySelector('rt.katakana-terminator-rt')
@@ -285,51 +262,27 @@ function rescanTextNodes() {
   })
 }
 
-function main() {
+function run(node) {
+  scanTextNodes(node)
+  translateTextNodes()
+  toggleRubyVisibility()
+}
+
+window.addEventListener('load', () => {
   console.debug('Katakana Terminator: started')
   GM_addStyle('rt.katakana-terminator-rt::before { content: attr(data-rt); }')
 
-  GM_registerMenuCommand('Rescan', rescanTextNodes)
-  GM_registerMenuCommand('Clear cache', () => {
-    GM_setValue('cachedTranslations', {})
-    cachedTranslations = {}
-  })
+  const observer = new MutationObserver(ms =>
+    ms.forEach(m => m.addedNodes.forEach((node) => {
+      const tagName = node.tagName?.toLowerCase() || ''
+      if (!tagName || tagName === 'script' || tagName === 'style')
+        return
+      run(node)
+    })),
+  )
+  observer.observe(_.body, { childList: true, subtree: true })
 
-  const timeoutId = setTimeout(() => {
-    rescanTextNodes()
-    clearTimeout(timeoutId)
-  }, 5000)
-}
-
-// Polyfill for Greasemonkey 4
-if (
-  typeof GM_xmlhttpRequest === 'undefined'
-  && typeof GM === 'object'
-  && typeof GM.xmlHttpRequest === 'function'
-)
-  GM_xmlhttpRequest = GM.xmlHttpRequest
-
-if (typeof GM_addStyle === 'undefined') {
-  GM_addStyle = function (css) {
-    const head = _.getElementsByTagName('head')[0]
-    if (!head)
-      return null
-
-    const style = _.createElement('style')
-    style.setAttribute('type', 'text/css')
-    style.textContent = css
-    head.appendChild(style)
-    return style
-  }
-}
-
-// Polyfill for ES5
-if (typeof NodeList.prototype.forEach === 'undefined') {
-  NodeList.prototype.forEach = function (callback, thisArg) {
-    thisArg = thisArg || window
-    for (let i = 0; i < this.length; i++)
-      callback.call(thisArg, this[i], i, this)
-  }
-}
-
-main()
+  setTimeout(() => {
+    run(_.body)
+  }, 1000)
+})

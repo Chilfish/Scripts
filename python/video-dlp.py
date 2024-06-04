@@ -25,6 +25,7 @@ ydl_opts = {
     },
     "concurrent_fragment_downloads": 16,
     "format": "bestvideo+bestaudio",
+    "proxy": "http://127.0.0.1:7890",
 }
 
 # 视频链接
