@@ -1,9 +1,6 @@
-import { createReadStream } from 'node:fs'
-import { stat } from 'node:fs/promises'
 import path from 'node:path'
-import { createHash } from 'node:crypto'
 import { defineCommand, runMain } from 'citty'
-import { fmtFileSize, prompt } from '../utils'
+import { fmtFileSize, hashFile, prompt } from '../utils'
 
 runMain(defineCommand({
   meta: {
@@ -33,32 +30,5 @@ runMain(defineCommand({
     const { hash, size } = await hashFile(file)
     console.log(`Hash: ${hash}`)
     console.log(`Size: ${fmtFileSize(size)}`)
-    console.log(`Memory useage: ${fmtFileSize(process.memoryUsage().rss)}`)
   },
 }))
-
-export async function hashFile(
-  path: string,
-): Promise<{ hash: string, size: number }> {
-  const fileSize = (await stat(path)).size
-  const chunkSize = 1024 * 1024 * 100 // 100MB
-
-  const hash = createHash('sha256')
-  const stream = createReadStream(path, {
-    highWaterMark: chunkSize,
-  })
-
-  stream.on('data', (data) => {
-    hash.update(data)
-  })
-
-  return new Promise((resolve, reject) => {
-    stream.on('end', () => {
-      resolve({
-        hash: hash.digest('hex'),
-        size: fileSize,
-      })
-    })
-    stream.on('error', reject)
-  })
-}

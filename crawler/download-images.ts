@@ -1,4 +1,4 @@
-import type { Page } from 'puppeteer'
+import { Page } from 'puppeteer'
 import { defineCommand, runMain } from 'citty'
 import { consola } from 'consola'
 import { devices, downloadBlob, newBrowser, prompt } from '../utils'

@@ -1,4 +1,4 @@
-import { httpHooks } from './utils/fetch'
+import { httpHooks } from './httpHook'
 import { getTweets } from './modules/user-tweets'
 import {
   GM_getValue,

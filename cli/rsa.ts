@@ -12,7 +12,7 @@ import { defineCommand, runMain } from 'citty'
 import { consola } from 'consola'
 import { prompt } from '../utils'
 
-const main = defineCommand({
+runMain(defineCommand({
   meta: {
     name: 'rsa',
     description: 'encrypt/decrypt data using RSA',
@@ -57,13 +57,11 @@ const main = defineCommand({
     if (!data?.trim())
       data = await prompt('Enter data:')
 
-    await app(mode as any, data, publicKey, privateKey)
+    await main(mode as any, data, publicKey, privateKey)
   },
-})
+}))
 
-runMain(main)
-
-async function app(
+async function main(
   mode: 'encrypt' | 'decrypt',
   data: string,
   publicKeyPath: string,

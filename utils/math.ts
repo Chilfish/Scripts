@@ -1,3 +1,5 @@
+export const delay = (ms = 1000) => new Promise(resolve => setTimeout(resolve, ms))
+
 export const randomInt = (min = 0, max = 100) => Math.floor(Math.random() * (max - min + 1)) + min
 
 export const randomBool = (rate = 0.5) => Math.random() < rate

@@ -1,8 +1,9 @@
+import path from 'node:path'
 import { existsSync } from 'node:fs'
 import { writeFile } from 'node:fs/promises'
 import { Buffer } from 'node:buffer'
-import path from 'node:path'
 import { ofetch } from 'ofetch'
+
 import { logger } from '../utils'
 
 export interface DownloadOptions {

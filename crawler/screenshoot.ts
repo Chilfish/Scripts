@@ -1,5 +1,5 @@
 import path from 'node:path'
-import type { Page } from 'puppeteer'
+import { Page } from 'puppeteer'
 import { consola } from 'consola'
 import { defineCommand, runMain } from 'citty'
 import { cookieToRecord, devices, newBrowser, prompt } from '../utils'

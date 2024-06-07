@@ -32,7 +32,7 @@ export default defineConfig({
         match: [
           'https://www.instagram.com/*',
         ],
-        version: '2024.05.31',
+        version: '2024.06.07',
         downloadURL,
         updateURL,
       },

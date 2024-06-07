@@ -1,4 +1,4 @@
-import type { Interceptor } from '../types'
+import type { Interceptor } from './types'
 import { unsafeWindow } from '$'
 
 /**
@@ -18,7 +18,6 @@ export function httpHooks(interceptors: Interceptor[] = []) {
     })
 
     // @ts-expect-error it's fine.
-
     xhrOpen.apply(this, arguments)
   }
 }

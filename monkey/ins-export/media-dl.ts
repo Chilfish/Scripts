@@ -1,4 +1,6 @@
-import { $, $$, dealy, formatTime, saveAs } from './utils'
+import { formatDate } from '~/utils/date'
+import { $, $$, saveAs } from '~/utils/dom'
+import { delay } from '~/utils/math'
 import { GM_registerMenuCommand } from '$'
 
 function findImgBox() {
@@ -23,7 +25,7 @@ async function findImgs(imgBox: HTMLElement) {
       return Array.from(urls)
 
     nextBtn.click()
-    await dealy(800)
+    await delay(800)
   }
 }
 
@@ -54,7 +56,7 @@ async function main() {
   let idx = 0
   for (const img of imgs) {
     const suffix = imgs.length > 1 ? `-${++idx}` : ''
-    const filename = `${formatTime(time)}-${id}${suffix}.jpg`
+    const filename = `${formatDate(time)}-${id}${suffix}.jpg`
     await doanload(img, filename)
   }
 }

@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         ins-exporter
 // @namespace    chilfish/monkey
-// @version      2024.05.31
+// @version      2024.06.07
 // @author       monkey
 // @description  Export Instagram posts
 // @icon         https://www.instagram.com/static/images/ico/favicon-192.png/68d99ba29cc8.png
@@ -31,9 +31,78 @@
       xhrOpen.apply(this, arguments)
     }
   }
+  const suspectProtoRx = /"(?:_|\\u0{2}5[Ff]){2}(?:p|\\u0{2}70)(?:r|\\u0{2}72)(?:o|\\u0{2}6[Ff])(?:t|\\u0{2}74)(?:o|\\u0{2}6[Ff])(?:_|\\u0{2}5[Ff]){2}"\s*:/
+  const suspectConstructorRx = /"(?:c|\\u0063)(?:o|\\u006[Ff])(?:n|\\u006[Ee])(?:s|\\u0073)(?:t|\\u0074)(?:r|\\u0072)(?:u|\\u0075)(?:c|\\u0063)(?:t|\\u0074)(?:o|\\u006[Ff])(?:r|\\u0072)"\s*:/
+  const JsonSigRx = /^\s*["[{]|^\s*-?\d{1,16}(\.\d{1,17})?(E[+-]?\d+)?\s*$/i
+  function jsonParseTransform(key, value) {
+    if (key === '__proto__' || key === 'constructor' && value && typeof value === 'object' && 'prototype' in value) {
+      warnKeyDropped(key)
+      return
+    }
+    return value
+  }
+  function warnKeyDropped(key) {
+    console.warn(`[destr] Dropping "${key}" key to prevent prototype pollution.`)
+  }
+  function destr(value, options = {}) {
+    if (typeof value !== 'string') {
+      return value
+    }
+    const _value = value.trim()
+    if (
+
+      value[0] === '"' && value.endsWith('"') && !value.includes('\\')
+    ) {
+      return _value.slice(1, -1)
+    }
+    if (_value.length <= 9) {
+      const _lval = _value.toLowerCase()
+      if (_lval === 'true') {
+        return true
+      }
+      if (_lval === 'false') {
+        return false
+      }
+      if (_lval === 'undefined') {
+        return void 0
+      }
+      if (_lval === 'null') {
+        return null
+      }
+      if (_lval === 'nan') {
+        return Number.NaN
+      }
+      if (_lval === 'infinity') {
+        return Number.POSITIVE_INFINITY
+      }
+      if (_lval === '-infinity') {
+        return Number.NEGATIVE_INFINITY
+      }
+    }
+    if (!JsonSigRx.test(value)) {
+      if (options.strict) {
+        throw new SyntaxError('[destr] Invalid JSON')
+      }
+      return value
+    }
+    try {
+      if (suspectProtoRx.test(value) || suspectConstructorRx.test(value)) {
+        if (options.strict) {
+          throw new Error('[destr] Possible prototype pollution')
+        }
+        return JSON.parse(value, jsonParseTransform)
+      }
+      return JSON.parse(value)
+    }
+    catch (error) {
+      if (options.strict) {
+        throw error
+      }
+      return value
+    }
+  }
   const $ = (selector, root = document) => root == null ? void 0 : root.querySelector(selector)
   const $$ = (selector, root = document) => Array.from((root == null ? void 0 : root.querySelectorAll(selector)) || [])
-  const dealy = ms => new Promise(resolve => setTimeout(resolve, ms))
   function saveBlobUrl(url, filename) {
     console.log(`Downloaded: ${filename} (${url})`)
     const a = document.createElement('a')
@@ -60,27 +129,20 @@
     saveBlobUrl(url, filename)
     URL.revokeObjectURL(url)
   }
-  function formatTime(time, fmt = 'YYYY-MM-DD HH:mm:ss') {
+  function formatDate(time, fmt = 'YYYY-MM-DD HH:mm:ss') {
     if (typeof time === 'number' && time < 1e12)
       time *= 1e3
     const date = new Date(time)
     if (Number.isNaN(date.getTime()))
       return ''
-    const year = date.getFullYear().toString()
-    const month = (date.getMonth() + 1).toString()
-    const day = date.getDate().toString()
-    const hour = date.getHours().toString()
-    const minute = date.getMinutes().toString()
-    const second = date.getSeconds().toString()
-    return fmt.replace('YYYY', year).replace('MM', month.padStart(2, '0')).replace('DD', day.padStart(2, '0')).replace('HH', hour.padStart(2, '0')).replace('mm', minute.padStart(2, '0')).replace('ss', second.padStart(2, '0'))
-  }
-  function parseJson(json) {
-    try {
-      return JSON.parse(json)
-    }
-    catch {
-      return null
-    }
+    const pad = num => num.toString().padStart(2, '0')
+    const year = date.getUTCFullYear()
+    const month = pad(date.getUTCMonth() + 1)
+    const day = pad(date.getUTCDate())
+    const hours = pad(date.getUTCHours())
+    const minutes = pad(date.getUTCMinutes())
+    const seconds = pad(date.getUTCSeconds())
+    return fmt.replace('YYYY', year.toString()).replace('MM', month).replace('DD', day).replace('HH', hours).replace('mm', minutes).replace('ss', seconds)
   }
   const urlMatch = 'graphql/query'
   let user
@@ -89,8 +151,8 @@
   const getTweets = (request, response) => {
     if (!request.url.includes(urlMatch))
       return
-    const tweetKey = 'xdt_api__v1__feed__user_timeline_graphql_connection'
-    const { data } = parseJson(response.responseText)
+    const tweetKey = Symbol('xdt_api__v1__feed__user_timeline_graphql_connection')
+    const { data } = destr(response.responseText)
     if (!data[tweetKey])
       return
     const { edges, page_info } = data[tweetKey]
@@ -117,7 +179,7 @@
         return {
           id: code,
           text: caption.text,
-          created_at: formatTime(caption.created_at),
+          created_at: formatDate(caption.created_at),
           images,
         }
       }).filter(Boolean),
@@ -130,6 +192,7 @@
       )
     }
   }
+  const delay = (ms = 1e3) => new Promise(resolve => setTimeout(resolve, ms))
   function findImgBox() {
     let imgBox = $('.x6s0dn4.x1dqoszc.xu3j5b3.xm81vs4.x78zum5.x1iyjqo2.x1tjbqro')
     if (isProfile())
@@ -147,7 +210,7 @@
       if (!nextBtn)
         return Array.from(urls)
       nextBtn.click()
-      await dealy(800)
+      await delay(800)
     }
   }
   function isProfile() {
@@ -173,7 +236,7 @@
     let idx = 0
     for (const img of imgs) {
       const suffix = imgs.length > 1 ? `-${++idx}` : ''
-      const filename = `${formatTime(time)}-${id}${suffix}.jpg`
+      const filename = `${formatDate(time)}-${id}${suffix}.jpg`
       await doanload(img, filename)
     }
   }

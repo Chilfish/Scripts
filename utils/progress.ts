@@ -1,5 +1,5 @@
 import readline from 'node:readline'
-import consola from 'consola'
+import { consola } from 'consola'
 
 export interface ProgressOptions {
   current: number

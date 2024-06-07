@@ -1,7 +1,36 @@
 import { readFile, writeFile } from 'node:fs/promises'
 import path from 'node:path'
-
 import { defineCommand, runMain } from 'citty'
+import { prompt } from '../utils'
+
+runMain(defineCommand({
+  meta: {
+    name: 'srt',
+    description: '翻译/提取 srt 字幕文件',
+  },
+  args: {
+    file: {
+      type: 'string',
+      description: '要翻译/提取的 srt 文件路径',
+    },
+    textOnly: {
+      type: 'boolean',
+      description: '仅提取字幕文本内容',
+    },
+    merge: {
+      type: 'string',
+      description: '合并为双语字幕，需要提供另一个 srt 文件路径',
+    },
+  },
+  run: async ({ args }) => {
+    let { file, textOnly, merge } = args
+    if (!file)
+      file = await prompt('Enter the file path:')
+
+    file = path.resolve(file)
+    await main(file, textOnly, merge)
+  },
+}))
 
 // Matches: 00:00:17,810 --> 00:00:20,330
 const timeMatch = /\d+:\d+:\d+,\d+\s-->\s\d+:\d+:\d+,\d+/
@@ -84,39 +113,18 @@ function mergeLines(
   })
 }
 
-runMain(defineCommand({
-  meta: {
-    name: '',
-    description: '',
-  },
-  args: {
-    file: {
-      type: 'string',
-      description: 'The srts file to translate',
-      required: true,
-    },
-    textOnly: {
-      type: 'boolean',
-      description: 'Only translate text',
-    },
-    merge: {
-      type: 'string',
-      description: 'Merge translated text to original file',
-    },
-  },
-  run: async ({ args }) => {
-    const { file, textOnly, merge } = args
-    await main(file, textOnly, merge)
-  },
-}))
-
 async function main(
   file: string,
-  textOnly: boolean,
-  merge: string,
+  textOnly = false,
+  merge?: string,
 ) {
-  file = path.resolve(file)
-  const transed = path.join(path.dirname(file), `transed-${path.basename(file)}`)
+  let prefix = 'transed'
+  if (textOnly)
+    prefix = 'text'
+  else if (merge)
+    prefix = 'merged'
+
+  const transed = path.join(path.dirname(file), `${prefix}-${path.basename(file)}`)
 
   console.log(`Translating ${file} to ${transed}`)
 

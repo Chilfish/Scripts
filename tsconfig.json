@@ -1,5 +1,5 @@
 {
-  "$schema": "http://json.schemastore.org/tsconfig",
+  "$schema": "https://json.schemastore.org/tsconfig",
   "compilerOptions": {
     "target": "ESNext",
     "jsx": "preserve",
@@ -11,9 +11,6 @@
     "paths": {
       "~/*": ["./*"]
     },
-    "types": [
-      "vite/client"
-    ],
     "allowJs": true,
     "strict": true,
     "strictNullChecks": true,

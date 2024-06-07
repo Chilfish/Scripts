@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         ins-exporter
 // @namespace    chilfish/monkey
-// @version      2024.05.31
+// @version      2024.06.07
 // @author       monkey
 // @description  Export Instagram posts
 // @icon         https://www.instagram.com/static/images/ico/favicon-192.png/68d99ba29cc8.png

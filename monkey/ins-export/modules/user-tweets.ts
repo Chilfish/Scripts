@@ -1,5 +1,7 @@
-import type { Interceptor, Tweet, User, UserFeed } from '../types'
-import { formatTime, parseJson, saveAs } from '../utils'
+import { destr } from 'destr'
+import { Interceptor, Tweet, User, UserFeed } from '../types'
+import { saveAs } from '~/utils/dom'
+import { formatDate } from '~/utils/date'
 
 const urlMatch = 'graphql/query'
 let user: User | undefined
@@ -10,8 +12,8 @@ export const getTweets: Interceptor = (request, response) => {
   if (!request.url.includes(urlMatch))
     return
 
-  const tweetKey = 'xdt_api__v1__feed__user_timeline_graphql_connection'
-  const { data } = parseJson(response.responseText)
+  const tweetKey = Symbol('xdt_api__v1__feed__user_timeline_graphql_connection')
+  const { data } = destr<{ data: any }>(response.responseText)
 
   if (!data[tweetKey])
     return
@@ -45,7 +47,7 @@ export const getTweets: Interceptor = (request, response) => {
     return {
       id: code,
       text: caption.text,
-      created_at: formatTime(caption.created_at),
+      created_at: formatDate(caption.created_at),
       images,
     }
   })

@@ -6,7 +6,7 @@
 // @description:zh-CN 在网页中的日语外来语上方标注英文原词
 // @author      Arnie97
 // @license     MIT
-// @version     2024.05.13
+// @version     2024.06.04
 // @copyright   2017-2024, Katakana Terminator Contributors (https://github.com/Arnie97/katakana-terminator/graphs/contributors)
 // @namespace   https://github.com/Arnie97
 // @homepageURL https://github.com/Arnie97/katakana-terminator

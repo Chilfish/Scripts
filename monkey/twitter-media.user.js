@@ -20,7 +20,6 @@
 // @updateURL   https://github.com/Chilfish/Scripts/raw/main/monkey/meta/twitter-media.meta.js
 // ==/UserScript==
 /* jshint esversion: 8 */
-/* eslint-disable style/no-mixed-operators */
 
 const filename = 'twitter_{user-name}(@{user-id})_{date-time}_{status-id}_{file-type}'
 

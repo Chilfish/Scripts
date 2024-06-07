@@ -1,5 +1,4 @@
-import puppeteer from 'puppeteer'
-import type { Browser } from 'puppeteer'
+import puppeteer, { Browser } from 'puppeteer'
 import { chromePath } from './index'
 
 export async function newBrowser() {
