@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Chill Script
 // @description  Hello! MyScript
-// @version      2024.05.19
+// @version      2024.06.07
 // @author       Chilfish
 // @match        *://*/*
 // @grant        GM_addStyle
@@ -11,9 +11,23 @@
 // @updateURL    https://github.com/Chilfish/Scripts/raw/main/monkey/meta/chilfish.meta.js
 // @license      MIT
 // ==/UserScript==
+
 /* eslint-disable unused-imports/no-unused-vars */
-const $ = e => document.querySelector(e)
-const $$ = e => Array.from(document.querySelectorAll(e))
+
+/**
+ * @param {string} e
+ * @param {any} root
+ * @returns {HTMLElement}
+ */
+const $ = (e, root = document) => root.querySelector(e)
+/**
+ * @param {string} e
+ * @param {any} root
+ * @returns {HTMLElement[]}
+ */
+const $$ = (e, root = document) => Array.from(root.querySelectorAll(e))
+
+// 配合 https://github.com/pushqrdx/vscode-inline-html 插件来高亮语法
 const css = String.raw
 
 let _css = css`

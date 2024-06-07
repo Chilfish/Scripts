@@ -12,9 +12,12 @@ Set-PSReadLineKeyHandler -Key DownArrow -ScriptBlock {
     [Microsoft.PowerShell.PSConsoleReadLine]::EndOfLine()
 }
 
+Invoke-Expression (&starship init powershell)
+Invoke-Expression (& { (zoxide init powershell | Out-String) })
+fnm env --use-on-cd | Out-String | Invoke-Expression
+
 New-Alias git hub
 New-Alias Set-LocationWithFnm z
-# New-Alias Get-Content bat
 New-Alias which Get-Command
 
 New-Alias code code-insiders
@@ -34,50 +37,48 @@ function wsll {
   & 'C:\Program Files\WSL\wsl.exe'
 }
 
+# like `wc` in linux
 function wc {
     param (
         [Parameter(ValueFromPipeline=$true, ValueFromPipelineByPropertyName=$true)]
         [string]$Text
     )
-
     begin {
         $wordCount = 0
     }
-
     process {
         $wordCount += ($Text -split '\s+' | Where-Object { $_ -ne '' }).Count
     }
-
     end {
         $wordCount
     }
 }
 
+# https://github.com/xampprocky/tokei
 function code-count {
-  # https://github.com/xampprocky/tokei
   tokei -s lines -e pnpm-lock.yaml $args . 
 }
 
+# nestjs/cli
 function nest-gen($name) {
-  # nestjs/cli
   nest g mo $name modules
   nest g co $name modules --no-spec 
   nest g s $name modules --no-spec 
 }
 
+# https://github.com/Chilfish/Scripts/blob/main/python/video-dlp.py
 function yt {
-  # https://github.com/Chilfish/Scripts/blob/main/python/video-dlp.py
   python D:/Codes/Scripts/python/video-dlp.py $args
 }
 
+# https://github.com/Chilfish/Weibo-archiver/blob/main/scripts/server.mjs
 function wb {
-  # https://github.com/Chilfish/Weibo-archiver/blob/main/scripts/server.mjs
   $cwd = "D:/Backups/Weibo"
   node "$cwd/server.mjs" $cwd
 }
 
+# bbdown: https://github.com/nilaoda/BBDown
 function danmu {
-  # https://github.com/nilaoda/BBDown
   bbdown $args --danmaku-only --work-dir=D:/videos
   rm -r D:/videos/*.xml
 }
@@ -85,72 +86,25 @@ function subtitle {
   bbdown --sub-only --skip-ai=false --work-dir=D:/videos $args
 }
 
-function ya {
-    $tmp = [System.IO.Path]::GetTempFileName()
-    yazi $args --cwd-file="$tmp"
-    $cwd = Get-Content -Path $tmp
-    if (-not [String]::IsNullOrEmpty($cwd) -and $cwd -ne $PWD.Path) {
-        Set-Location -Path $cwd
-    }
-    Remove-Item -Path $tmp
-}
-
+# https://github.com/eza-community/eza
 function lss {
-  # https://github.com/eza-community/eza
   eza -lnhaa --time-style "+%m-%d %H:%m" --no-quotes --sort type $args
 }
 
-# github-copilot-cli aliases
-function ?? {
-  github-copilot-cli what-the-shell $args
-}
-
-function git? {
-  github-copilot-cli git-assist $args
-}
-
-function gh? {
-  github-copilot-cli gh-assist $args
-}
-
+# 查看文件夹大小
 function mem {
   $res = (ls $args -recurse | measure-object length -Sum).Sum/1MB 
   echo ("{0:N3} MB" -f $res)
 }
 
-# clone a repo and init it
-function gc1 {
-  param(
-      [Parameter(Mandatory=$true)]
-      [string]$user,
-      [Parameter(Mandatory=$true)]
-      [string]$repo,
-      
-      [string]$dir=$repo
-  )
-  try {
-    git clone --depth=1 "https://github.com/$user/$repo.git" $dir
-    cd $dir
-    Remove-Item -Recurse -Force .git
-
-    git init
-    git add .
-  } catch {
-    Write-Host "Git clone failed. Exiting..."
-    return  
-  }
-}
-
 function tomp4 {
   $name = $args[0]
-  ffmpeg -i $name -c copy "$name.mp4"
+  $basename = [System.IO.Path]::GetFileNameWithoutExtension($name)
+  ffmpeg -i $name -c copy "$basename.mp4"
 }
 
+# get battery report
 function battery {
   $Path = "D:/battery-report.html"
   powercfg /batteryreport /output $Path
 }
-
-Invoke-Expression (&starship init powershell)
-Invoke-Expression (& { (zoxide init powershell | Out-String) })
-fnm env --use-on-cd | Out-String | Invoke-Expression
