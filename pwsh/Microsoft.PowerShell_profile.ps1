@@ -81,6 +81,9 @@ function danmu {
   bbdown $args --danmaku-only --work-dir=D:/videos
   rm -r D:/videos/*.xml
 }
+function subtitle {
+  bbdown --sub-only --skip-ai=false --work-dir=D:/videos $args
+}
 
 function ya {
     $tmp = [System.IO.Path]::GetTempFileName()
@@ -141,6 +144,11 @@ function gc1 {
 function tomp4 {
   $name = $args[0]
   ffmpeg -i $name -c copy "$name.mp4"
+}
+
+function battery {
+  $Path = "D:/battery-report.html"
+  powercfg /batteryreport /output $Path
 }
 
 Invoke-Expression (&starship init powershell)
