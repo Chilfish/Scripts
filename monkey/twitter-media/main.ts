@@ -55,9 +55,6 @@ function addButtonToImgs(article: HTMLElement) {
     return
 
   const status_item = $<HTMLAnchorElement>('a[href*="/status/"]', article)
-  if (!status_item)
-    return
-
   const status_id = getStatusId(status_item)
   if (!status_id)
     return
@@ -97,12 +94,9 @@ function addButtonToImgs(article: HTMLElement) {
   })
 }
 
-function getStatusId(item: HTMLElement) {
-  const status_item = $<HTMLAnchorElement>('a[href*="/status/"]', item)
-  if (!status_item)
-    return ''
-
-  const status_id = status_item.href.split('/status/').pop()?.split('/').shift()
+function getStatusId(item: HTMLAnchorElement | null) {
+  const regex = /\/status\/(\d+)/
+  const status_id = item?.href.match(regex)?.[1]
 
   return status_id || ''
 }
@@ -111,7 +105,8 @@ function addButtonToMediaList(item: HTMLElement) {
   if (item.dataset.detected)
     return
   item.dataset.detected = 'true'
-  const status_id = getStatusId(item)
+  const status_item = $<HTMLAnchorElement>('a[href*="/status/"]', item)
+  const status_id = getStatusId(status_item)
 
   const is_exist = idHistory.includes(status_id)
   const btn_down = createDownBtn()
@@ -149,7 +144,7 @@ async function click(
   info['status-id'] = status_id
   info['user-name'] = user.name
   info['user-id'] = user.screen_name
-  info['date-time'] = formatDate(tweet.created_at)
+  info['date-time'] = formatDate(tweet.created_at, 'YYYYMMDD_HHmmss')
 
   let medias = tweet.extended_entities && tweet.extended_entities.media
 

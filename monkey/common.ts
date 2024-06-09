@@ -1,9 +1,12 @@
 import path from 'node:path'
+import os from 'node:os'
 import { fileURLToPath } from 'node:url'
-import { defineConfig } from 'vite'
+import { UserConfig, defineConfig } from 'vite'
 import monkey, { MonkeyOption } from 'vite-plugin-monkey'
 
-const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../')
+export const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../')
+
+export const desktop = path.resolve(os.homedir(), 'Desktop')
 
 /**
  * define vite config for monkey script
@@ -13,6 +16,7 @@ export function viteConfig(
     name: string
     filename: string
   },
+  viteConfig?: UserConfig,
 ) {
   const { name, filename } = monkeyConfig
   const repo = 'https://github.com/Chilfish/Scripts/raw/main/monkey'
@@ -20,6 +24,7 @@ export function viteConfig(
   const updateURL = `${repo}/meta/${filename}.meta.js`
 
   return defineConfig({
+    ...viteConfig,
     resolve: {
       alias: {
         '~': `${root}`,
@@ -48,7 +53,8 @@ export function viteConfig(
       }),
     ],
     server: {
-    // in monkey script, we should reload the page manually
+      ...viteConfig?.server,
+      // in monkey script, we should reload the page manually
       hmr: false,
     },
   })

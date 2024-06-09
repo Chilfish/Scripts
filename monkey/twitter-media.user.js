@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Twitter media downloader
 // @namespace    chilfish/monkey
-// @version      2024.06.09
+// @version      2024.06.10
 // @author       monkey
 // @description  Download Twitter media
 // @icon         https://abs.twimg.com/favicons/twitter.ico
@@ -180,8 +180,6 @@
     if (!media)
       return
     const status_item = $('a[href*="/status/"]', article)
-    if (!status_item)
-      return
     const status_id = getStatusId(status_item)
     if (!status_id)
       return
@@ -214,17 +212,16 @@
   }
   function getStatusId(item) {
     let _a
-    const status_item = $('a[href*="/status/"]', item)
-    if (!status_item)
-      return ''
-    const status_id = (_a = status_item.href.split('/status/').pop()) == null ? void 0 : _a.split('/').shift()
+    const regex = /\/status\/(\d+)/
+    const status_id = (_a = item == null ? void 0 : item.href.match(regex)) == null ? void 0 : _a[1]
     return status_id || ''
   }
   function addButtonToMediaList(item) {
     if (item.dataset.detected)
       return
     item.dataset.detected = 'true'
-    const status_id = getStatusId(item)
+    const status_item = $('a[href*="/status/"]', item)
+    const status_id = getStatusId(status_item)
     const is_exist = idHistory.includes(status_id)
     const btn_down = createDownBtn()
     btn_down.classList.add('tmd-down', 'tmd-media')
@@ -248,7 +245,7 @@
     info['status-id'] = status_id
     info['user-name'] = user.name
     info['user-id'] = user.screen_name
-    info['date-time'] = formatDate(tweet.created_at)
+    info['date-time'] = formatDate(tweet.created_at, 'YYYYMMDD_HHmmss')
     let medias = tweet.extended_entities && tweet.extended_entities.media
     if (index)
       medias = [medias[index - 1]]
