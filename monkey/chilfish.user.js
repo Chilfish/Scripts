@@ -17,13 +17,13 @@
 /**
  * @param {string} e
  * @param {any} root
- * @returns {HTMLElement}
+ * @returns {HTMLElement} the first element that matches the specified selector
  */
 const $ = (e, root = document) => root.querySelector(e)
 /**
  * @param {string} e
  * @param {any} root
- * @returns {HTMLElement[]}
+ * @returns {HTMLElement[]} array of elements that match the specified selector
  */
 const $$ = (e, root = document) => Array.from(root.querySelectorAll(e))
 

@@ -4,7 +4,10 @@ interface Cookie {
   domain: string
 }
 
-export function getCookie(cookie: string | Record<string, string>[]) {
+export function getCookie(cookie?: string | Record<string, string>[]) {
+  if (!cookie)
+    cookie = document.cookie
+
   if (typeof cookie === 'object') {
     const cookies: Record<string, string> = {}
     cookie.forEach(({ name, value }) => {

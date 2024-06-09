@@ -1,6 +1,6 @@
 /**
  * Format the date string
- * @param input the date string
+ * @param time the date string
  * @param fmt the format string, e.g. `YYYY-MM-DD HH:mm:ss`
  */
 export function formatDate(

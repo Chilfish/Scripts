@@ -9,8 +9,7 @@
   },
   "license": "MIT",
   "scripts": {
-    "dev:ins": "cd monkey/ins-export && vite dev",
-    "build:ins": "cd monkey/ins-export && vite build",
+    "build:monkey": "tsx monkey/build.ts",
     "lint": "eslint .",
     "postinstall": "simple-git-hooks"
   },

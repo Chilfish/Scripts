@@ -103,6 +103,13 @@ function tomp4 {
   ffmpeg -i $name -c copy "$basename.mp4"
 }
 
+# 字幕压制
+function subMp4 {
+  $video = $args[0]
+  $subtitle = $args[1]
+  ffmpeg -i $video -vf "ass=$subtitle" -c:v libx264 -crf 23 -c:a aac -b:a 192k output.mp4
+}
+
 # get battery report
 function battery {
   $Path = "D:/battery-report.html"
