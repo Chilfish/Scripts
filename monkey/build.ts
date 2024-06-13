@@ -22,6 +22,6 @@ for (const file of metaFiles) {
 
 console.log('lint the code')
 
-await runCommand(`cd ${cwd} && pnpm eslint . --fix`)
+await runCommand(`cd ${cwd} && pnpm eslint **/*.js --fix`)
 
 console.log('build complete')

@@ -85,6 +85,9 @@ function danmu {
 function subtitle {
   bbdown --sub-only --skip-ai=false --work-dir=D:/videos $args
 }
+function downbb {
+  bbdown -aria2 -mt --aria2c-args="-x16 -s16 -j16" --work-dir=D:/videos $args
+}
 
 # https://github.com/eza-community/eza
 function lss {

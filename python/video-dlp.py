@@ -1,7 +1,9 @@
 import argparse
 import json
-from datetime import datetime
+import os
+import subprocess
 
+from datetime import datetime
 import yt_dlp
 
 # 设置参数
@@ -10,6 +12,11 @@ parser.add_argument("url", help="video url")
 parser.add_argument(
     "--no-download",
     help="don't download video",
+    action="store_true"
+)
+parser.add_argument(
+    "--gif",
+    help="convert video to gif",
     action="store_true"
 )
 args = parser.parse_args()
@@ -24,7 +31,6 @@ ydl_opts = {
         "temp": out_dir
     },
     "concurrent_fragment_downloads": 16,
-    "format": "bestvideo+bestaudio",
     "proxy": "http://127.0.0.1:7890",
 }
 
@@ -52,6 +58,7 @@ with yt_dlp.YoutubeDL(ydl_opts) as ydl:
     ydl_opts["outtmpl"]["default"] = f"{upload_date}_{title}.mp4"
     ydl.params.update(ydl_opts)
 
+    filepath = f"{out_dir}/{upload_date}_{title}"
     print(ydl_opts)
 
     if args.no_download:
@@ -59,3 +66,15 @@ with yt_dlp.YoutubeDL(ydl_opts) as ydl:
             json.dump(info, file, ensure_ascii=False, indent=2)
     else:
         ydl.download([video_url])
+
+    if args.gif:
+        subprocess.run(
+            [
+                "ffmpeg",
+                "-i",
+                f"{filepath}.mp4",
+                f"{filepath}.gif",
+            ],
+            check=True,
+        )
+        os.remove(f"{filepath}.mp4")
