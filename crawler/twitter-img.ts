@@ -1,3 +1,10 @@
+/**
+ * Download images from Twitter，imgs.json：
+ * [
+ *  { name: '1.png', url: 'https://pbs.twimg.com/media/1.png' },
+ * ]
+ */
+
 import { mkdir, readFile } from 'node:fs/promises'
 import { existsSync } from 'node:fs'
 import path from 'node:path'

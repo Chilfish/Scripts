@@ -1,15 +1,12 @@
 import path from 'node:path'
 import readline from 'node:readline'
 import { execSync } from 'node:child_process'
-import { fileURLToPath } from 'node:url'
 import { createHash } from 'node:crypto'
 import { createReadStream } from 'node:fs'
 import { stat } from 'node:fs/promises'
 
 import { LogType, consola } from 'consola'
 import { isMacOS, isWindows } from 'std-env'
-
-export const root = path.resolve(fileURLToPath(import.meta.url), '../../')
 
 export async function prompt(msg: string) {
   const ans = await consola.prompt(msg) as string

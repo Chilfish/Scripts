@@ -29,13 +29,10 @@ Remove-Item Alias:ni -Force -ErrorAction Ignore
 
 $hosts = "C:\Windows\System32\drivers\etc\hosts"
 $me = "C:/Users/Chilfish"
+$video = "D:/Videos"
+$download = "D:/Downloads"
 
 $Env:OLLAMA_ORIGINS="https://chatkit.app"
-
-# wsl from ssh
-function wsll {
-  & 'C:\Program Files\WSL\wsl.exe'
-}
 
 # like `wc` in linux
 function wc {
@@ -79,14 +76,14 @@ function wb {
 
 # bbdown: https://github.com/nilaoda/BBDown
 function danmu {
-  bbdown $args --danmaku-only --work-dir=D:/videos
+  bbdown $args --danmaku-only --work-dir=$video
   rm -r D:/videos/*.xml
 }
 function subtitle {
-  bbdown --sub-only --skip-ai=false --work-dir=D:/videos $args
+  bbdown --sub-only --skip-ai=false --work-dir=$video $args
 }
 function downbb {
-  bbdown -aria2 -mt --aria2c-args="-x16 -s16 -j16" --work-dir=D:/videos $args
+  bbdown -aria2 -mt --aria2c-args="-x16 -s16 -j16" --work-dir=$video $args
 }
 
 # https://github.com/eza-community/eza
@@ -115,6 +112,6 @@ function subMp4 {
 
 # get battery report
 function battery {
-  $Path = "D:/battery-report.html"
+  $Path = "$download/battery-report.html"
   powercfg /batteryreport /output $Path
 }
