@@ -2,7 +2,14 @@ import fs from 'node:fs'
 import { mkdir } from 'node:fs/promises'
 import PQueue from 'p-queue'
 import { downloadBlob, readJson, writeJson } from '../../utils'
-import { _fetch, getAreas, getCharacters, getMapStories } from '.'
+import {
+  _fetch,
+  fetchExplorer,
+  getAreas,
+  getCharacters,
+  getFileDir,
+  getMapStories,
+} from '.'
 
 /**
  * 根据乐队获取所有角色的 地图剧情
@@ -38,7 +45,7 @@ export async function getStories(
     return await readJson(dest)
   }
 
-  const resourceset = await _fetch('/explorer/jp/assets/_info.json')
+  const resourceset = await getFileDir()
     .then(infos => Object.keys(infos.characters.resourceset))
 
   const characters = await getCharacters()
@@ -53,7 +60,7 @@ export async function getStories(
       if (!chara)
         return
 
-      const data = await _fetch<string[]>(`/explorer/jp/assets/characters/resourceset/${key}.json`)
+      const data = await fetchExplorer<string[]>(`/characters/resourceset/${key}.json`)
       if (!data)
         return
 

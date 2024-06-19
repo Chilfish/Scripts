@@ -8,6 +8,7 @@ export default antfu({
     'prefer-rest-params': 'off',
     'node/prefer-global/process': 'off',
     'ts/consistent-type-imports': 'off',
+    'unused-imports/no-unused-vars': 'warn',
     'regexp/no-unused-capturing-group': 'off',
     'style/no-mixed-operators': 'off',
   },

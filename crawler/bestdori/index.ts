@@ -30,6 +30,12 @@ export async function _fetch<T = any>(
   }
 }
 
+export async function fetchExplorer<T = any>(
+  path: string,
+) {
+  return await _fetch<T>(`/explorer/jp/assets${path}`)
+}
+
 export async function getCharacters() {
   return await _fetch('/characters/main.2.json')
     .then((data: any) => Object.entries(data)
@@ -73,4 +79,11 @@ export async function getMapStoryAssets(storyId: number) {
   const voice = `${baseUrl}/sound/voice/scenario/actionset/actionset${10 * Math.floor(storyId / 200)}_rip/`
 
   return { assest, voice }
+}
+
+/**
+ * 获取文件树列表
+ */
+export async function getFileDir() {
+  return await _fetch('/explorer/jp/assets/_info.json')
 }

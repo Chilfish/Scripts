@@ -1,6 +1,6 @@
 import path from 'node:path'
 import { existsSync } from 'node:fs'
-import { writeFile } from 'node:fs/promises'
+import { mkdir, writeFile } from 'node:fs/promises'
 import { Buffer } from 'node:buffer'
 import { ofetch } from 'ofetch'
 
@@ -10,6 +10,7 @@ export interface DownloadOptions {
   url: string
   dest?: string
   name?: string
+  mime?: string
   fetchOptions?: RequestInit
 }
 
@@ -19,6 +20,7 @@ export async function downloadBlob(
   let {
     url,
     name,
+    mime,
     dest = 'D:/Downloads',
     fetchOptions,
   } = options
@@ -37,18 +39,32 @@ export async function downloadBlob(
   if (existsSync(filename))
     return true
 
+  if (!existsSync(dest))
+    await mkdir(dest, { recursive: true })
+
   try {
     const res = await fetch(url, fetchOptions)
-      .then(res => res.arrayBuffer())
+    const mimeType = res.headers.get('content-type') || 'image/jpeg'
 
-    await writeFile(filename, Buffer.from(res))
+    if (
+      !res.ok
+      || !res.body
+      || mime && !mimeType.includes(mime)
+    ) {
+      if (mime)
+        logger(`miniType not match: ${mimeType} !== ${mime}`, 'warn')
+      throw new Error(`Failed to download ${url}`)
+    }
+
+    const buffer = await res.arrayBuffer()
+    await writeFile(filename, Buffer.from(buffer))
 
     logger(`Downloaded ${name}`, 'success')
 
     return true
   }
   catch (e) {
-    logger(`Failed to download ${name}`, 'error')
+    logger(`Failed to download ${url}`, 'error')
     return false
   }
 }

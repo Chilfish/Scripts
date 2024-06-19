@@ -1,5 +1,13 @@
 import path from 'node:path'
-import { readFile, writeFile } from 'node:fs/promises'
+import { existsSync } from 'node:fs'
+import {
+  mkdir,
+  readFile,
+  readdir,
+  rename,
+  stat,
+  writeFile,
+} from 'node:fs/promises'
 import { fileURLToPath } from 'node:url'
 
 export const root = path.resolve(fileURLToPath(import.meta.url), '../../../')
@@ -42,4 +50,27 @@ export async function readJson<T = any>(file: string) {
 
   const data = await readFile(file, 'utf-8')
   return JSON.parse(data) as T
+}
+
+export async function moveFoler(
+  from: string,
+  to: string,
+) {
+  if (!existsSync(to))
+    await mkdir(to, { recursive: true })
+
+  const files = await readdir(from)
+
+  for (const file of files) {
+    const oldPath = `${from}/${file}`
+    const newPath = `${to}/${file}`
+
+    const stats = await stat(oldPath)
+    if (stats.isDirectory())
+      await moveFoler(oldPath, newPath)
+    else
+      await rename(oldPath, newPath)
+
+    // await fs.rmdir(from)
+  }
 }

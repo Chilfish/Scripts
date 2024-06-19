@@ -2,13 +2,13 @@ import argparse
 import json
 import os
 import subprocess
-
 from datetime import datetime
+
 import yt_dlp
 
 # 设置参数
 parser = argparse.ArgumentParser()
-parser.add_argument("url", help="video url")
+parser.add_argument("url", help="video url, or list split by ', '", type=str)
 parser.add_argument(
     "--no-download",
     help="don't download video",
@@ -21,23 +21,32 @@ parser.add_argument(
 )
 args = parser.parse_args()
 
-out_dir = "D:/Downloads"
 
-# 设置下载参数
-ydl_opts = {
-    "cookiesfrombrowser": ("chrome",),
-    "paths": {
-        "home": out_dir,
-        "temp": out_dir
-    },
-    "concurrent_fragment_downloads": 16,
-    "proxy": "http://127.0.0.1:7890",
-}
+def main(video_url: str):
+    out_dir = "D:/Downloads"
 
-# 视频链接
-video_url = args.url
+    opt_format = "bestvideo/best+bestaudio/best"
+    proxy = "http://127.0.0.1:7890"
 
-with yt_dlp.YoutubeDL(ydl_opts) as ydl:
+    # starBeat 番剧画质超分辨率
+    if video_url.find("bilibili.com/bangumi/play/") != -1:
+        opt_format = "bestvideo[height=1080]+bestaudio/best"
+        proxy = None
+
+    # 设置下载参数
+    ydl_opts = {
+        "cookiesfrombrowser": ("chrome",),
+        "paths": {
+            "home": out_dir,
+            "temp": out_dir
+        },
+        "concurrent_fragment_downloads": 16,
+        "proxy": proxy,
+        "format": opt_format,
+    }
+
+    ydl = yt_dlp.YoutubeDL(ydl_opts)
+
     info = ydl.extract_info(video_url, download=False) or {}
 
     title = info.get("title", "video")
@@ -55,11 +64,12 @@ with yt_dlp.YoutubeDL(ydl_opts) as ydl:
         else info.get("upload_date", "unknown")
     )
 
-    ydl_opts["outtmpl"]["default"] = f"{upload_date}_{title}.mp4"
+    if host != "BiliBiliBangumi":
+        ydl_opts["outtmpl"]["default"] = f"{upload_date}_{title}.mp4"
     ydl.params.update(ydl_opts)
 
     filepath = f"{out_dir}/{upload_date}_{title}"
-    print(ydl_opts)
+    print("options:", ydl.params)
 
     if args.no_download:
         with open(f"{out_dir}/{title}.json", "w", encoding="utf-8") as file:
@@ -78,3 +88,9 @@ with yt_dlp.YoutubeDL(ydl_opts) as ydl:
             check=True,
         )
         os.remove(f"{filepath}.mp4")
+
+
+if __name__ == "__main__":
+    urls = args.url.split(", ")
+    for url in urls:
+        main(url)
