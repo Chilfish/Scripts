@@ -52,19 +52,19 @@ export async function downloadBlob(
       || mime && !mimeType.includes(mime)
     ) {
       if (mime)
-        logger(`miniType not match: ${mimeType} !== ${mime}`, 'warn')
+        logger.warn(`miniType not match: ${mimeType} !== ${mime}`)
       throw new Error(`Failed to download ${url}`)
     }
 
     const buffer = await res.arrayBuffer()
     await writeFile(filename, Buffer.from(buffer))
 
-    logger(`Downloaded ${name}`, 'success')
+    logger.success(`Downloaded ${name}`)
 
     return true
   }
   catch (e) {
-    logger(`Failed to download ${url}`, 'error')
+    logger.error(`Failed to download ${url}`)
     return false
   }
 }

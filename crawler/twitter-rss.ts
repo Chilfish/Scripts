@@ -3,6 +3,7 @@ import { readFile } from 'node:fs/promises'
 import { defineCommand, runMain } from 'citty'
 import { serve } from '@hono/node-server'
 import { Hono } from 'hono'
+import { Browser } from 'puppeteer'
 import { logger, newBrowser, root } from '../utils/node'
 import { buildSearchParam, devices, getCookie } from '../utils'
 import { json2rss } from '../utils/rss'
@@ -12,8 +13,10 @@ const cssSelector = `article[data-testid="tweet"]`
 const cookies = await readFile(path.resolve(root, 'cookie.txt'), 'utf-8')
   .then(data => getCookie(data))
 
-export async function search(url: string) {
-  const browser = await newBrowser()
+let browser: Browser | null
+
+async function search(url: string) {
+  browser = await newBrowser()
   const page = await browser.newPage()
 
   const device = devices.desktop
@@ -32,6 +35,9 @@ export async function search(url: string) {
   })
 
   await page.waitForSelector(cssSelector)
+  await page.evaluate(() => {
+    window.scrollBy(0, window.innerHeight)
+  })
 
   const tweets = await page.$$eval(cssSelector, (articles) => {
     return articles.map((article) => {
@@ -49,12 +55,10 @@ export async function search(url: string) {
     })
   })
 
-  await browser.close()
-
   return tweets
 }
 
-export async function searchRss(
+async function searchRss(
   keyword: string,
 ) {
   // https://twitter.com/search?q=--&src=recent_search_click&f=live
@@ -64,8 +68,11 @@ export async function searchRss(
     f: 'live',
  })}`)
     .catch((err) => {
-      logger(`[twitter-rss]: ${err}`, 'error', true)
+      logger.error(`[twitter-rss]: ${err}`, true)
       return []
+    })
+    .finally(async () => {
+      await browser?.close()
     })
 }
 
@@ -83,8 +90,11 @@ runMain(defineCommand({
   run: async ({ args }) => {
     const { keyword } = args
     if (keyword) {
+      logger.info(`Searching for ${keyword}`)
       const tweets = await searchRss(keyword)
-      console.log(tweets)
+
+      logger.info(`Found ${tweets.length} tweets`)
+      logger.info(tweets)
       return
     }
 
@@ -120,7 +130,7 @@ async function main() {
   })
 
   const port = 3456
-  console.log(`Server is running on port ${port}`)
+  logger.info(`Server is running on port ${port}`)
 
   serve({
     fetch: app.fetch,

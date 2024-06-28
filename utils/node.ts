@@ -40,20 +40,33 @@ export function isInCli(filename: string) {
   return path.resolve(filename) === path.resolve(argFile)
 }
 
-export function logger(
-  message: string,
+type LogMessage = any
+
+export const logger = {
+  info: (message: LogMessage, file = false) => log(message, 'info', file),
+  success: (message: LogMessage, file = false) => log(message, 'success', file),
+  warn: (message: LogMessage, file = false) => log(message, 'warn', file),
+  error: (message: LogMessage, file = false) => log(message, 'error', file),
+  debug: (message: LogMessage, file = false) => log(message, 'debug', file),
+}
+
+export function log(
+  message: LogMessage,
   type: LogType = 'info',
   file = false,
 ) {
+  if (typeof message === 'object') {
+    message = JSON.stringify(message, null, 2)
+  }
+
+  const log = `${new Date().toISOString()} [${type.toUpperCase()}] ${message}\n`
   if (file) {
-    const log = `${new Date().toISOString()} [${type.toUpperCase()}] ${message}\n`
     const logPath = path.resolve(root, 'scripts.log')
-    console.log(logPath, log)
     fs.appendFileSync(logPath, log, { encoding: 'utf-8' })
   }
   if (process.env.PROGRESS !== 'true') {
     consola[type](message)
-    return
+    return log
   }
 
   // 保存当前光标位置
@@ -63,6 +76,8 @@ export function logger(
   // 重新打印进度条
   readline.cursorTo(process.stdout, 0)
   readline.moveCursor(process.stdout, 0, 1) // 移动回进度条位置
+
+  return log
 }
 
 export async function hashFile(

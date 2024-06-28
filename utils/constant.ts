@@ -29,7 +29,7 @@ export const devices: Record<Devices, DeviceInfo> = {
   },
   desktop: {
     ua: randomUserAgent(),
-    width: 1920,
-    height: 1080,
+    width: 1552,
+    height: 1000,
   },
 }
