@@ -4,7 +4,7 @@ import { mkdir, writeFile } from 'node:fs/promises'
 import { Buffer } from 'node:buffer'
 import { ofetch } from 'ofetch'
 
-import { logger } from '../utils'
+import { logger } from '../utils/node'
 
 export interface DownloadOptions {
   url: string

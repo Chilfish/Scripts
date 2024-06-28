@@ -2,7 +2,8 @@ import path from 'node:path'
 import { Page } from 'puppeteer'
 import { consola } from 'consola'
 import { defineCommand, runMain } from 'citty'
-import { cookieToRecord, devices, newBrowser, prompt } from '../utils'
+import { newBrowser, prompt } from '../utils/node'
+import { cookieToRecord, devices } from '../utils'
 
 const app = defineCommand({
   meta: {

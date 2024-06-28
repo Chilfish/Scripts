@@ -1,6 +1,6 @@
 import { consola } from 'consola'
 import { defineCommand, runMain } from 'citty'
-import { fetchIntercept, newBrowser, prompt } from '../utils'
+import { fetchIntercept, newBrowser, prompt } from '../utils/node'
 
 runMain(defineCommand({
   meta: {

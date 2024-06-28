@@ -1,6 +1,6 @@
 import path from 'node:path'
 import PQueue from 'p-queue'
-import { downloadBlob } from '../../utils'
+import { downloadBlob } from '../../utils/node'
 import { _fetch, fetchExplorer, getFileDir } from '.'
 
 const dest = 'D:/Downloads/bestdori/voice'

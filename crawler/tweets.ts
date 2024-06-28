@@ -1,6 +1,7 @@
 import { readFile, writeFile } from 'node:fs/promises'
 import path from 'node:path'
-import { root, uniqueObj } from '../utils'
+import { root } from '../utils/node'
+import { uniqueObj } from '../utils'
 
 // `2023-04-26 18:41:52` to `20230426_184152`
 function formatTime(time: string) {

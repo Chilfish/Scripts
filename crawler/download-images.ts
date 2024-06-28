@@ -1,7 +1,8 @@
 import { Page } from 'puppeteer'
 import { defineCommand, runMain } from 'citty'
 import { consola } from 'consola'
-import { devices, downloadBlob, newBrowser, prompt } from '../utils'
+import { downloadBlob, newBrowser, prompt } from '../utils/node'
+import { devices } from '../utils'
 
 runMain(defineCommand({
   meta: {

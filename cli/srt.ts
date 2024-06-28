@@ -1,7 +1,8 @@
 import { readFile, writeFile } from 'node:fs/promises'
 import path from 'node:path'
 import { defineCommand, runMain } from 'citty'
-import { prompt } from '../utils'
+import { prompt } from '../utils/node'
+import { buildSearchParam } from '../utils'
 
 runMain(defineCommand({
   meta: {
@@ -38,12 +39,6 @@ const timeMatch = /\d+:\d+:\d+,\d+\s-->\s\d+:\d+:\d+,\d+/
 // 翻译行数缓冲区大小
 const chunkSize = 100
 const translated: string[] = []
-
-function buildSearchParam(obj: Record<string, string>) {
-  return Object.keys(obj)
-    .map(key => `${encodeURIComponent(key)}=${encodeURIComponent(obj[key])}`)
-    .join('&')
-}
 
 function chunkArray<T>(array: T[], size: number) {
   const result = [] as T[][]

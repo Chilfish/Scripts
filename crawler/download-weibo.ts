@@ -5,8 +5,8 @@ import {
   downloadBlob,
   getWeiboAnonToken,
   prompt,
-} from '../utils'
-import { runCommand } from '../utils/node'
+  runCommand,
+} from '../utils/node'
 
 interface PicInfo {
   largest: {

@@ -10,7 +10,7 @@ import {
 } from 'node:fs/promises'
 import { fileURLToPath } from 'node:url'
 
-export const root = path.resolve(fileURLToPath(import.meta.url), '../../../')
+export const root = path.resolve(fileURLToPath(import.meta.url), '../../')
 
 export async function writeJson(
   file: string,

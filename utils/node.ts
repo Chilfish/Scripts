@@ -4,9 +4,12 @@ import { execSync } from 'node:child_process'
 import { createHash } from 'node:crypto'
 import { createReadStream } from 'node:fs'
 import { stat } from 'node:fs/promises'
-
 import { LogType, consola } from 'consola'
-import { isMacOS, isWindows } from 'std-env'
+
+export * from './fetch'
+export * from './puppeteer'
+export * from './progress'
+export * from './file'
 
 export async function prompt(msg: string) {
   const ans = await consola.prompt(msg) as string
@@ -30,24 +33,11 @@ export async function runCommand(command: string) {
 /**
  * Check the filename is same to `tsx path/file.ts`
  */
-export function isRunSame() {
+export function isInCli(filename: string) {
   const [_tsx, argFile] = process.argv
-  const { filename } = import.meta
-
-  console.log({ filename, argFile })
 
   return path.resolve(filename) === path.resolve(argFile)
 }
-
-export const chromePath = (() => {
-  if (isWindows)
-    return 'C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe'
-
-  if (isMacOS)
-    return '/Applications/Google Chrome.app/Contents/MacOS/Google Chrome'
-
-  return '/usr/bin/google-chrome'
-})()
 
 export function logger(
   message: string,

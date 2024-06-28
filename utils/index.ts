@@ -1,9 +1,10 @@
 export * from './math'
-export * from './fetch'
 export * from './constant'
-export * from './node'
-export * from './puppeteer'
 export * from './cookie'
 export * from './date'
-export * from './progress'
-export * from './file'
+
+export function buildSearchParam(obj: Record<string, string>) {
+  return Object.keys(obj)
+    .map(key => `${encodeURIComponent(key)}=${encodeURIComponent(obj[key])}`)
+    .join('&')
+}

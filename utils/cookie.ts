@@ -6,7 +6,7 @@ interface Cookie {
 
 export function getCookie(cookie?: string | Record<string, string>[]) {
   if (!cookie)
-    cookie = document.cookie
+    cookie = document && document.cookie
 
   if (typeof cookie === 'object') {
     const cookies: Record<string, string> = {}
