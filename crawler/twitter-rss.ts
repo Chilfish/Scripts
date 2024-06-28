@@ -1,7 +1,11 @@
 import path from 'node:path'
 import { readFile } from 'node:fs/promises'
-import { isInCli, newBrowser, prompt, root } from '../utils/node'
+import { defineCommand, runMain } from 'citty'
+import { serve } from '@hono/node-server'
+import { Hono } from 'hono'
+import { newBrowser, root } from '../utils/node'
 import { buildSearchParam, devices, getCookie } from '../utils'
+import { json2rss } from '../utils/rss'
 
 const cssSelector = `article[data-testid="tweet"]`
 
@@ -37,10 +41,10 @@ export async function search(url: string) {
       const url = tweetTime?.parentElement?.getAttribute('href')
 
       return {
-        author: author?.textContent?.trim(),
-        text: tweetText?.textContent?.trim(),
-        time: tweetTime?.dateTime,
-        url: url ? `https://x.com${url}` : undefined,
+        author: author?.textContent?.trim() || 'Unknown',
+        text: tweetText?.textContent?.trim() || 'No text',
+        time: tweetTime?.dateTime || new Date().toISOString(),
+        url: url ? `https://x.com${url}` : 'https://x.com',
       }
     })
   })
@@ -61,8 +65,61 @@ export async function searchRss(
  })}`)
 }
 
-if (isInCli(import.meta.filename)) {
-  const keyword = await prompt('Enter the keyword: ')
-  const tweets = await searchRss(keyword)
-  console.log(tweets)
+runMain(defineCommand({
+  meta: {
+    name: 'twitter-rss',
+    description: 'RSS for Twitter Search',
+  },
+  args: {
+    keyword: {
+      type: 'string',
+      description: 'Search keyword',
+    },
+  },
+  run: async ({ args }) => {
+    const { keyword } = args
+    if (keyword) {
+      const tweets = await searchRss(keyword)
+      console.log(tweets)
+      return
+    }
+
+    await main()
+  },
+}))
+
+async function main() {
+  const app = new Hono()
+
+  app.get('/', (c) => {
+    return c.text('Hello Hono!')
+  })
+  app.get('/search/:keyword', async (c) => {
+    const { keyword } = c.req.param()
+    const tweets = await searchRss(keyword)
+
+    const rss = json2rss({
+      title: `Twitter Search: ${keyword}`,
+      description: `Twitter Search for ${keyword}`,
+      link: `https://x.com/search?q=${keyword}`,
+    }, tweets.map(tweet => ({
+      title: tweet.author,
+      link: tweet.url,
+      pubDate: tweet.time,
+      content: tweet.text,
+      author: tweet.author,
+    })))
+
+    return c.body(rss, 200, {
+      'Content-Type': 'application/xml',
+    })
+  })
+
+  const port = 3456
+  console.log(`Server is running on port ${port}`)
+
+  serve({
+    fetch: app.fetch,
+    port,
+  })
 }

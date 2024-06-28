@@ -23,14 +23,15 @@ New-Alias which Get-Command
 New-Alias code code-insiders
 New-Alias curl D:/Scoop/shims/curl.exe
 
-New-Alias pnpm  D:\Dev\Node\pnpm\pnpm.CMD
-New-Alias pnpx  D:\Dev\Node\pnpm\pnpx.CMD
+New-Alias pnpm D:\Dev\Node\pnpm\pnpm.CMD
+New-Alias pnpx D:\Dev\Node\pnpm\pnpx.CMD
 Remove-Item Alias:ni -Force -ErrorAction Ignore
 
 $hosts = "C:\Windows\System32\drivers\etc\hosts"
 $me = "C:/Users/Chilfish"
 $video = "D:/Videos"
 $download = "D:/Downloads"
+$scripts = "D:/Codes/Scripts"
 
 $Env:OLLAMA_ORIGINS="https://chatkit.app"
 
@@ -65,7 +66,7 @@ function nest-gen($name) {
 
 # https://github.com/Chilfish/Scripts/blob/main/python/video-dlp.py
 function yt {
-  python D:/Codes/Scripts/python/video-dlp.py $args
+  python $scripts/python/video-dlp.py $args
 }
 
 # https://github.com/Chilfish/Weibo-archiver/blob/main/scripts/server.mjs
@@ -76,14 +77,17 @@ function wb {
 
 # bbdown: https://github.com/nilaoda/BBDown
 function danmu {
-  bbdown $args --danmaku-only --work-dir=$video
-  rm -r D:/videos/*.xml
+  bbdown --danmaku-only --work-dir="$video/弹幕/" $args
+  rm -r "$video/弹幕/*.xml"
 }
 function subtitle {
   bbdown --sub-only --skip-ai=false --work-dir=$video $args
 }
 function downbb {
   bbdown -aria2 -mt --aria2c-args="-x16 -s16 -j16" --work-dir=$video $args
+}
+function downbb-low {
+  bbdown -mt -e "hevc" -q "1080P 高清" --work-dir=$video $args
 }
 
 # https://github.com/eza-community/eza
@@ -115,3 +119,15 @@ function battery {
   $Path = "$download/battery-report.html"
   powercfg /batteryreport /output $Path
 }
+
+function gitblame {
+  echo "" >> .git-blame-ignore-revs
+  git config --local blame.ignoreRevsFile .git-blame-ignore-revs
+}
+
+function start-rss { 
+  $command = "tsx $scripts/crawler/twitter-rss.ts"
+  
+  Start-Process powershell -ArgumentList "-NoProfile -NoLogo -Command $command" -WindowStyle Hidden
+}
+
