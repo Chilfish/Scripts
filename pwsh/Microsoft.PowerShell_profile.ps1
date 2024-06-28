@@ -125,16 +125,22 @@ function gitblame {
   git config --local blame.ignoreRevsFile .git-blame-ignore-revs
 }
 
-function start-rss { 
-  $command = "tsx $scripts/crawler/twitter-rss.ts"
-  
+function runCommand {
+  param(
+    [string]$command
+  )
   Start-Process powershell -ArgumentList "-NoProfile -NoLogo -Command $command" -WindowStyle Hidden
+}
+
+function start-rss { 
+  cd $scripts
+  runCommand "pnpm run:rss"
 }
 
 # sudo: https://github.com/gerardog/gsudo
 function KillByPort {
   param(
-      [int]$Port
+    [int]$Port
   )
 
   $connection = Get-NetTCPConnection -LocalPort $Port -State Listen
