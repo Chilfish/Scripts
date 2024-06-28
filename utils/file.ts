@@ -1,6 +1,7 @@
 import path from 'node:path'
 import { existsSync } from 'node:fs'
 import {
+  appendFile,
   mkdir,
   readFile,
   readdir,
@@ -28,18 +29,15 @@ export async function writeJson(
   }
 
   // console.log(`Writing to ${file}`)
-  const options: any = { }
 
   if (mode === 'write') {
-    options.flag = 'w'
     data = JSON.stringify(data, null, 2)
+    await writeFile(file, data)
   }
   else {
-    options.flag = 'a'
     data = `${JSON.stringify(data)},\n`
+    await appendFile(file, data)
   }
-
-  await writeFile(file, data, options)
 
   return file
 }

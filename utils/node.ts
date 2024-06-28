@@ -1,10 +1,11 @@
 import path from 'node:path'
+import fs, { createReadStream } from 'node:fs'
 import readline from 'node:readline'
 import { execSync } from 'node:child_process'
 import { createHash } from 'node:crypto'
-import { createReadStream } from 'node:fs'
 import { stat } from 'node:fs/promises'
 import { LogType, consola } from 'consola'
+import { root } from './file'
 
 export * from './fetch'
 export * from './puppeteer'
@@ -42,7 +43,14 @@ export function isInCli(filename: string) {
 export function logger(
   message: string,
   type: LogType = 'info',
+  file = false,
 ) {
+  if (file) {
+    const log = `${new Date().toISOString()} [${type.toUpperCase()}] ${message}\n`
+    const logPath = path.resolve(root, 'scripts.log')
+    console.log(logPath, log)
+    fs.appendFileSync(logPath, log, { encoding: 'utf-8' })
+  }
   if (process.env.PROGRESS !== 'true') {
     consola[type](message)
     return

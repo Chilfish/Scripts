@@ -131,3 +131,18 @@ function start-rss {
   Start-Process powershell -ArgumentList "-NoProfile -NoLogo -Command $command" -WindowStyle Hidden
 }
 
+# sudo: https://github.com/gerardog/gsudo
+function KillByPort {
+  param(
+      [int]$Port
+  )
+
+  $connection = Get-NetTCPConnection -LocalPort $Port -State Listen
+  if ($connection) {
+      $pids = $connection.OwningProcess
+      Write-Host "Found process with PID: $pids on port $Port"
+      sudo Stop-Process -Id $pids -Force
+  } else {
+      Write-Host "No process found listening on port $Port"
+  }
+}

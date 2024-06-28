@@ -3,7 +3,7 @@ import { readFile } from 'node:fs/promises'
 import { defineCommand, runMain } from 'citty'
 import { serve } from '@hono/node-server'
 import { Hono } from 'hono'
-import { newBrowser, root } from '../utils/node'
+import { logger, newBrowser, root } from '../utils/node'
 import { buildSearchParam, devices, getCookie } from '../utils'
 import { json2rss } from '../utils/rss'
 
@@ -63,6 +63,10 @@ export async function searchRss(
     src: 'recent_search_click',
     f: 'live',
  })}`)
+    .catch((err) => {
+      logger(`[twitter-rss]: ${err}`, 'error', true)
+      return []
+    })
 }
 
 runMain(defineCommand({
