@@ -132,8 +132,10 @@ function runCommand {
   Start-Process powershell -ArgumentList "-NoProfile -NoLogo -Command $command" -WindowStyle Hidden
 }
 
-function start-rss { 
+function start-rss {
+  KillByPort 3456
   cd $scripts
+  Write-Host "running on http://localhost:3456"
   runCommand "pnpm run:rss"
 }
 

@@ -4,13 +4,15 @@ export default antfu({
   rules: {
     'no-console': 'off',
     'no-alert': 'off',
-    'no-cond-assign': 'off',
     'prefer-rest-params': 'off',
     'node/prefer-global/process': 'off',
     'ts/consistent-type-imports': 'off',
-    'unused-imports/no-unused-vars': 'warn',
     'regexp/no-unused-capturing-group': 'off',
     'style/no-mixed-operators': 'off',
+    'no-unused-vars': 'warn',
+    'no-cond-assign': 'warn',
+    'unused-imports/no-unused-vars': 'warn',
+    'no-undef': 'warn',
   },
   ignores: [
     '*.py',

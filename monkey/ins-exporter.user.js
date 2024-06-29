@@ -136,12 +136,12 @@
     if (Number.isNaN(date.getTime()))
       return ''
     const pad = num => num.toString().padStart(2, '0')
-    const year = date.getUTCFullYear()
-    const month = pad(date.getUTCMonth() + 1)
-    const day = pad(date.getUTCDate())
-    const hours = pad(date.getUTCHours())
-    const minutes = pad(date.getUTCMinutes())
-    const seconds = pad(date.getUTCSeconds())
+    const year = date.getFullYear()
+    const month = pad(date.getMonth() + 1)
+    const day = pad(date.getDate())
+    const hours = pad(date.getHours())
+    const minutes = pad(date.getMinutes())
+    const seconds = pad(date.getSeconds())
     return fmt.replace('YYYY', year.toString()).replace('MM', month).replace('DD', day).replace('HH', hours).replace('mm', minutes).replace('ss', seconds)
   }
   const urlMatch = 'graphql/query'

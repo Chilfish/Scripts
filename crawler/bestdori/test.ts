@@ -1,6 +1,5 @@
 import fs from 'node:fs/promises'
 import path from 'node:path'
-import { existsSync, readdir } from 'node:fs'
 
 const info = [
   { id: 1, bandId: 1, name: '户山香澄' },

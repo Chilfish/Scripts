@@ -5,7 +5,7 @@ import { serve } from '@hono/node-server'
 import { Hono } from 'hono'
 import { Browser } from 'puppeteer'
 import { logger, newBrowser, root } from '../utils/node'
-import { buildSearchParam, devices, getCookie } from '../utils'
+import { buildSearchParam, checkNetwork, devices, getCookie } from '../utils'
 import { json2rss } from '../utils/rss'
 
 const cssSelector = `article[data-testid="tweet"]`
@@ -14,6 +14,14 @@ const cookies = await readFile(path.resolve(root, 'cookie.txt'), 'utf-8')
   .then(data => getCookie(data))
 
 let browser: Browser | null
+
+interface Tweet {
+  author: string
+  text: string
+  time: string
+  url: string
+  image: string
+}
 
 async function search(url: string) {
   browser = await newBrowser()
@@ -33,47 +41,66 @@ async function search(url: string) {
   await page.goto(url, {
     waitUntil: 'domcontentloaded',
   })
-
-  await page.waitForSelector(cssSelector)
+  await page.waitForSelector(cssSelector, {
+    timeout: 15_000,
+  })
   await page.evaluate(() => {
     window.scrollBy(0, window.innerHeight)
   })
 
-  const tweets = await page.$$eval(cssSelector, (articles) => {
+  const tweets: Tweet[] = await page.$$eval(cssSelector, (articles) => {
     return articles.map((article) => {
+      const isAd = article.querySelector('svg.r-4qtqp9.r-yyyyoo.r-dnmrzs.r-bnwqim.r-lrvibr.r-m6rgpd.r-1q142lx.r-ip8ujx.r-1gs4q39.r-14j79pv') !== null
+      if (isAd) {
+        return null
+      }
+
       const tweetText = article.querySelector(`div[data-testid="tweetText"]`)
       const tweetTime = article.querySelector(`time`)
       const author = article.querySelector(`div[data-testid="User-Name"] a`)
       const url = tweetTime?.parentElement?.getAttribute('href')
+
+      const photos = Array.from(
+        article.querySelectorAll(`div[data-testid="tweetPhoto"] img`),
+      )
+        .map(photo => photo.getAttribute('src'))
+        .filter((src): src is string => !!src)
+
+      const cardPhoto = article.querySelector(`div[data-testid="card.wrapper"] img`)?.getAttribute('src')
 
       return {
         author: author?.textContent?.trim() || 'Unknown',
         text: tweetText?.textContent?.trim() || 'No text',
         time: tweetTime?.dateTime || new Date().toISOString(),
         url: url ? `https://x.com${url}` : 'https://x.com',
+        image: cardPhoto || photos[0] || '',
       }
     })
+      .filter((tweet): tweet is Tweet => tweet !== null)
   })
 
   return tweets
 }
 
-async function searchRss(
-  keyword: string,
-) {
-  // https://twitter.com/search?q=--&src=recent_search_click&f=live
-  return await search(`https://x.com/search?${buildSearchParam({
-    q: keyword,
-    src: 'recent_search_click',
-    f: 'live',
- })}`)
-    .catch((err) => {
-      logger.error(`[twitter-rss]: ${err}`, true)
-      return []
-    })
-    .finally(async () => {
-      await browser?.close()
-    })
+async function searchRss(keyword: string) {
+  try {
+    return await search(`https://x.com/search?${buildSearchParam({
+      q: keyword,
+      src: 'recent_search_click',
+      f: 'live',
+    })}`)
+  }
+  catch (err: any) {
+    let mes = await checkNetwork()
+    if (mes === 'ok')
+      mes = err.message
+
+    logger.error(`[twitter-rss]: ${mes}`, true)
+    return [] as Tweet[]
+  }
+  finally {
+    await browser?.close()
+  }
 }
 
 runMain(defineCommand({
@@ -117,11 +144,12 @@ async function main() {
       description: `Twitter Search for ${keyword}`,
       link: `https://x.com/search?q=${keyword}`,
     }, tweets.map(tweet => ({
-      title: tweet.author,
+      title: tweet.text.slice(0, 50),
       link: tweet.url,
       pubDate: tweet.time,
       content: tweet.text,
       author: tweet.author,
+      image: tweet.image,
     })))
 
     return c.body(rss, 200, {

@@ -16,12 +16,12 @@ export function formatDate(
 
   const pad = (num: number) => num.toString().padStart(2, '0')
 
-  const year = date.getUTCFullYear()
-  const month = pad(date.getUTCMonth() + 1) // Months are zero-based
-  const day = pad(date.getUTCDate())
-  const hours = pad(date.getUTCHours())
-  const minutes = pad(date.getUTCMinutes())
-  const seconds = pad(date.getUTCSeconds())
+  const year = date.getFullYear()
+  const month = pad(date.getMonth() + 1) // Months are zero-based
+  const day = pad(date.getDate())
+  const hours = pad(date.getHours())
+  const minutes = pad(date.getMinutes())
+  const seconds = pad(date.getSeconds())
 
   return fmt
     .replace('YYYY', year.toString())
@@ -30,4 +30,12 @@ export function formatDate(
     .replace('HH', hours)
     .replace('mm', minutes)
     .replace('ss', seconds)
+}
+
+/**
+ *  time to local time
+ */
+export function now() {
+  const _now = new Date().toLocaleString('zh-CN')
+  return formatDate(_now)
 }

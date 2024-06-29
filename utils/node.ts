@@ -6,8 +6,9 @@ import { createHash } from 'node:crypto'
 import { stat } from 'node:fs/promises'
 import { LogType, consola } from 'consola'
 import { root } from './file'
+import { now } from './date'
 
-export * from './fetch'
+export * from './download'
 export * from './puppeteer'
 export * from './progress'
 export * from './file'
@@ -59,7 +60,7 @@ export function log(
     message = JSON.stringify(message, null, 2)
   }
 
-  const log = `${new Date().toISOString()} [${type.toUpperCase()}] ${message}\n`
+  const log = `${now()} [${type.toUpperCase()}] ${message}\n`
   if (file) {
     const logPath = path.resolve(root, 'scripts.log')
     fs.appendFileSync(logPath, log, { encoding: 'utf-8' })
