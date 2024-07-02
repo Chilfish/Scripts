@@ -133,9 +133,8 @@ function runCommand {
 }
 
 function start-rss {
-  KillByPort 3456
-  cd $scripts
   Write-Host "running on http://localhost:3456"
+  cd $scripts
   runCommand "pnpm run:rss"
 }
 

@@ -3,10 +3,10 @@ import { ofetch } from 'ofetch'
 import { consola } from 'consola'
 import {
   downloadBlob,
-  getWeiboAnonToken,
   prompt,
   runCommand,
 } from '../utils/node'
+import { getWeiboAnonToken } from '../utils'
 
 interface PicInfo {
   largest: {

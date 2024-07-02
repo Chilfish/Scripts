@@ -3,7 +3,6 @@ import { mkdir } from 'node:fs/promises'
 import PQueue from 'p-queue'
 import { downloadBlob, readJson, writeJson } from '../../utils/node'
 import {
-  _fetch,
   fetchExplorer,
   getAreas,
   getCharacters,
@@ -119,7 +118,7 @@ export async function downStories() {
  * 故事剧情，语音在 sound/voice/scenario/birthdaystory{id}
  */
 export async function downBirthday() {
-  const birthdays = await _fetch<string[]>('/scenario/birthdaystory.json')
+  const birthdays = await fetchExplorer<string[]>('/scenario/birthdaystory.json')
   if (!birthdays)
     return
 

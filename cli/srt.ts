@@ -2,7 +2,7 @@ import { readFile, writeFile } from 'node:fs/promises'
 import path from 'node:path'
 import { defineCommand, runMain } from 'citty'
 import { prompt } from '../utils/node'
-import { buildSearchParam } from '../utils'
+import { buildUrl } from '../utils'
 
 runMain(defineCommand({
   meta: {
@@ -50,15 +50,17 @@ function chunkArray<T>(array: T[], size: number) {
 
 // from jp to zh
 async function translator(text: string) {
-  const query = buildSearchParam({
-    client: 'gtx',
-    sl: 'ja',
-    tl: 'zh-CN',
-    dt: 't',
-    q: text,
+  const api = buildUrl({
+    uri: `https://translate.googleapis.com/translate_a/single`,
+    query: {
+      client: 'gtx',
+      sl: 'ja',
+      tl: 'zh-CN',
+      dt: 't',
+      q: text,
+    },
   })
 
-  const api = `https://translate.googleapis.com/translate_a/single?${query}`
   const res = await fetch(api).then(res => res.json())
 
   return res[0].map(([translated]) => translated).join('') as string

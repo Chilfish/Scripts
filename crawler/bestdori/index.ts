@@ -17,7 +17,7 @@ export interface Area {
 
 export async function _fetch<T = any>(
   path: string,
-  base = 'https://bestdori.com/api/',
+  base = 'https://bestdori.com/api',
 ) {
   const url = `${base}${path}`
   try {

@@ -5,7 +5,7 @@ import { serve } from '@hono/node-server'
 import { Hono } from 'hono'
 import { Browser } from 'puppeteer'
 import { logger, newBrowser, root } from '../utils/node'
-import { buildSearchParam, checkNetwork, devices, getCookie } from '../utils'
+import { buildUrl, checkNetwork, devices, getCookie } from '../utils'
 import { json2rss } from '../utils/rss'
 
 const cssSelector = `article[data-testid="tweet"]`
@@ -84,11 +84,15 @@ async function search(url: string) {
 
 async function searchRss(keyword: string) {
   try {
-    return await search(`https://x.com/search?${buildSearchParam({
-      q: keyword,
-      src: 'recent_search_click',
-      f: 'live',
-    })}`)
+    const url = buildUrl({
+      uri: `https://x.com/search`,
+      query: {
+        q: keyword,
+        src: 'recent_search_click',
+        f: 'live',
+      },
+    })
+    return await search(url)
   }
   catch (err: any) {
     let mes = await checkNetwork()
