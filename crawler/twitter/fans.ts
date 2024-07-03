@@ -1,6 +1,6 @@
 import { consola } from 'consola'
 import { defineCommand, runMain } from 'citty'
-import { fetchIntercept, newBrowser, prompt } from '../utils/node'
+import { fetchIntercept, newBrowser, prompt } from '~/utils/node'
 
 runMain(defineCommand({
   meta: {
@@ -21,9 +21,11 @@ runMain(defineCommand({
     const url = `https://x.com/${name}`
     const apiMatch = '/UserByScreenName'
 
+    consola.info(`Fetching twitter fans of ${url}...`)
+
     const browser = await newBrowser()
     const data = await fetchIntercept(browser, url, apiMatch)
-      .then(res => res.data.user.result.legacy)
+      .then(res => res.data?.user.result.legacy)
       .finally(() => browser.close())
 
     const displyName = data.name

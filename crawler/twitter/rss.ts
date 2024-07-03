@@ -4,9 +4,9 @@ import { defineCommand, runMain } from 'citty'
 import { serve } from '@hono/node-server'
 import { Hono } from 'hono'
 import { Browser } from 'puppeteer'
-import { logger, newBrowser, root } from '../utils/node'
-import { buildUrl, checkNetwork, devices, getCookie } from '../utils'
-import { json2rss } from '../utils/rss'
+import { logger, newBrowser, root } from '~/utils/node'
+import { buildUrl, checkNetwork, devices, getCookie } from '~/utils'
+import { json2rss } from '~/utils/rss'
 
 const cssSelector = `article[data-testid="tweet"]`
 

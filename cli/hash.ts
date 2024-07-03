@@ -1,7 +1,7 @@
 import path from 'node:path'
 import { defineCommand, runMain } from 'citty'
-import { hashFile, prompt } from '../utils/node'
-import { fmtFileSize } from '../utils'
+import { hashFile, prompt } from '~/utils/node'
+import { fmtFileSize } from '~/utils'
 
 runMain(defineCommand({
   meta: {

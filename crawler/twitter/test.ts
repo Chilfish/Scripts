@@ -1,5 +1,5 @@
 import { writeFile } from 'node:fs/promises'
-import { fetchIntercept, newBrowser } from '../utils/node'
+import { fetchIntercept, newBrowser } from '~/utils/node'
 
 const name = process.argv[2] || 'elonmusk'
 const url = `https://x.com/${name}`
@@ -69,7 +69,7 @@ function parseUser(data: any): UserInfo {
   }
 }
 
-const tweets = data.map(parseTweet).sort((a, b) => a.date.localeCompare(b.date))
+const tweets = data.map(parseTweet).sort((a: any, b: any) => a.date.localeCompare(b.date))
 const user = parseUser(data[0])
 
 await writeFile('data.json', JSON.stringify({ tweets, user }, null, 2))

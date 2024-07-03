@@ -1,7 +1,6 @@
 import fs from 'node:fs'
 import { mkdir } from 'node:fs/promises'
 import PQueue from 'p-queue'
-import { downloadBlob, readJson, writeJson } from '../../utils/node'
 import {
   fetchExplorer,
   getAreas,
@@ -9,6 +8,7 @@ import {
   getFileDir,
   getMapStories,
 } from '.'
+import { downloadBlob, readJson, writeJson } from '~/utils/node'
 
 /**
  * 根据乐队获取所有角色的 地图剧情

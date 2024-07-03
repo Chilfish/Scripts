@@ -4,28 +4,20 @@ import { saveAs } from '~/utils/dom'
 import { formatDate } from '~/utils/date'
 
 const urlMatch = 'graphql/query'
+const tweetKey = 'xdt_api__v1__feed__user_timeline_graphql_connection'
 let user: User | undefined
 const tweets: Tweet[] = []
-let started = false
 
 export const getTweets: Interceptor = (request, response) => {
   if (!request.url.includes(urlMatch))
     return
 
-  const tweetKey = Symbol('xdt_api__v1__feed__user_timeline_graphql_connection')
   const { data } = destr<{ data: any }>(response.responseText)
 
   if (!data[tweetKey])
     return
 
   const { edges, page_info } = data[tweetKey] as UserFeed
-
-  if (edges.length > 6) {
-    started = true
-    console.log('started')
-  }
-  if (!started)
-    return
 
   console.log('fetched:', tweets.length)
 
@@ -54,7 +46,7 @@ export const getTweets: Interceptor = (request, response) => {
     .filter(Boolean) as Tweet[],
   )
 
-  if (!page_info.has_next_page) {
+  if (!page_info?.has_next_page && tweets.length > 0) {
     const now = new Date().getTime()
     saveAs(
       { user, tweets },

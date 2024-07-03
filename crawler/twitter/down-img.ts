@@ -14,7 +14,7 @@ import {
   downloadBlob,
   root,
   updateProgress,
-} from '../utils/node'
+} from '~/utils/node'
 
 const name = process.argv[2]
 if (!name) {

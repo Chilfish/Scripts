@@ -1,7 +1,7 @@
 import { fileURLToPath } from 'node:url'
 import { readdir, rename } from 'node:fs/promises'
 import path from 'node:path'
-import { runCommand } from '../utils/node'
+import { runCommand } from '~/utils/node'
 
 const cwd = path.dirname(fileURLToPath(import.meta.url))
 

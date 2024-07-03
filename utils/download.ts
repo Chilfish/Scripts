@@ -3,7 +3,7 @@ import { existsSync } from 'node:fs'
 import { mkdir, writeFile } from 'node:fs/promises'
 import { Buffer } from 'node:buffer'
 
-import { logger } from '../utils/node'
+import { logger } from '~/utils/node'
 
 export interface DownloadOptions {
   url: string

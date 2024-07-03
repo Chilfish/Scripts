@@ -1,6 +1,6 @@
 import { readdir, writeFile } from 'node:fs/promises'
 import path from 'node:path'
-import { readJson } from '../../utils/node'
+import { readJson } from '~/utils/node'
 
 const dir = 'D:/Downloads/bestdori/birthday/'
 const textDir = path.join(dir, 'text')

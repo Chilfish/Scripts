@@ -1,8 +1,8 @@
 import { readFile, writeFile } from 'node:fs/promises'
 import path from 'node:path'
 import { defineCommand, runMain } from 'citty'
-import { prompt } from '../utils/node'
-import { buildUrl } from '../utils'
+import { prompt } from '~/utils/node'
+import { buildUrl } from '~/utils'
 
 runMain(defineCommand({
   meta: {
@@ -63,6 +63,7 @@ async function translator(text: string) {
 
   const res = await fetch(api).then(res => res.json())
 
+  // @ts-expect-error haha
   return res[0].map(([translated]) => translated).join('') as string
 }
 
