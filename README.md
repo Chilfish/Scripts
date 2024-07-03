@@ -1,5 +1,7 @@
 ### 一些自用的脚本
 
+不负责任地随缘维护更新）
+
 必要依赖：[tsx: ts 运行器](https://github.com/privatenumber/tsx)、ffmpeg、nodejs>=20、Python3
 
 - [cli/srt](cli/srt.ts)：提取字幕或翻译 srt 字幕文件

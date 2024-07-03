@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Instagram Exporter
 // @namespace    chilfish/monkey
-// @version      2024.06.09
+// @version      2024.07.03
 // @author       monkey
 // @description  Export Instagram posts
 // @icon         https://www.instagram.com/static/images/ico/favicon-192.png/68d99ba29cc8.png
@@ -145,23 +145,16 @@
     return fmt.replace('YYYY', year.toString()).replace('MM', month).replace('DD', day).replace('HH', hours).replace('mm', minutes).replace('ss', seconds)
   }
   const urlMatch = 'graphql/query'
+  const tweetKey = 'xdt_api__v1__feed__user_timeline_graphql_connection'
   let user
   const tweets = []
-  let started = false
   const getTweets = (request, response) => {
     if (!request.url.includes(urlMatch))
       return
-    const tweetKey = Symbol('xdt_api__v1__feed__user_timeline_graphql_connection')
     const { data } = destr(response.responseText)
     if (!data[tweetKey])
       return
     const { edges, page_info } = data[tweetKey]
-    if (edges.length > 6) {
-      started = true
-      console.log('started')
-    }
-    if (!started)
-      return
     console.log('fetched:', tweets.length)
     tweets.push(
       ...edges.map(({ node }) => {
@@ -184,7 +177,7 @@
         }
       }).filter(Boolean),
     )
-    if (!page_info.has_next_page) {
+    if (!(page_info == null ? void 0 : page_info.has_next_page) && tweets.length > 0) {
       const now = (/* @__PURE__ */ new Date()).getTime()
       saveAs(
         { user, tweets },
@@ -244,6 +237,7 @@
   const enableAllTweets = _GM_getValue('enableAllTweets', false)
   if (enableAllTweets)
     httpHooks([getTweets])
+  console.debug('ins-export loaded', { enableAllTweets })
   _GM_registerMenuCommand(
     `导出所有推文 ${enableAllTweets ? '（已启用）' : ''}`,
     () => {

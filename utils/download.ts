@@ -52,7 +52,7 @@ export async function downloadBlob(
     ) {
       if (mime)
         logger.warn(`miniType not match: ${mimeType} !== ${mime}`)
-      throw new Error(`Failed to download ${url}`)
+      throw new Error('Invalid response, no body or not ok')
     }
 
     const buffer = await res.arrayBuffer()
@@ -63,7 +63,7 @@ export async function downloadBlob(
     return true
   }
   catch (e) {
-    logger.error(`Failed to download ${url}`)
+    logger.error(`Failed to download ${url}，${e}`)
     return false
   }
 }
