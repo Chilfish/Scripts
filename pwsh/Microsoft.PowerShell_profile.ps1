@@ -33,7 +33,7 @@ $video = "D:/Videos"
 $download = "D:/Downloads"
 $scripts = "D:/Codes/Scripts"
 
-$Env:OLLAMA_ORIGINS="https://chatkit.app"
+$Env:OLLAMA_ORIGINS="https://lobe.chilfish.top"
 
 # like `wc` in linux
 function wc {
@@ -153,3 +153,8 @@ function KillByPort {
       Write-Host "No process found listening on port $Port"
   }
 }
+
+#f45873b3-b655-43a6-b217-97c00aa0db58 PowerToys CommandNotFound module
+
+Import-Module -Name Microsoft.WinGet.CommandNotFound
+#f45873b3-b655-43a6-b217-97c00aa0db58

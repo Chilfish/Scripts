@@ -23,13 +23,19 @@ export const chromeUserData = (() => {
   return path.join(process.env.HOME!, '.config/google-chrome')
 })()
 
+const proxy = 'http://127.0.0.1:7890'
+
 export async function newBrowser() {
   return await puppeteer.launch({
     headless: 'shell',
     // headless: false,
     executablePath: chromePath,
     userDataDir: chromeUserData,
-    args: ['--no-sandbox', '--disable-setuid-sandbox'],
+    args: [
+      '--no-sandbox',
+      '--disable-setuid-sandbox',
+      `--proxy-server=${proxy}`,
+    ],
   })
 }
 

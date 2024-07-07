@@ -10,7 +10,7 @@
   "scripts": {
     "build:monkey": "tsx monkey/build.ts",
     "build:rss": "tsup --format=esm --treeshake --target=esnext ./crawler/twitter/rss.ts",
-    "run:rss": "pnpm build:rss && node dist/twitter-rss.js",
+    "run:rss": "pnpm build:rss && node dist/rss.js",
     "lint": "eslint .",
     "postinstall": "simple-git-hooks"
   },
