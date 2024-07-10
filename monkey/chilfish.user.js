@@ -12,23 +12,22 @@
 // @license      MIT
 // ==/UserScript==
 
-/* eslint-disable unused-imports/no-unused-vars */
-
 /**
  * @param {string} e
  * @param {any} root
- * @returns {HTMLElement} the first element that matches the specified selector
+ * @returns {HTMLElement | null} the first element that matches the specified selector
  */
-const $ = (e, root = document) => root.querySelector(e)
+const $ = (e, root = document) => root?.querySelector(e)
 /**
  * @param {string} e
  * @param {any} root
  * @returns {HTMLElement[]} array of elements that match the specified selector
  */
-const $$ = (e, root = document) => Array.from(root.querySelectorAll(e))
+const $$ = (e, root = document) => Array.from(root?.querySelectorAll(e)).filter(Boolean)
 
 // 配合 https://github.com/pushqrdx/vscode-inline-html 插件来高亮语法
 const css = String.raw
+const html = String.raw
 
 let _css = css`
   *::-webkit-scrollbar {

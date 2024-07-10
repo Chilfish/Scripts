@@ -126,6 +126,9 @@ export async function downBirthday() {
 
   const queue = new PQueue({ concurrency: 16 })
   for (const key of birthdays) {
+    if (!key.endsWith('.asset'))
+      continue
+
     queue.add(async () => {
       await downloadBlob({
         url: `${baseUrl}/scenario/birthdaystory_rip/${key}`,

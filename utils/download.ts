@@ -58,7 +58,7 @@ export async function downloadBlob(
     const buffer = await res.arrayBuffer()
     await writeFile(filename, Buffer.from(buffer))
 
-    logger.success(`Downloaded ${name}`)
+    logger.success(`Downloaded ${url}`)
 
     return true
   }

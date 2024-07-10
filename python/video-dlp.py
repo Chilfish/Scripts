@@ -8,7 +8,11 @@ import yt_dlp
 
 # 设置参数
 parser = argparse.ArgumentParser()
-parser.add_argument("url", help="video url, or list split by ', '", type=str)
+parser.add_argument(
+    "url", 
+    help="video url, or list split by ', '",
+    type=str
+)
 parser.add_argument(
     "--no-download",
     help="don't download video",
@@ -19,11 +23,17 @@ parser.add_argument(
     help="convert video to gif",
     action="store_true"
 )
+parser.add_argument(
+    "--audio",
+    help="download audio only",
+    action="store_true"
+)
 args = parser.parse_args()
 
 
 def main(video_url: str):
     out_dir = "D:/Downloads"
+    temp_dir = os.environ.get("TEMP", out_dir)
 
     opt_format = "bestvideo/best+bestaudio/best"
     proxy = "http://127.0.0.1:7890"
@@ -33,12 +43,15 @@ def main(video_url: str):
         opt_format = "bestvideo[height=1080]+bestaudio/best"
         proxy = None
 
+    if args.audio:
+        opt_format = "bestaudio/best"
+
     # 设置下载参数
     ydl_opts = {
         "cookiesfrombrowser": ("chrome",),
         "paths": {
             "home": out_dir,
-            "temp": out_dir
+            "temp": temp_dir,
         },
         "concurrent_fragment_downloads": 16,
         "proxy": proxy,
@@ -63,9 +76,15 @@ def main(video_url: str):
         if "timestamp" in info
         else info.get("upload_date", "unknown")
     )
+    filename = f"{upload_date}_{title}"
+    ext = "mp4"
 
     if host != "BiliBiliBangumi":
-        ydl_opts["outtmpl"]["default"] = f"{upload_date}_{title}.mp4"
+        filename = title
+    if args.audio:
+        ext = "mp3"
+    ydl_opts["outtmpl"]["default"] = f"{filename}.{ext}"
+
     ydl.params.update(ydl_opts)
 
     filepath = f"{out_dir}/{upload_date}_{title}"
