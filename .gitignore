@@ -33,6 +33,6 @@ out/
 
 *.pem
 imgs
-data.json
+data/*
 __pycache__
-cookie.txt
+cookie.yaml

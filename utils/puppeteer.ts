@@ -2,6 +2,7 @@ import { homedir } from 'node:os'
 import path from 'node:path'
 import puppeteer, { Browser } from 'puppeteer'
 import { isMacOS, isWindows } from 'std-env'
+import { proxyUrl } from './constant'
 
 export const chromePath = (() => {
   if (isWindows)
@@ -23,8 +24,6 @@ export const chromeUserData = (() => {
   return path.join(process.env.HOME!, '.config/google-chrome')
 })()
 
-const proxy = 'http://127.0.0.1:7890'
-
 export async function newBrowser() {
   return await puppeteer.launch({
     headless: 'shell',
@@ -34,7 +33,7 @@ export async function newBrowser() {
     args: [
       '--no-sandbox',
       '--disable-setuid-sandbox',
-      `--proxy-server=${proxy}`,
+      `--proxy-server=${proxyUrl}`,
     ],
   })
 }

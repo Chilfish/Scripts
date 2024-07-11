@@ -3,7 +3,11 @@ import { existsSync } from 'node:fs'
 import { mkdir, writeFile } from 'node:fs/promises'
 import { Buffer } from 'node:buffer'
 
+import { ProxyAgent, RequestInit, fetch } from 'undici'
+import { proxyUrl } from './constant'
 import { logger } from '~/utils/node'
+
+const proxy = new ProxyAgent(proxyUrl)
 
 export interface DownloadOptions {
   url: string
@@ -42,7 +46,10 @@ export async function downloadBlob(
     await mkdir(dest, { recursive: true })
 
   try {
-    const res = await fetch(url, fetchOptions)
+    const res = await fetch(url, {
+      ...fetchOptions,
+      dispatcher: proxy,
+    })
     const mimeType = res.headers.get('content-type') || 'image/jpeg'
 
     if (
@@ -56,6 +63,7 @@ export async function downloadBlob(
     }
 
     const buffer = await res.arrayBuffer()
+
     await writeFile(filename, Buffer.from(buffer))
 
     logger.success(`Downloaded ${url}`)

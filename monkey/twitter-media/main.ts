@@ -134,13 +134,13 @@ async function click(
     return
 
   set_status(btn, 'loading')
-  const out = `{date-time}-{status-id}`
   const json = await fetchTweet(status_id)
   const tweet = json.legacy
   const user = json.core.user_results.result.legacy
 
   const info: Record<string, string> = {}
 
+  const outFmt = `{user-id}-{date-time}-{status-id}`
   info['status-id'] = status_id
   info['user-name'] = user.name
   info['user-id'] = user.screen_name
@@ -160,23 +160,16 @@ async function click(
   const tasks_result: string[] = []
 
   medias.forEach((media: any, i: number) => {
-    info.url = media.type === 'photo'
-      ? `${media.media_url_https.replace('jpg', 'png')}:large`
-      : media.video_info.variants
-        .filter((n: any) => n.content_type === 'video/mp4')
-        .sort((a: any, b: any) => b.bitrate - a.bitrate)[0]
-        .url
-
+    info.url = `${media.media_url_https.replace('jpg', 'png')}:large`
     info.file = info.url.split('/').pop()?.split(/[:?]/).shift() || 'media'
     info['file-name'] = info.file.split('.').shift() || 'media'
     info['file-ext'] = info.file.split('.').pop() || 'jpg'
     info['file-type'] = media.type.replace('animated_', '') || 'photo'
 
     // Remove the {file-ext} placeholder and append the index if needed
-    const baseOut = out.replace(/\.?\{file-ext\}/, '')
-    const shouldAppendIndex = (medias.length > 1 || index) && out.match('{file-name}')
+    const shouldAppendIndex = (medias.length > 1 || index) && outFmt.match('{file-name}')
     const indexSuffix = shouldAppendIndex ? `-${index ? index - 1 : i}` : ''
-    const formattedOut = `${baseOut}${indexSuffix}.{file-ext}`
+    const formattedOut = `${outFmt}${indexSuffix}.{file-ext}`
 
     // Replace placeholders in the formatted string with actual values from info
     info.out = formattedOut.replace(/\{([^{}:]+)(:[^{}]+)?\}/g, (_match, name) => info[name])

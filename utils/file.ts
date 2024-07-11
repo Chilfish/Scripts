@@ -1,4 +1,5 @@
 import path from 'node:path'
+import os from 'node:os'
 import { existsSync } from 'node:fs'
 import {
   appendFile,
@@ -10,16 +11,52 @@ import {
   writeFile,
 } from 'node:fs/promises'
 import { fileURLToPath } from 'node:url'
+import { logger } from './node'
 
 export const root = path.resolve(fileURLToPath(import.meta.url), '../../')
+
+interface DirOptions {
+  path: string
+  root?: boolean
+  user?: boolean
+}
+
+export function dir(options: string | DirOptions): string {
+  let _path = ''
+
+  if (typeof options !== 'string') {
+    if (options.root)
+      _path = path.resolve(root, options.path)
+    else if (options.user)
+      _path = path.resolve(os.homedir(), options.path)
+    else
+      _path = path.resolve(options.path)
+  }
+  else {
+    if (path.isAbsolute(options))
+      _path = options
+    else
+      _path = path.resolve(root, options)
+  }
+
+  const isFile = !!_path.split('/').at(-1)?.includes('.')
+  const _dir = isFile ? path.dirname(_path) : _path
+
+  if (!existsSync(_dir))
+    mkdir(_dir, { recursive: true })
+
+  if (isFile && !existsSync(_path))
+    logger.warn(`File not found: ${_path}`)
+
+  return _path
+}
 
 export async function writeJson(
   file: string,
   data: any,
   mode: 'write' | 'append' = 'write',
 ) {
-  if (!path.isAbsolute(file))
-    file = path.resolve(root, file)
+  file = dir(file)
 
   if (data instanceof Map) {
     data = Object.fromEntries([...data.entries()])
@@ -43,8 +80,7 @@ export async function writeJson(
 }
 
 export async function readJson<T = any>(file: string) {
-  if (!path.isAbsolute(file))
-    file = path.resolve(root, file)
+  file = dir(file)
 
   const data = await readFile(file, 'utf-8')
   return JSON.parse(data) as T

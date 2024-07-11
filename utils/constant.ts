@@ -33,3 +33,5 @@ export const devices: Record<Devices, DeviceInfo> = {
     height: 1000,
   },
 }
+
+export const proxyUrl = 'http://127.0.0.1:7890'

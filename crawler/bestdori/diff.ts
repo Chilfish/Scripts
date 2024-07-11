@@ -2,12 +2,11 @@
  * 查看是否有新数据，有则更新
  */
 
-import path from 'node:path'
 import { diff } from 'ohash'
 import { getFileDir } from '.'
-import { readJson, root, writeJson } from '~/utils/file'
+import { dir, readJson, writeJson } from '~/utils/file'
 
-const savePath = path.resolve(root, 'crawler/bestdori/data.json')
+const savePath = dir('data/bestdori.json')
 
 const [oldFile, newFile] = await Promise.all([
   readJson(savePath).catch(() => ({})),

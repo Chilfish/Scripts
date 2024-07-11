@@ -1,17 +1,14 @@
-import path from 'node:path'
-import { readFile } from 'node:fs/promises'
 import { defineCommand, runMain } from 'citty'
 import { serve } from '@hono/node-server'
 import { Hono } from 'hono'
 import { Browser } from 'puppeteer'
-import { logger, newBrowser, root } from '~/utils/node'
+import { logger, newBrowser, readCookie } from '~/utils/node'
 import { buildUrl, checkNetwork, devices, getCookie } from '~/utils'
 import { json2rss } from '~/utils/rss'
 
 const cssSelector = `article[data-testid="tweet"]`
 
-const cookies = await readFile(path.resolve(root, 'cookie.txt'), 'utf-8')
-  .then(data => getCookie(data))
+const cookies = await readCookie('twitter').then(getCookie)
 
 let browser: Browser | null
 

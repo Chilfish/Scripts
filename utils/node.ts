@@ -5,13 +5,16 @@ import { execSync } from 'node:child_process'
 import { createHash } from 'node:crypto'
 import { stat } from 'node:fs/promises'
 import { LogType, consola } from 'consola'
+import { ProxyAgent } from 'undici'
 import { root } from './file'
 import { now } from './date'
+import { proxyUrl } from './constant'
 
 export * from './download'
 export * from './puppeteer'
 export * from './progress'
 export * from './file'
+export * from './config'
 
 export async function prompt(msg: string) {
   const ans = await consola.prompt(msg) as string
@@ -106,3 +109,5 @@ export async function hashFile(
     stream.on('error', reject)
   })
 }
+
+export const proxy = new ProxyAgent(proxyUrl)
