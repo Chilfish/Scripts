@@ -3,6 +3,7 @@ import os from 'node:os'
 import { fileURLToPath } from 'node:url'
 import { UserConfig, defineConfig } from 'vite'
 import monkey, { MonkeyOption } from 'vite-plugin-monkey'
+import { version } from '../package.json'
 
 export const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../')
 
@@ -41,6 +42,7 @@ export function viteConfig(
           namespace: 'chilfish/monkey',
           downloadURL,
           updateURL,
+          version,
           ...monkeyConfig.userscript,
         },
         server: {

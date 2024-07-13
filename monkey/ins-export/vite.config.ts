@@ -10,6 +10,5 @@ export default viteConfig({
     match: [
       'https://www.instagram.com/*',
     ],
-    version: '2024.07.03',
   },
 })

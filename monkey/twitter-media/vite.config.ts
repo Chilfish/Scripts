@@ -11,6 +11,5 @@ export default viteConfig({
       'https://twitter.com/*',
       'https://x.com/*',
     ],
-    version: '2024.06.10',
   },
 })

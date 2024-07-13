@@ -29,7 +29,7 @@ export async function newBrowser() {
     headless: 'shell',
     // headless: false,
     executablePath: chromePath,
-    userDataDir: chromeUserData,
+    // userDataDir: chromeUserData,
     args: [
       '--no-sandbox',
       '--disable-setuid-sandbox',

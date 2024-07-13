@@ -38,9 +38,15 @@ async function search(url: string) {
   await page.goto(url, {
     waitUntil: 'domcontentloaded',
   })
+
   await page.waitForSelector(cssSelector, {
     timeout: 15_000,
   })
+    .catch(async () => {
+      const text = await page.evaluate(() => $('react-root')?.textContent)
+      logger.error(`[twitter-rss]: ${text}`, true)
+    })
+
   await page.evaluate(() => {
     window.scrollBy(0, window.innerHeight)
   })

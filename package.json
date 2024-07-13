@@ -1,6 +1,7 @@
 {
   "name": "chilfish-scipts",
   "type": "module",
+  "version": "2024.07.13",
   "private": true,
   "author": {
     "name": "Chilfish",
