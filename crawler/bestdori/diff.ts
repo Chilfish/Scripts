@@ -3,8 +3,9 @@
  */
 
 import { diff } from 'ohash'
-import { getFileDir } from '.'
+import { explorerUrl, getFileDir } from '.'
 import { dir, readJson, writeJson } from '~/utils/file'
+import { formatDate, now } from '~/utils'
 
 const savePath = dir('data/bestdori.json')
 
@@ -28,7 +29,15 @@ if (Object.keys(oldFile).length === 0) {
   process.exit(0)
 }
 
-console.log('Diff:')
+const newData: string[] = []
 for (const { newValue } of theDiff) {
-  console.log(newValue.key.replace(/\./g, '/'))
+  const key = newValue.key.replace(/\./g, '/')
+  newData.push(`${explorerUrl}/${key}`)
 }
+
+await writeJson(
+  `data/bestdori-diff-${formatDate(now(), 'MM-DD')}.json`,
+  newData,
+)
+
+console.log('Diff:', newData.length)

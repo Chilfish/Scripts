@@ -11,7 +11,6 @@ import {
   writeFile,
 } from 'node:fs/promises'
 import { fileURLToPath } from 'node:url'
-import { logger } from './node'
 
 export const root = path.resolve(fileURLToPath(import.meta.url), '../../')
 
@@ -45,8 +44,8 @@ export function dir(options: string | DirOptions): string {
   if (!existsSync(_dir))
     mkdir(_dir, { recursive: true })
 
-  if (isFile && !existsSync(_path))
-    logger.warn(`File not found: ${_path}`)
+  // if (isFile && !existsSync(_path))
+  // logger.warn(`File not found: ${_path}`)
 
   return _path
 }

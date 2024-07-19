@@ -43,7 +43,7 @@ async function search(url: string) {
     timeout: 15_000,
   })
     .catch(async () => {
-      const text = await page.evaluate(() => $('react-root')?.textContent)
+      const text = await page.evaluate(() => document.querySelector('#react-root')?.textContent)
       logger.error(`[twitter-rss]: ${text}`, true)
     })
 

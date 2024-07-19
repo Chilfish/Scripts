@@ -87,3 +87,5 @@ export async function getMapStoryAssets(storyId: number) {
 export async function getFileDir() {
   return await _fetch('/explorer/jp/assets/_info.json')
 }
+
+export const explorerUrl = 'https://bestdori.com/tool/explorer/asset/jp'

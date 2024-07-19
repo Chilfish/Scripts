@@ -1,7 +1,7 @@
 import { readFile, writeFile } from 'node:fs/promises'
 import path from 'node:path'
 import { defineCommand, runMain } from 'citty'
-import { prompt } from '~/utils/node'
+import { prompt, proxyFetch } from '~/utils/node'
 import { buildUrl } from '~/utils'
 
 runMain(defineCommand({
@@ -37,7 +37,7 @@ runMain(defineCommand({
 const timeMatch = /\d+:\d+:\d+,\d+\s-->\s\d+:\d+:\d+,\d+/
 
 // 翻译行数缓冲区大小
-const chunkSize = 100
+const chunkSize = 80
 const translated: string[] = []
 
 function chunkArray<T>(array: T[], size: number) {
@@ -61,7 +61,12 @@ async function translator(text: string) {
     },
   })
 
-  const res = await fetch(api).then(res => res.json())
+  const res = await proxyFetch(api)
+    .then(res => res.json())
+    .catch((err) => {
+      console.error(err.cause || err)
+      return []
+    })
 
   // @ts-expect-error haha
   return res[0].map(([translated]) => translated).join('') as string
@@ -102,10 +107,15 @@ function isText(line: string) {
 function mergeLines(
   from: string[],
   to: string,
+  replace = false,
 ) {
   return to.replace(/.+/g, (line) => {
     if (isText(line)) {
-      return `${line}\n${from.shift()}` || ''
+      let text = `${line}\n${from.shift()}` || ''
+      if (replace) {
+        text = line.replace(/.+/g, () => from.shift() || '')
+      }
+      return text
     }
     return line
   })

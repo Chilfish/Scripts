@@ -1,10 +1,25 @@
-import { readJson, writeJson } from './file'
+import { downloadBlob } from './download'
+import { readCookie } from './config'
 
-const oldData = await readJson('D:/Backups/twitter-喜欢-1716837973875.json') as any[]
-const newData = await readJson('D:/Downloads/twitter-Likes-1720677666320.json') as any[]
+const url = 'https://api.bilibili.com/x/vas/dlc_act/asset_bag?act_id=102857&csrf=f16035a8661780a1ac5577af276b2f39&lottery_id=0&ruid=0'
+const cookie = await readCookie('bilibili')
 
-const merged = Array
-  .from(new Set([...oldData, ...newData]))
-  .sort((a, b) => Number(b.id) - Number(a.id))
+const { data } = await fetch(url).then(res => res.json())
 
-await writeJson('D:/Downloads/twitter-喜欢-1716837973875.json', merged)
+for (const { card_item } of data.item_list) {
+  const videoUrl = card_item?.video_list?.[0]
+  if (!videoUrl)
+    continue
+  const name = card_item.card_name
+
+  console.log(`Downloading ${name}...`)
+  await downloadBlob({
+    url: videoUrl,
+    name: `${name}.mp4`,
+    fetchOptions: {
+      headers: {
+        cookie,
+      },
+    },
+  })
+}

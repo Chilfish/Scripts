@@ -7,10 +7,12 @@ import { ProxyAgent, RequestInit, fetch } from 'undici'
 import { proxyUrl } from './constant'
 import { logger } from '~/utils/node'
 
-const proxy = new ProxyAgent(proxyUrl)
+export const proxy = new ProxyAgent(proxyUrl)
+export const proxyFetch = (url: string, options?: RequestInit) => fetch(url, { ...options, dispatcher: proxy })
 
 export interface DownloadOptions {
   url: string
+  raw?: boolean
   dest?: string
   name?: string
   mime?: string
@@ -22,15 +24,21 @@ export async function downloadBlob(
 ) {
   let {
     url,
+    raw,
     name,
     mime,
     dest = 'D:/Downloads',
     fetchOptions,
   } = options
 
-  url = url.replace('-scaled', '') // -scaled
-    .replace(/-\d+x\d+/, '') // remove size suffix: -300x300
-    .replace(/-\d+px/, '') // remove size suffix: -300px
+  if (!url)
+    throw new Error('url is required')
+
+  if (!raw) {
+    url = url.replace('-scaled', '') // -scaled
+      .replace(/-\d+x\d+/, '') // remove size suffix: -300x300
+      .replace(/-\d+px/, '') // remove size suffix: -300px
+  }
 
   if (!name?.trim())
     name = new URL(url).pathname.split('/').pop() || 'image.jpg'

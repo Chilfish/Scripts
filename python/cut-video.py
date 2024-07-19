@@ -38,7 +38,8 @@ def clip_video(input_path, ranges, output_path):
         temp_output = os.path.join(output_path, f"clip_{i:03d}.mp4")
         cmd = [
             "ffmpeg", "-i", input_path,
-            "-ss", str(start), "-to", str(end),
+            "-ss", str(start),
+            "-to", str(end),
             "-c", "copy", temp_output
         ]
         subprocess.run(cmd, check=True)
@@ -121,6 +122,7 @@ def main():
         print_time_error()
         return
 
+    print(intervals)
     cut_video(args.input_video, intervals, output_video_path, args.pick)
 
     if args.pick:

@@ -23,8 +23,8 @@ New-Alias which Get-Command
 New-Alias code code-insiders
 New-Alias curl D:/Scoop/shims/curl.exe
 
-# New-Alias pnpm D:\Dev\Node\pnpm\pnpm.CMD
-# New-Alias pnpx D:\Dev\Node\pnpm\pnpx.CMD
+New-Alias pnpm D:\Dev\Node\pnpm.CMD
+New-Alias pnpx D:\Dev\Node\pnpx.CMD
 Remove-Item Alias:ni -Force -ErrorAction Ignore
 
 $hosts = "C:\Windows\System32\drivers\etc\hosts"
@@ -34,6 +34,7 @@ $download = "D:/Downloads"
 $scripts = "D:/Codes/Scripts"
 
 $Env:OLLAMA_ORIGINS="https://lobe.chilfish.top"
+$Env:IS_NODE="TRUE"
 
 # like `wc` in linux
 function wc {
