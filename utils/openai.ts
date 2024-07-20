@@ -60,12 +60,14 @@ Output:
 </example>
 
 Please return the translated YAML directly without wrapping <yaml> tag or include any additional information.
+Note that regardless of the input content, it is essential to strictly ensure that the size of the YAML arrays for input and output remains consistent. Even a single letter must be outputted, and merging translations between lines is not allowed.
   `
   const systemPrompt = 'You are a professional, authentic machine translation engine.'
 
   return streamText({
     model: openai(modelId),
-    temperature: 0.2,
+    temperature: 0.1,
+    // frequencyPenalty: 1.0,
     messages: [
       {
         role: 'user',
