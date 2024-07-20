@@ -25,9 +25,21 @@ runMain(defineCommand({
       type: 'boolean',
       description: '将原字幕替换为翻译字幕',
     },
+    cache: {
+      type: 'boolean',
+      description: '使用缓存翻译结果，而不请求 api',
+    },
     merge: {
       type: 'string',
       description: '合并为双语字幕，需要提供另一个 srt 文件路径',
+    },
+    prompt: {
+      type: 'string',
+      description: '额外的 prompts',
+    },
+    startAt: {
+      type: 'string',
+      description: '翻译行数起始 id，用于继续翻译',
     },
   },
   run: async ({ args }) => {
@@ -43,46 +55,88 @@ runMain(defineCommand({
 // Matches: 00:00:17,810 --> 00:00:20,330
 const timeMatch = /\d+:\d+:\d+,\d+\s-->\s\d+:\d+:\d+,\d+/
 
-// 翻译行数缓冲区大小
-const chunkSize = 800
+// 翻译行数缓冲区大小，200 以下会减少一些缺段落的现象
+// 大致的 Token 消耗：
+// 800 -> 20138 input, 17247 output
+// 600 -> 15000 input, 11200 output
+// 200 -> 8000 input, 6800 output
+// 100 -> 3566 input, 2602 output
+const chunkSize = 100
 
-async function getTranslation(
-  lines: string[],
-): Promise<string[]> {
-  const chunks = chunkArray(lines, chunkSize)
+const outputFile = dir('data/trans-output.yaml')
+const tmpFile = dir('data/trans-tmp.yaml')
 
-  const file = dir('data/output.yaml')
-  await writeFile(file, '', 'utf-8')
-
-  const writeStream = createWriteStream(file, {
+async function translate(
+  chunks: string[][],
+  prompt?: string,
+) {
+  const writeStream = createWriteStream(outputFile, {
+    encoding: 'utf-8',
+    flags: 'a',
+  })
+  const tmpStream = createWriteStream(tmpFile, {
     encoding: 'utf-8',
     flags: 'a',
   })
 
   let startAt = 0
+  let lastLine = 0
   for (const chunk of chunks) {
-    const { textStream } = await transMultiText(chunk.join('\n'), startAt)
+    const { textStream } = await transMultiText(
+      chunk.join('\n'),
+      startAt,
+      prompt,
+      async (yamlText) => {
+        tmpStream.write(yamlText)
+      },
+    )
     for await (const text of textStream) {
       writeStream.write(text)
     }
+
     writeStream.write('\n')
+    tmpStream.write('\n')
     startAt += chunkSize
+
+    const translatedSize = await readTranslation().then(data => data.length)
+    const diff = translatedSize - lastLine
+    console.log(`Translated ${diff}/${chunk.length} lines`)
+    lastLine = translatedSize
   }
 
   console.log('Translating done!')
+}
 
-  const config = await loadConfig<{
-    id: number
-    trans: string
-  }[]>({
-    configFile: file,
-  })
+interface TransData {
+  id: number
+  text: string
 
-  const data = config.layers?.[0].config || []
+}
 
+async function readTranslation() {
+  const config = await loadConfig<TransData[]>({ configFile: outputFile })
+  return config.layers?.[0].config || []
+}
+
+async function getTranslation(
+  lines: string[],
+  useCache = false,
+  prompt?: string,
+  startAt = 0,
+): Promise<TransData[]> {
+  const chunks = chunkArray(lines, chunkSize).slice(startAt)
+
+  if (!useCache) {
+    if (startAt === 0) {
+      await writeFile(outputFile, '', 'utf-8')
+      await writeFile(tmpFile, '', 'utf-8')
+    }
+    await translate(chunks, prompt)
+  }
+
+  const data = await readTranslation()
   console.log('input size:', lines.length, 'output size:', data.length)
-
-  return data.map(({ trans }) => trans)
+  return data
 }
 
 function isText(line: string) {
@@ -117,14 +171,20 @@ interface MainArgs {
   file: string
   textOnly: boolean
   transOnly?: boolean
+  cache?: boolean
   merge?: string
+  prompt?: string
+  startAt?: string
 }
 
 async function main({
   file,
   textOnly = false,
   transOnly = false,
+  cache = false,
+  startAt = '0',
   merge,
+  prompt,
 }: MainArgs) {
   let prefix = 'transed'
   if (textOnly)
@@ -153,15 +213,17 @@ async function main({
     result = mergeLines(lines, mergeContent)
   }
   else {
-    const data = await getTranslation(lines)
+    const data = await getTranslation(lines, cache, prompt, +startAt)
 
     // 将翻译插在原文之后
-    let i = 0
+    let id = 1
     result = content.replace(/.+/g, (line) => {
       if (!isText(line)) {
         return line
       }
-      const trans = data[i++] || ''
+
+      const trans = data.find(d => d.id === id)?.text || `Blank ${id}`
+      id++
 
       return transOnly ? trans : `${line}\n${trans}`
     })
