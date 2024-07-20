@@ -23,6 +23,14 @@ export function uniqueObj<T extends Record<string, unknown>>(arr: T[], key: stri
   return Array.from(map.values()) as T[]
 }
 
+export function chunkArray<T>(array: T[], size: number) {
+  const result = [] as T[][]
+  for (let i = 0; i < array.length; i += size) {
+    result.push(array.slice(i, i + size))
+  }
+  return result
+}
+
 export function fmtFileSize(size: number) {
   const units = ['B', 'KB', 'MB', 'GB', 'TB']
   let i = 0
@@ -38,10 +46,44 @@ export function fmtFileSize(size: number) {
 const alphabet = '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ'
 
 /**
+ * Convert hex or base62 to decimal
+ */
+export function toDec(input: string | number | bigint) {
+  if (typeof input === 'number')
+    return input
+
+  if (typeof input === 'bigint')
+    return Number(input)
+
+  if (input.startsWith('0x'))
+    return Number.parseInt(input.slice(2), 16)
+
+  if (input.startsWith('0o'))
+    return Number.parseInt(input.slice(2), 8)
+
+  if (/^[01]+$/.test(input))
+    return Number.parseInt(input, 2)
+
+  let num = 0
+  for (let i = 0; i < input.length; i++) {
+    const char = input[i]
+    const index = alphabet.indexOf(char)
+    if (index === -1)
+      return Number.NaN
+
+    num = num * 62 + index
+  }
+  return num
+}
+
+/**
  * Convert a number to base62
  */
-export function toBase62(input: string | number) {
-  let num = +input
+export function toBase62(input: string | number | bigint) {
+  let num = toDec(input)
+  if (Number.isNaN(num))
+    return null
+
   let base62 = ''
   do {
     base62 = alphabet[num % 62] + base62
@@ -61,8 +103,8 @@ export function shuffleArray<T>(arr: T[]) {
 }
 
 export function genToken(
-  prefix = '',
   length = 16,
+  prefix = '',
 ) {
   let token = Date.now().toString(36)
 

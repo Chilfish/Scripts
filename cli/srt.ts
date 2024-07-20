@@ -1,8 +1,11 @@
 import { readFile, writeFile } from 'node:fs/promises'
+import { createWriteStream } from 'node:fs'
 import path from 'node:path'
 import { defineCommand, runMain } from 'citty'
-import { prompt, proxyFetch } from '~/utils/node'
-import { buildUrl } from '~/utils'
+import { loadConfig } from 'c12'
+import { dir, prompt } from '~/utils/node'
+import { chunkArray } from '~/utils'
+import { transMultiText } from '~/utils/openai'
 
 runMain(defineCommand({
   meta: {
@@ -18,18 +21,22 @@ runMain(defineCommand({
       type: 'boolean',
       description: '仅提取字幕文本内容',
     },
+    transOnly: {
+      type: 'boolean',
+      description: '将原字幕替换为翻译字幕',
+    },
     merge: {
       type: 'string',
       description: '合并为双语字幕，需要提供另一个 srt 文件路径',
     },
   },
   run: async ({ args }) => {
-    let { file, textOnly, merge } = args
+    let file = args.file
     if (!file)
       file = await prompt('Enter the file path:')
 
     file = path.resolve(file)
-    await main(file, textOnly, merge)
+    await main(args)
   },
 }))
 
@@ -37,60 +44,45 @@ runMain(defineCommand({
 const timeMatch = /\d+:\d+:\d+,\d+\s-->\s\d+:\d+:\d+,\d+/
 
 // 翻译行数缓冲区大小
-const chunkSize = 80
-const translated: string[] = []
+const chunkSize = 800
 
-function chunkArray<T>(array: T[], size: number) {
-  const result = [] as T[][]
-  for (let i = 0; i < array.length; i += size) {
-    result.push(array.slice(i, i + size))
-  }
-  return result
-}
-
-// from jp to zh
-async function translator(text: string) {
-  const api = buildUrl({
-    uri: `https://translate.googleapis.com/translate_a/single`,
-    query: {
-      client: 'gtx',
-      sl: 'ja',
-      tl: 'zh-CN',
-      dt: 't',
-      q: text,
-    },
-  })
-
-  const res = await proxyFetch(api)
-    .then(res => res.json())
-    .catch((err) => {
-      console.error(err.cause || err)
-      return []
-    })
-
-  // @ts-expect-error haha
-  return res[0].map(([translated]) => translated).join('') as string
-}
-
-async function translation(
-  content: string,
+async function getTranslation(
   lines: string[],
-) {
+): Promise<string[]> {
   const chunks = chunkArray(lines, chunkSize)
 
+  const file = dir('data/output.yaml')
+  await writeFile(file, '', 'utf-8')
+
+  const writeStream = createWriteStream(file, {
+    encoding: 'utf-8',
+    flags: 'a',
+  })
+
+  let startAt = 0
   for (const chunk of chunks) {
-    await translator(chunk.join('\n'))
-      .then(res => translated.push(...res.split('\n')))
+    const { textStream } = await transMultiText(chunk.join('\n'), startAt)
+    for await (const text of textStream) {
+      writeStream.write(text)
+    }
+    writeStream.write('\n')
+    startAt += chunkSize
   }
 
-  // 将翻译插在原文之后
-  let i = 0
-  return content.replace(/.+/g, (line) => {
-    if (!isText(line)) {
-      return line
-    }
-    return `${line}\n${translated[i++] || ''}`
+  console.log('Translating done!')
+
+  const config = await loadConfig<{
+    id: number
+    trans: string
+  }[]>({
+    configFile: file,
   })
+
+  const data = config.layers?.[0].config || []
+
+  console.log('input size:', lines.length, 'output size:', data.length)
+
+  return data.map(({ trans }) => trans)
 }
 
 function isText(line: string) {
@@ -121,11 +113,19 @@ function mergeLines(
   })
 }
 
-async function main(
-  file: string,
+interface MainArgs {
+  file: string
+  textOnly: boolean
+  transOnly?: boolean
+  merge?: string
+}
+
+async function main({
+  file,
   textOnly = false,
-  merge?: string,
-) {
+  transOnly = false,
+  merge,
+}: MainArgs) {
   let prefix = 'transed'
   if (textOnly)
     prefix = 'text'
@@ -153,9 +153,19 @@ async function main(
     result = mergeLines(lines, mergeContent)
   }
   else {
-    result = await translation(content, lines)
+    const data = await getTranslation(lines)
+
+    // 将翻译插在原文之后
+    let i = 0
+    result = content.replace(/.+/g, (line) => {
+      if (!isText(line)) {
+        return line
+      }
+      const trans = data[i++] || ''
+
+      return transOnly ? trans : `${line}\n${trans}`
+    })
   }
 
   await writeFile(transed, result, 'utf-8')
-  console.log(`Translating done!`)
 }

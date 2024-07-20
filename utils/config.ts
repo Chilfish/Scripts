@@ -1,12 +1,14 @@
 import { loadConfig } from 'c12'
 import { dir } from '~/utils/node'
 
-export async function readCookie(
+const { config } = await loadConfig({
+  configFile: dir('config.yaml'),
+})
+
+export function readCookie(
   name: 'twitter' | 'pixiv' | 'bilibili',
 ) {
-  const { config } = await loadConfig({
-    configFile: dir('cookie.yaml'),
-  })
-
-  return config[name] as string
+  return config.cookie[name] as string
 }
+
+export const openaiKey = config.openaiKey as string
