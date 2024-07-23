@@ -1,7 +1,7 @@
 import path from 'node:path'
 import PQueue from 'p-queue'
 import { fetchExplorer, getFileDir } from '.'
-import { downloadBlob } from '~/utils/node'
+import { downloadBlob } from '~/utils/index.node'
 
 const dest = 'D:/Downloads/bestdori/voice'
 const baseUrl = 'https://bestdori.com/assets/jp/sound'

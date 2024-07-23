@@ -2,13 +2,15 @@ import { defineCommand, runMain } from 'citty'
 import { serve } from '@hono/node-server'
 import { Hono } from 'hono'
 import { Browser } from 'puppeteer'
-import { logger, newBrowser, readCookie } from '~/utils/node'
 import { buildUrl, checkNetwork, devices, getCookie } from '~/utils'
 import { json2rss } from '~/utils/rss'
+import { logger } from '~/utils/cli'
+import { readCookie } from '~/utils/config'
+import { newBrowser } from '~/utils/puppeteer'
 
 const cssSelector = `article[data-testid="tweet"]`
 
-const cookies = await readCookie('twitter').then(getCookie)
+const cookies = getCookie(readCookie('twitter'))
 
 let browser: Browser | null
 

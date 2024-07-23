@@ -8,7 +8,7 @@ import {
   getFileDir,
   getMapStories,
 } from '.'
-import { downloadBlob, readJson, writeJson } from '~/utils/node'
+import { downloadBlob, readJson, writeJson } from '~/utils/index.node'
 
 /**
  * 根据乐队获取所有角色的 地图剧情

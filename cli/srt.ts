@@ -3,9 +3,10 @@ import { createWriteStream } from 'node:fs'
 import path from 'node:path'
 import { defineCommand, runMain } from 'citty'
 import { loadConfig } from 'c12'
-import { dir, prompt } from '~/utils/node'
-import { chunkArray } from '~/utils'
+import { prompt } from '~/utils/cli'
+import { chunkArray } from '~/utils/math'
 import { transMultiText } from '~/utils/openai'
+import { dir } from '~/utils/file'
 
 runMain(defineCommand({
   meta: {

@@ -1,20 +1,10 @@
 import path from 'node:path'
-import fs, { createReadStream } from 'node:fs'
+import fs from 'node:fs'
 import readline from 'node:readline'
 import { execSync } from 'node:child_process'
-import { createHash } from 'node:crypto'
-import { stat } from 'node:fs/promises'
 import { LogType, consola } from 'consola'
-import { ProxyAgent } from 'undici'
 import { root } from './file'
 import { now } from './date'
-import { proxyUrl } from './constant'
-
-export * from './download'
-export * from './puppeteer'
-export * from './progress'
-export * from './file'
-export * from './config'
 
 export async function prompt(msg: string) {
   const ans = await consola.prompt(msg) as string
@@ -83,31 +73,3 @@ export function log(
 
   return log
 }
-
-export async function hashFile(
-  path: string,
-): Promise<{ hash: string, size: number }> {
-  const fileSize = (await stat(path)).size
-  const chunkSize = 1024 * 1024 * 100 // 100MB
-
-  const hash = createHash('sha256')
-  const stream = createReadStream(path, {
-    highWaterMark: chunkSize,
-  })
-
-  stream.on('data', (data) => {
-    hash.update(data)
-  })
-
-  return new Promise((resolve, reject) => {
-    stream.on('end', () => {
-      resolve({
-        hash: hash.digest('hex'),
-        size: fileSize,
-      })
-    })
-    stream.on('error', reject)
-  })
-}
-
-export const proxy = new ProxyAgent(proxyUrl)

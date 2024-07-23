@@ -1,13 +1,13 @@
 import { createOpenAI } from '@ai-sdk/openai'
 import { CoreMessage, streamText } from 'ai'
-import { openaiKey } from './config'
+import { openaiConfig } from './config'
+
+console.log({ openaiConfig })
 
 export const openai = createOpenAI({
-  baseURL: 'https://aigcapi.io/v1',
-  apiKey: openaiKey,
+  baseURL: openaiConfig.url,
+  apiKey: openaiConfig.key,
 })
-
-export const gpt4omini = openai('gpt-4o-mini')
 
 const modelId = 'gpt-4o-mini'
 
@@ -43,7 +43,6 @@ export async function transMultiText(
 ${yamlText}
 </yaml>
 
-
 For each entry in the YAML, translate the contents of the "text" field into ${target}.
 Write the translation back into the "text" field for that entry and keep the "id" field unchanged.
 Here is an example of the expected format
@@ -63,10 +62,9 @@ Output:
   text: 你好，你还好吗？
 
 Please return the translated YAML directly without wrapping <yaml> tag or include any additional information like markdown code.
-Note that regardless of the input content, it is essential to strictly ensure that the size of the YAML arrays for input and output remains consistent. Even a single letter must be outputted, and merging translations between lines is not allowed.
+Note that regardless of the input content, it is essential to strictly ensure that the size of the YAML arrays for input and output remains consistent. Even a single letter must be outputted, and merging translations between lines is not allowed.`
 
-  `
-  const systemPrompt = '您是专业、正宗的机器翻译引擎，精通日语，英语和中文，您只能按用语习惯、语境来信达雅地、不机翻而生动地翻译文本到指定的语言。'
+  const systemPrompt = 'You are a professional and authentic machine translation engine, proficient in Japanese, English, and Chinese. You can only translate text into the specified language accurately, elegantly, and naturally according to usage habits and context, without mechanical translation.'
 
   const messages = [
     {

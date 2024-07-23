@@ -12,7 +12,7 @@ import {
   downloadBlob,
   readJson,
   updateProgress,
-} from '~/utils/node'
+} from '~/utils/index.node'
 
 const name = process.argv[2]
 if (!name) {

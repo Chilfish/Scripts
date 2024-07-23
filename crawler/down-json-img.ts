@@ -1,7 +1,7 @@
 import path from 'node:path'
 import fs from 'node:fs'
 import PQueue from 'p-queue'
-import { downloadBlob, readJson } from '~/utils/node'
+import { downloadBlob, readJson } from '~/utils/index.node'
 
 const file = process.argv[2]
 if (!file) {

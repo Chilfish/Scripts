@@ -1,4 +1,6 @@
-openaiKey:
+openai:
+  key:
+  url:
 cookie:
   twitter:
   pixiv:

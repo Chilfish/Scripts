@@ -1,5 +1,5 @@
 import { loadConfig } from 'c12'
-import { dir } from '~/utils/node'
+import { dir } from '~/utils/file'
 
 const { config } = await loadConfig({
   configFile: dir('config.yaml'),
@@ -11,4 +11,7 @@ export function readCookie(
   return config.cookie[name] as string
 }
 
-export const openaiKey = config.openaiKey as string
+export const openaiConfig = config.openai as {
+  key: string
+  url: string
+}

@@ -10,7 +10,7 @@ import { Buffer } from 'node:buffer'
 import { readFile, writeFile } from 'node:fs/promises'
 import { defineCommand, runMain } from 'citty'
 import { consola } from 'consola'
-import { prompt } from '~/utils/node'
+import { prompt } from '~/utils/cli'
 
 runMain(defineCommand({
   meta: {

@@ -5,7 +5,7 @@ import { Buffer } from 'node:buffer'
 
 import { ProxyAgent, RequestInit, fetch } from 'undici'
 import { proxyUrl } from './constant'
-import { logger } from '~/utils/node'
+import { logger } from '~/utils/cli'
 
 export const proxy = new ProxyAgent(proxyUrl)
 export const proxyFetch = (url: string, options?: RequestInit) => fetch(url, { ...options, dispatcher: proxy })

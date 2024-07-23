@@ -1,5 +1,5 @@
 import { loadConfig } from 'c12'
-import { dir } from './node'
+import { dir } from './file'
 
 interface Source {
   id: number

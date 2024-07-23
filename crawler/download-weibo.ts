@@ -5,7 +5,7 @@ import {
   downloadBlob,
   prompt,
   runCommand,
-} from '~/utils/node'
+} from '~/utils/index.node'
 import { getWeiboAnonToken } from '~/utils'
 
 interface PicInfo {

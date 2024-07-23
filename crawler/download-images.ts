@@ -1,7 +1,7 @@
 import { Page } from 'puppeteer'
 import { defineCommand, runMain } from 'citty'
 import { consola } from 'consola'
-import { downloadBlob, newBrowser, prompt } from '~/utils/node'
+import { downloadBlob, newBrowser, prompt } from '~/utils/index.node'
 import { devices } from '~/utils'
 
 runMain(defineCommand({
@@ -113,7 +113,8 @@ async function downImage(
 
   for (const url of imgs) {
     const res = await downloadBlob({ url })
-    res && cnt++
+    if (res)
+      cnt++
   }
 
   consola.success(`已下载 ${cnt}`)

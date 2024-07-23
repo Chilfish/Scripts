@@ -1,6 +1,9 @@
 import path from 'node:path'
+import { createHash } from 'node:crypto'
+import { createReadStream } from 'node:fs'
+import { stat } from 'node:fs/promises'
 import { defineCommand, runMain } from 'citty'
-import { hashFile, prompt } from '~/utils/node'
+import { prompt } from '~/utils/cli'
 import { fmtFileSize } from '~/utils'
 
 runMain(defineCommand({
@@ -64,4 +67,30 @@ async function isSameFile(file1: string, file2: string) {
     hash1,
     hash2,
   }
+}
+
+async function hashFile(
+  path: string,
+): Promise<{ hash: string, size: number }> {
+  const fileSize = (await stat(path)).size
+  const chunkSize = 1024 * 1024 * 100 // 100MB
+
+  const hash = createHash('sha256')
+  const stream = createReadStream(path, {
+    highWaterMark: chunkSize,
+  })
+
+  stream.on('data', (data) => {
+    hash.update(data)
+  })
+
+  return new Promise((resolve, reject) => {
+    stream.on('end', () => {
+      resolve({
+        hash: hash.digest('hex'),
+        size: fileSize,
+      })
+    })
+    stream.on('error', reject)
+  })
 }
