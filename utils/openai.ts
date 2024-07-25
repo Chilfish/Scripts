@@ -2,7 +2,7 @@ import { createOpenAI } from '@ai-sdk/openai'
 import { CoreMessage, streamText } from 'ai'
 import { openaiConfig } from './config'
 
-console.log({ openaiConfig })
+// console.log({ openaiConfig })
 
 export const openai = createOpenAI({
   baseURL: openaiConfig.url,

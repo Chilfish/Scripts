@@ -3,6 +3,7 @@ import { createWriteStream } from 'node:fs'
 import path from 'node:path'
 import { defineCommand, runMain } from 'citty'
 import { loadConfig } from 'c12'
+import { config } from '~/utils/config'
 import { chunkArray } from '~/utils/math'
 import { transMultiText } from '~/utils/openai'
 import { dir } from '~/utils/file'
@@ -36,7 +37,7 @@ runMain(defineCommand({
     },
     prompt: {
       type: 'string',
-      description: '额外的 prompts',
+      description: '额外的 prompts，存储在 config.yaml 中',
     },
     startAt: {
       type: 'string',
@@ -64,8 +65,17 @@ const tmpFile = dir('data/trans-tmp.yaml')
 
 async function translate(
   chunks: string[][],
-  prompt?: string,
+  promptKey?: string,
 ) {
+  const prompt = promptKey ? config.prompts?.[promptKey] : undefined
+
+  if (promptKey && !prompt) {
+    console.warn(`Prompt ${promptKey} not found`)
+  }
+  else if (prompt) {
+    console.log('Using prompt:', prompt)
+  }
+
   const writeStream = createWriteStream(outputFile, {
     encoding: 'utf-8',
     flags: 'a',
