@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Chill Script
 // @description  Hello! MyScript
-// @version      2024.06.07
+// @version      2024.07.13
 // @author       Chilfish
 // @match        *://*/*
 // @grant        GM_addStyle

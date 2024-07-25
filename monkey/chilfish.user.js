@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Chill Script
 // @description  Hello! MyScript
-// @version      2024.06.07
+// @version      2024.07.13
 // @author       Chilfish
 // @match        *://*/*
 // @grant        GM_addStyle
@@ -30,16 +30,16 @@ const css = String.raw
 const html = String.raw
 
 let _css = css`
-  *::-webkit-scrollbar {
+  html::-webkit-scrollbar {
     width: 8px;height: 8px;
   }
-  *::-webkit-scrollbar-track {
+  html::-webkit-scrollbar-track {
     border-radius: 8px;background-color: transparent;
   }
-  *::-webkit-scrollbar-thumb {
+  html::-webkit-scrollbar-thumb {
     border-radius: 8px;background-color: #7a797963;
   }
-  * {
+  html {
     scrollbar-width: thin!important;
   }
   *, *:focus-visible{
@@ -51,6 +51,13 @@ let _css = css`
   }
 `
 
+/**
+ * @typedef UrlAction {pattern: RegExp, action: () => void}
+ */
+
+/**
+ * @typedef {UrlAction[]} UrlAction
+ */
 const urlActions = [
   {
     pattern: /msn\.com|enet\.10000\.gd\.cn/,
@@ -78,7 +85,7 @@ const urlActions = [
     action: () => {
       _css += css`
         div, p, li, a, span {
-          font-size:12.5px !important;
+          font-size: 12.5px !important;
         }
       `
     },

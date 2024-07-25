@@ -3,7 +3,6 @@ import { createWriteStream } from 'node:fs'
 import path from 'node:path'
 import { defineCommand, runMain } from 'citty'
 import { loadConfig } from 'c12'
-import { prompt } from '~/utils/cli'
 import { chunkArray } from '~/utils/math'
 import { transMultiText } from '~/utils/openai'
 import { dir } from '~/utils/file'
@@ -17,6 +16,7 @@ runMain(defineCommand({
     file: {
       type: 'string',
       description: '要翻译/提取的 srt 文件路径',
+      required: true,
     },
     textOnly: {
       type: 'boolean',
@@ -44,11 +44,6 @@ runMain(defineCommand({
     },
   },
   run: async ({ args }) => {
-    let file = args.file
-    if (!file)
-      file = await prompt('Enter the file path:')
-
-    file = path.resolve(file)
     await main(args)
   },
 }))
