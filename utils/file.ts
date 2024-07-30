@@ -41,8 +41,9 @@ export function dir(options: string | DirOptions): string {
   const isFile = !!_path.split('/').at(-1)?.includes('.')
   const _dir = isFile ? path.dirname(_path) : _path
 
-  if (!existsSync(_dir))
+  if (!existsSync(_dir)) {
     mkdir(_dir, { recursive: true })
+  }
 
   // if (isFile && !existsSync(_path))
   // logger.warn(`File not found: ${_path}`)

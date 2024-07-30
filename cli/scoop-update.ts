@@ -1,48 +1,28 @@
 import { execSync } from 'node:child_process'
-import fs from 'node:fs'
+import { readFile } from 'node:fs/promises'
 
-// 读取要跳过的包名
-function readSkipList(filePath: string) {
-  const content = fs.readFileSync(filePath, 'utf8')
-  return content.split('\n').map(line => line.trim()).filter(line => line.length > 0)
+const skipListFilePath = 'D:/Scoop/skip.txt'
+const skipList: string[] = await readFile(skipListFilePath, { encoding: 'utf-8' })
+  .then(data => data
+    .split('\n')
+    .map(line => line.trim())
+    .filter(Boolean),
+  )
+  .catch(() => {
+    console.log(`Skip list file not found: ${skipListFilePath}`)
+    return []
+  })
+
+const packages = execSync('scoop status').toString()
+  .split('\n')
+  .slice(4)
+  .map(line => line.trim().split(/\s+/)[0])
+  .filter(pkg => !skipList.includes(pkg) && pkg)
+
+if (packages.length > 0) {
+  console.log(`Found ${packages.length} packages to update`)
+  execSync(`scoop update ${packages.join(' ')}`, { stdio: 'inherit' })
 }
-
-// 解析 scoop status 输出
-function parseScoopStatus(output: string) {
-  const lines = output.split('\n').slice(4)
-  const packages = []
-
-  for (const line of lines) {
-    const parts = line.trim().split(/\s+/)
-    const name = parts[0]
-    packages.push(name)
-  }
-  return packages
+else {
+  console.log('No packages to update.')
 }
-
-// 执行 scoop update，跳过指定的包
-function updateScoopPackages(skipList: string[]) {
-  try {
-    // 获取 scoop status 输出
-    const statusOutput = execSync('scoop status').toString()
-    const packagesToUpdate = parseScoopStatus(statusOutput)
-
-    // 过滤掉需要跳过的包
-    const filteredPackages = packagesToUpdate.filter(pkg => !skipList.includes(pkg))
-
-    if (filteredPackages.length > 0) {
-      console.log(`Updating packages: ${filteredPackages.join(', ')}`)
-      execSync(`scoop update ${filteredPackages.join(' ')}`, { stdio: 'inherit' })
-    }
-    else {
-      console.log('No packages to update.')
-    }
-  }
-  catch (error) {
-    console.error('Error during update:', error)
-  }
-}
-
-const skipListFilePath = 'D:\\Scoop\\skip.txt'
-const skipList = readSkipList(skipListFilePath)
-updateScoopPackages(skipList)
