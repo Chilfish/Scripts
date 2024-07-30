@@ -1,5 +1,5 @@
 import { formatDate } from '~/utils/date'
-import { $, $$, saveAs } from '~/utils/dom'
+import { $, $$, saveAs } from '~/monkey/utils'
 import { delay } from '~/utils/math'
 import { GM_registerMenuCommand } from '$'
 

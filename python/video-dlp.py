@@ -72,24 +72,24 @@ def main(video_url: str):
         title = f"{author}_{title}"
 
     upload_date = (
-        datetime.fromtimestamp(info["timestamp"]).strftime("%Y-%m-%d_%H-%M")
+        datetime.fromtimestamp(info["timestamp"]).strftime("%Y%m%d-%H%M%S")
         if "timestamp" in info
         else info.get("upload_date", "unknown")
     )
-    filename = f"{upload_date}_{title}"
     ext = "mp4"
 
     if host != "BiliBiliBangumi":
-        filename = title
+        filename = f"{upload_date}_{title}"
+
     if args.audio:
         ext = "mp3"
-    ydl_opts["outtmpl"]["default"] = f"{filename}.{ext}"
 
+    ydl_opts["outtmpl"]["default"] = f"{filename}.{ext}"
     ydl.params.update(ydl_opts)
 
-    filepath = f"{out_dir}/{upload_date}_{title}"
     print("options:", ydl.params)
 
+    filepath = f"{out_dir}/{filename}"
     if args.no_download:
         with open(f"{out_dir}/{title}.json", "w", encoding="utf-8") as file:
             json.dump(info, file, ensure_ascii=False, indent=2)

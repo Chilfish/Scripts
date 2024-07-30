@@ -1,37 +1,22 @@
-export const $ = <T = HTMLElement>(selector: string, root: any = document) => root?.querySelector(selector) as T | null
+// dom in nodejs
 
-export const $$ = <T = HTMLElement>(selector: string, root: any = document) => Array.from(root?.querySelectorAll(selector) || []) as T[]
+import { Window } from 'happy-dom'
 
-export function saveBlobUrl(url: string, filename: string) {
-  console.log(`Downloaded: ${filename} (${url})`)
-  const a = document.createElement('a')
-  a.href = url
-  a.download = filename
-  a.click()
-  a.remove()
+const window = new Window()
+const document = window.document
+
+export function $<T = HTMLElement>(
+  rootHTML: string,
+  selector: string,
+) {
+  document.body.innerHTML = rootHTML
+  return document.querySelector(selector) as T | null
 }
 
-export function saveAs(
-  data: string | object | Blob,
-  filename: string,
-  inline = false,
+export function $$<T = HTMLElement>(
+  rootHTML: string,
+  selector: string,
 ) {
-  let blob: Blob
-
-  if (typeof data === 'string') {
-    blob = new Blob([data], { type: 'text/plain' })
-  }
-  else if (data instanceof Blob) {
-    blob = data
-  }
-  else {
-    blob = new Blob(
-      [JSON.stringify(data, null, inline ? 0 : 2)],
-      { type: 'application/json' },
-    )
-  }
-
-  const url = URL.createObjectURL(blob)
-  saveBlobUrl(url, filename)
-  URL.revokeObjectURL(url)
+  document.body.innerHTML = rootHTML
+  return Array.from(document.querySelectorAll(selector)) as T[]
 }

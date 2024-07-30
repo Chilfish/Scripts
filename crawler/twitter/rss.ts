@@ -1,8 +1,9 @@
 import { defineCommand, runMain } from 'citty'
 import { serve } from '@hono/node-server'
-import { Hono } from 'hono'
+import { Hono } from 'hono/tiny'
 import { Browser } from 'puppeteer'
 import { buildUrl, checkNetwork, devices, getCookie } from '~/utils'
+import { $, $$ } from '~/utils/dom'
 import { json2rss } from '~/utils/rss'
 import { logger } from '~/utils/cli'
 import { readCookie } from '~/utils/config'
@@ -26,6 +27,8 @@ async function search(url: string) {
   browser = await newBrowser()
   const page = await browser.newPage()
 
+  page.on('console', msg => logger.info(msg.text()))
+
   const device = devices.desktop
   await page.setViewport({
     width: device.width,
@@ -46,45 +49,46 @@ async function search(url: string) {
   })
     .catch(async () => {
       const text = await page.evaluate(() => document.querySelector('#react-root')?.textContent)
-      logger.error(`[twitter-rss]: ${text}`, true)
+      logger.error(`[twitter-rss]: timeout\n${text}`, true)
     })
 
   await page.evaluate(() => {
     window.scrollBy(0, window.innerHeight)
   })
 
-  const tweets: Tweet[] = await page.$$eval(cssSelector, (articles) => {
-    return articles.map((article) => {
-      const isAd = article.querySelector('svg.r-4qtqp9.r-yyyyoo.r-dnmrzs.r-bnwqim.r-lrvibr.r-m6rgpd.r-1q142lx.r-ip8ujx.r-1gs4q39.r-14j79pv') !== null
-      if (isAd) {
-        return null
-      }
+  const articles = await page.$$(cssSelector)
+  const tweets = await Promise.all(articles.map(async (article) => {
+    const html = await article.evaluate(node => node.outerHTML)
+    return parseTweet(html)
+  }))
 
-      const tweetText = article.querySelector(`div[data-testid="tweetText"]`)
-      const tweetTime = article.querySelector(`time`)
-      const author = article.querySelector(`div[data-testid="User-Name"] a`)
-      const url = tweetTime?.parentElement?.getAttribute('href')
+  return tweets.filter(Boolean) as Tweet[]
+}
 
-      const photos = Array.from(
-        article.querySelectorAll(`div[data-testid="tweetPhoto"] img`),
-      )
-        .map(photo => photo.getAttribute('src'))
-        .filter((src): src is string => !!src)
+function parseTweet(article: string): Tweet | null {
+  const isAd = $(article, 'svg.r-4qtqp9.r-yyyyoo.r-dnmrzs.r-bnwqim.r-lrvibr.r-m6rgpd.r-1q142lx.r-ip8ujx.r-1gs4q39.r-14j79pv') !== null
+  if (isAd) {
+    return null
+  }
 
-      const cardPhoto = article.querySelector(`div[data-testid="card.wrapper"] img`)?.getAttribute('src')
+  const tweetText = $(article, `div[data-testid="tweetText"]`)
+  const tweetTime = $<HTMLTimeElement>(article, `time`)
+  const author = $(article, `div[data-testid="User-Name"] a`)
+  const url = tweetTime?.parentElement?.getAttribute('href')
 
-      return {
-        author: author?.textContent?.trim() || 'Unknown',
-        text: tweetText?.textContent?.trim() || 'No text',
-        time: tweetTime?.dateTime || new Date().toISOString(),
-        url: url ? `https://x.com${url}` : 'https://x.com',
-        image: cardPhoto || photos[0] || '',
-      }
-    })
-      .filter((tweet): tweet is Tweet => tweet !== null)
-  })
+  const photos = $$(article, `div[data-testid="tweetPhoto"] img`)
+    .map(photo => photo?.getAttribute('src') || '')
+    .filter(Boolean)
 
-  return tweets
+  const cardPhoto = $(article, `div[data-testid="card.wrapper"] img`)?.getAttribute('src')
+
+  return {
+    author: author?.textContent?.trim() || 'Unknown',
+    text: tweetText?.textContent?.trim() || 'No text',
+    time: tweetTime?.dateTime || new Date().toISOString(),
+    url: url ? `https://x.com${url}` : 'https://x.com',
+    image: cardPhoto || photos[0] || '',
+  }
 }
 
 async function searchRss(keyword: string) {

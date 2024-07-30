@@ -3,7 +3,6 @@ import fs from 'node:fs'
 import readline from 'node:readline'
 import { execSync } from 'node:child_process'
 import { LogType, consola } from 'consola'
-import { root } from './file'
 import { now } from './date'
 
 export async function prompt(msg: string) {
@@ -55,7 +54,7 @@ export function log(
 
   const log = `${now()} [${type.toUpperCase()}] ${message}\n`
   if (file) {
-    const logPath = path.resolve(root, 'scripts.log')
+    const logPath = path.resolve('D:/logs/scripts.log')
     fs.appendFileSync(logPath, log, { encoding: 'utf-8' })
   }
   if (process.env.PROGRESS !== 'true') {
