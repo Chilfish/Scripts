@@ -36,23 +36,6 @@ $scripts = "D:/Codes/Scripts"
 $Env:OLLAMA_ORIGINS="https://lobe.chilfish.top"
 $Env:IS_NODE="TRUE"
 
-# like `wc` in linux
-function wc {
-    param (
-        [Parameter(ValueFromPipeline=$true, ValueFromPipelineByPropertyName=$true)]
-        [string]$Text
-    )
-    begin {
-        $wordCount = 0
-    }
-    process {
-        $wordCount += ($Text -split '\s+' | Where-Object { $_ -ne '' }).Count
-    }
-    end {
-        $wordCount
-    }
-}
-
 # https://github.com/xampprocky/tokei
 function code-count {
   tokei -s lines -e pnpm-lock.yaml $args . 
@@ -68,6 +51,9 @@ function nest-gen($name) {
 # https://github.com/Chilfish/Scripts/blob/main/python/video-dlp.py
 function yt {
   python $scripts/python/video-dlp.py $args
+}
+function ytd {
+  yt-dlp --cookies-from-browser chrome -f 'bestvideo+bestaudio' -o "$videos/%(title)s.%(ext)s" $args
 }
 
 # https://github.com/Chilfish/Weibo-archiver/blob/main/scripts/server.mjs
@@ -110,8 +96,10 @@ function tomp4 {
 
 # 字幕压制
 function subMp4 {
-  $video = $args[0]
-  $subtitle = $args[1]
+  param (
+    [string]$video,
+    [string]$subtitle
+  )
   ffmpeg -i $video -vf "ass=$subtitle" -c:v libx264 -crf 23 -c:a aac -b:a 192k output.mp4
 }
 
@@ -126,7 +114,7 @@ function gitblame {
   git config --local blame.ignoreRevsFile .git-blame-ignore-revs
 }
 
-function runCommand {
+function runBg {
   param(
     [string]$command
   )
@@ -136,7 +124,7 @@ function runCommand {
 function start-rss {
   Write-Host "running on http://localhost:3456"
   cd $scripts
-  runCommand "pnpm run:rss"
+  runBg "pnpm run:rss"
 }
 
 # sudo: https://github.com/gerardog/gsudo
@@ -153,6 +141,33 @@ function KillByPort {
   } else {
       Write-Host "No process found listening on port $Port"
   }
+}
+
+function isSame {
+    param (
+        [string]$file1,
+        [string]$file2
+    )
+    if (-not (Test-Path $file1)) {
+        Write-Error "File $file1 does not exist."
+        return
+    }
+    if (-not (Test-Path $file2)) {
+        Write-Error "File $file2 does not exist."
+        return
+    }
+    $hash1 = & openssl dgst -sha256 -binary $file1 | & openssl base64
+    $hash2 = & openssl dgst -sha256 -binary $file2 | & openssl base64
+
+    if ($hash1 -eq $hash2) {
+        Write-Output "The files have the same hash.`n$hash1"
+    } else {
+        Write-Output "The files have different hashes.`n$hash1`n$hash2"
+    }
+}
+
+function update-scoop {
+  tsx "$scripts/cli/scoop-update.ts"
 }
 
 #f45873b3-b655-43a6-b217-97c00aa0db58 PowerToys CommandNotFound module
