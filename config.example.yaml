@@ -7,3 +7,9 @@ cookie:
   bilbili:
 prompts:
   key: value
+rss:
+  interval: 60 # minutes
+  folder: D:/Videos
+  maxDuration: 1200 # seconds, 20 minutes
+  urls:
+    - https://example.com/rss.xml

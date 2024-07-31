@@ -3,14 +3,14 @@ import { serve } from '@hono/node-server'
 import { Hono } from 'hono/tiny'
 import { Browser } from 'puppeteer'
 import { load as loadHTML } from 'cheerio'
+import { consola } from 'consola'
 import { buildUrl, checkNetwork, devices, getCookie } from '~/utils'
 import { json2rss } from '~/utils/rss'
-import { logger } from '~/utils/cli'
+import { createLogger } from '~/utils/logger'
 import { readCookie } from '~/utils/config'
 import { newBrowser } from '~/utils/puppeteer'
 
-const cssSelector = `article[data-testid="tweet"]`
-
+const logger = createLogger('twitter-rss')
 const cookies = getCookie(readCookie('twitter'))
 
 let browser: Browser | null
@@ -44,12 +44,13 @@ async function search(url: string) {
     waitUntil: 'domcontentloaded',
   })
 
+  const cssSelector = `article[data-testid="tweet"]`
   await page.waitForSelector(cssSelector, {
     timeout: 15_000,
   })
     .catch(async () => {
       const text = await page.evaluate(() => document.querySelector('#react-root')?.textContent)
-      logger.error(`[twitter-rss]: timeout\n${text}`, true)
+      logger.error(`timeout: ${text}`)
     })
 
   await page.evaluate(() => {
@@ -111,7 +112,7 @@ async function searchRss(keyword: string) {
     if (mes === 'ok')
       mes = err.message
 
-    logger.error(`[twitter-rss]: ${mes}`, true)
+    logger.error(mes)
     return [] as Tweet[]
   }
   finally {
@@ -136,8 +137,8 @@ runMain(defineCommand({
       logger.info(`Searching for ${keyword}`)
       const tweets = await searchRss(keyword)
 
-      logger.info(`Found ${tweets.length} tweets`)
-      logger.info(tweets)
+      consola.info(`Found ${tweets.length} tweets`)
+      consola.info(tweets)
       return
     }
 

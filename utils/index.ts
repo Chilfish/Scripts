@@ -16,3 +16,28 @@ export function buildUrl({ uri, query }: {
   }
   return url.href
 }
+
+/**
+ * 使用 setTimeout 实现 setInterval
+ */
+export function setInterval_(callback: () => any, interval: number) {
+  let timerId: number | null = null
+
+  callback()
+  const start = async () => {
+    timerId = setTimeout(async () => {
+      await callback()
+      start()
+    }, interval) as any
+  }
+
+  start()
+
+  return {
+    clear: () => {
+      if (timerId !== null) {
+        clearTimeout(timerId)
+      }
+    },
+  }
+}

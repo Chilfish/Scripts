@@ -15,6 +15,10 @@
 - [cut-video.py](python/cut-video.py)：快速视频切片
 - [PowerShell_profile.ps1](pwsh/Microsoft.PowerShell_profile.ps1)：Powershell 的配置文件
 - [download-weibo.ts](crawler/download-weibo.ts)： 下载微博图片/视频
-- [twitter-rss](crawler/twitter/rss.ts)：启动一个本地的 twitter 搜索的 rss 服务器 http://localhost:3456/search/:keyword 。需要先获取完整 cookies 到 README.md 同级的 cookie.txt
+- [twitter-rss](crawler/twitter/rss.ts)：启动一个本地的 twitter 搜索的 rss 服务器 http://localhost:3456/search/:keyword 。需要先获取完整 cookies 到 config.yaml（当然现在改用 RSSHub 了）
 
-使用 [twitter-web-exporter](https://github.com/prinsss/twitter-web-exporter) 插件导出推文 json 后，用 [tweets.ts](crawler/twitter/tweets.ts) 解析必要数据，用 [tweets-img.ts](crawler/twitter-img.ts) 下载导出的图片。图片格式为 `YYYYMMDD_HHMMSS_{status_id}`，这样既可以快速知道图片的日期，要查看原推文则 `https://twitter.com/i/status/{status_id}`
+> 使用 [twitter-web-exporter](https://github.com/prinsss/twitter-web-exporter) 插件导出推文 json 后，用 [tweets.ts](crawler/twitter/tweets.ts) 解析必要数据，用 [tweets-img.ts](crawler/twitter-img.ts) 下载导出的图片。
+>
+> 图片格式为 `${name}_YYYYMMDD_HHMMSS_{status_id}`，这样既可以快速知道图片的日期，要查看原推文则 `https://twitter.com/i/status/{status_id}`
+
+- [rss-download](cli/rss-download.ts)：订阅 rss 并自动下载视频，b站使用 [BBDown](https://github.com/nilaoda/BBDown)，其它的使用 [yt-dlp](https://github.com/yt-dlp/yt-dlp)

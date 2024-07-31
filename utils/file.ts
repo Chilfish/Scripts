@@ -45,9 +45,6 @@ export function dir(options: string | DirOptions): string {
     mkdir(_dir, { recursive: true })
   }
 
-  // if (isFile && !existsSync(_path))
-  // logger.warn(`File not found: ${_path}`)
-
   return _path
 }
 

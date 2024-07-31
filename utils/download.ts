@@ -2,10 +2,9 @@ import path from 'node:path'
 import { existsSync } from 'node:fs'
 import { mkdir, writeFile } from 'node:fs/promises'
 import { Buffer } from 'node:buffer'
-
 import { ProxyAgent, RequestInit, fetch } from 'undici'
+import { consola } from 'consola'
 import { proxyUrl } from './constant'
-import { logger } from '~/utils/cli'
 
 export const proxy = new ProxyAgent(proxyUrl)
 export const proxyFetch = (url: string, options?: RequestInit) => fetch(url, { ...options, dispatcher: proxy })
@@ -66,7 +65,7 @@ export async function downloadBlob(
       || mime && !mimeType.includes(mime)
     ) {
       if (mime)
-        logger.warn(`miniType not match: ${mimeType} !== ${mime}`)
+        consola.warn(`miniType not match: ${mimeType} !== ${mime}`)
       throw new Error('Invalid response, no body or not ok')
     }
 
@@ -74,12 +73,12 @@ export async function downloadBlob(
 
     await writeFile(filename, Buffer.from(buffer))
 
-    logger.success(`Downloaded ${url}`)
+    consola.success(`Downloaded ${url}`)
 
     return true
   }
   catch (e) {
-    logger.error(`Failed to download ${url}，${e}`)
+    consola.error(`Failed to download ${url}，${e}`)
     return false
   }
 }

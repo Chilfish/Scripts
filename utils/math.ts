@@ -43,6 +43,22 @@ export function fmtFileSize(size: number) {
   return `${size.toFixed(2)} ${units[i]}`
 }
 
+/**
+ * format duration to hh:mm:ss
+ * @param duration in seconds
+ */
+export function fmtDuration(duration: number) {
+  const padZero = (num: number) => num.toString().padStart(2, '0')
+
+  const hours = Math.floor(duration / 3600)
+  const minutes = Math.floor((duration % 3600) / 60)
+  const seconds = Math.floor(duration % 60)
+
+  const formattedDuration = `${padZero(hours)}:${padZero(minutes)}:${padZero(seconds)}`
+
+  return formattedDuration
+}
+
 const alphabet = '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ'
 
 /**

@@ -1,4 +1,13 @@
-import { getBiliAnonToken } from '~/utils'
+import { networkInterfaces } from 'node:os'
 
-const biliAnonToken = await getBiliAnonToken()
-console.log(biliAnonToken)
+function getLocalhostAddress() {
+  const interfaces = networkInterfaces()
+  const address = Object.keys(interfaces)
+    .flatMap(name => interfaces[name] ?? [])
+    .filter(iface => iface?.family === 'IPv4' && !iface.internal)
+    .map(iface => iface?.address)
+    .filter(Boolean)
+  return address
+}
+
+console.log(getLocalhostAddress())

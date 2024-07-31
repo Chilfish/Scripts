@@ -14,6 +14,15 @@ interface Config {
   prompts: {
     [key: string]: string
   }
+  rss: {
+    /**
+     * RSS 运行间隔，单位为分钟
+     */
+    interval: number
+    folder: string
+    maxDuration: number
+    urls: string[]
+  }
 }
 
 export const { config } = await loadConfig<Config>({
