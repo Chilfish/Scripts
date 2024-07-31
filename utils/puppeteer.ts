@@ -25,7 +25,7 @@ export const chromeUserData = (() => {
 })()
 
 export async function newBrowser() {
-  return await puppeteer.launch({
+  const browser = await puppeteer.launch({
     headless: 'shell',
     // headless: false,
     executablePath: chromePath,
@@ -36,6 +36,10 @@ export async function newBrowser() {
       `--proxy-server=${proxyUrl}`,
     ],
   })
+
+  // setTimeout(() => browser.close(), 1000 * 60)
+
+  return browser
 }
 
 export async function fetchIntercept<T = any>(

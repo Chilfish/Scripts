@@ -24,7 +24,7 @@ export function getCookie(cookie?: string | Record<string, string>[]) {
   return cookies
 }
 
-export function getCookieString(cookie: Record<string, string>[]) {
+export function getCookieString(cookie: Cookie[]) {
   return cookie
     .map(({ name, value }) => `${name}=${value}`)
     .join('; ')
