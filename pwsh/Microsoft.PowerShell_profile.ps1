@@ -29,7 +29,7 @@ Remove-Item Alias:ni -Force -ErrorAction Ignore
 
 $hosts = "C:\Windows\System32\drivers\etc\hosts"
 $me = "C:/Users/Chilfish"
-$video = "D:/Videos"
+$videos = "D:/Videos"
 $download = "D:/Downloads"
 $scripts = "D:/Codes/Scripts"
 
@@ -64,17 +64,17 @@ function wb {
 
 # bbdown: https://github.com/nilaoda/BBDown
 function danmu {
-  bbdown --danmaku-only --work-dir="$video/弹幕/" $args
-  rm -r "$video/弹幕/*.xml"
+  bbdown --danmaku-only --work-dir="$videos/弹幕/" $args
+  rm -r "$videos/弹幕/*.xml"
 }
 function subtitle {
-  bbdown --sub-only --skip-ai=false --work-dir=$video $args
+  bbdown --sub-only --skip-ai=false --work-dir=$videos $args
 }
 function downbb {
-  bbdown -aria2 -mt --aria2c-args="-x16 -s16 -j16" --work-dir=$video $args
+  bbdown -aria2 -mt --aria2c-args="-x16 -s16 -j16" --work-dir=$videos $args
 }
 function downbb-low {
-  bbdown -mt -e "hevc" -q "1080P 高清" --work-dir=$video $args
+  bbdown -mt -e "hevc" -q "1080P 高清" --work-dir=$videos $args
 }
 
 # https://github.com/eza-community/eza
@@ -88,19 +88,58 @@ function mem {
   echo ("{0:N3} MB" -f $res)
 }
 
-function tomp4 {
-  $name = $args[0]
+function get-filename {
+  param (
+    [string]$name
+  )
   $basename = [System.IO.Path]::GetFileNameWithoutExtension($name)
-  ffmpeg -i $name -c copy "$basename.mp4"
+  return $basename
+}
+function get-relative {
+  param (
+    [string]$path
+  )
+  $pwd = Get-Location
+  $relative = [System.IO.Path]::GetRelativePath($pwd, $path).Replace("\", "/")
+  return $relative
 }
 
-# 字幕压制
+# ------ FFmpeg ------
+$smallArgs = @(
+  "-c:v", "libx264", # 使用 H.264 编码
+  "-tag:v", "avc1", # 将视频流标记为 avc1
+  "-movflags", "faststart", # 使视频流在播放时能够边下载边播放
+  "-crf", "25", # 视频质量，值越小质量越高
+  "-preset", "superfast", # 编码速度，与压缩率成反比
+  "-c:a", "aac", # 使用 AAC 音频编码
+  "-b:a", "192k" # 音频码率
+)
+
+function tomp4 {
+  param (
+    [string]$video
+  )
+  $basename = get-filename $video
+  ffmpeg -i $video -c copy "$basename.mp4"
+}
+# 字幕压制，6倍速
 function subMp4 {
   param (
     [string]$video,
     [string]$subtitle
   )
-  ffmpeg -i $video -vf "ass=$subtitle" -c:v libx264 -crf 23 -c:a aac -b:a 192k output.mp4
+  cd $videos
+  $basename = get-filename $video
+  $subPath = get-relative $subtitle
+
+  ffmpeg -i $video -vf "ass=$subPath" $smallArgs "sub-$basename.mp4"
+}
+function small-mp4 {
+  param(
+    [string]$video
+  )
+  $basename = get-filename $video
+  ffmpeg -i $video $smallArgs "small-$basename.mp4"
 }
 
 # get battery report
@@ -121,6 +160,7 @@ function runBg {
   Start-Process powershell -ArgumentList "-NoProfile -NoLogo -Command $command" -WindowStyle Hidden
 }
 
+# https://github.com/Chilfish/Scripts
 function start-rss {
   Write-Host "running on http://localhost:3456"
   cd $scripts
@@ -168,6 +208,9 @@ function isSame {
 
 function update-scoop {
   tsx "$scripts/cli/scoop-update.ts"
+}
+function ip {
+  curl "ipinfo.io?token=$Env:ip_token"
 }
 
 #f45873b3-b655-43a6-b217-97c00aa0db58 PowerToys CommandNotFound module
