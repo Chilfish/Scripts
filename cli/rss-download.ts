@@ -2,7 +2,7 @@ import { exec } from 'node:child_process'
 import { promisify } from 'node:util'
 import { ofetch } from 'ofetch'
 import { load as loadXML } from 'cheerio'
-import { fmtDuration, setInterval_ } from '~/utils'
+import { fmtDuration, now, setInterval_ } from '~/utils'
 import { createLogger } from '~/utils/logger'
 import { config } from '~/utils/config'
 import { dir, readJson, writeJson } from '~/utils/file'
@@ -124,7 +124,7 @@ async function main(title: string, link: string) {
 
   await downloadVideo(link, title)
   await cache.update(link, {
-    downloadAt: new Date().toISOString(),
+    downloadAt: now(),
   })
 }
 

@@ -160,11 +160,14 @@ function runBg {
   Start-Process powershell -ArgumentList "-NoProfile -NoLogo -Command $command" -WindowStyle Hidden
 }
 
-# https://github.com/Chilfish/Scripts
 function start-rss {
-  Write-Host "running on http://localhost:3456"
+  Write-Host "running on http://localhost:1200"
+  cd D:/Codes/fork/RSSHub
+  runBg "pnpm start"
+}
+function start-rss-download {
   cd $scripts
-  runBg "pnpm run:rss"
+  runBg "tsx cli/rss-download.ts"
 }
 
 # sudo: https://github.com/gerardog/gsudo
