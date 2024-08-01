@@ -96,7 +96,18 @@ async function downloadVideo(url: string, title: string) {
   let execOut = {} as { stdout: string, stderr: string }
 
   if (isBili(url)) {
-    execOut = await execAsync(`bbdown -aria2 -mt --aria2c-args="-x16 -s16 -j16" -e "hevc" -q "1080P 高清" -hs --work-dir=${folder} ${url}`)
+    execOut = await execAsync([
+      'bbdown',
+      '-aria2',
+      '-mt',
+      '-hs',
+      '-e hevc',
+      '-p 1',
+      `-F="<ownerName> - <videoTitle>"`,
+      `-M="<ownerName> - <videoTitle>"`,
+      `--work-dir=${folder}`,
+      url,
+    ].join(' '))
   }
   else {
     execOut = await execAsync(`python ${dir('python/video-dlp.py')} ${url}`)
@@ -112,11 +123,8 @@ async function main(title: string, link: string) {
 
   // 如果已经下载过了，或者时长超过限制，就不再下载
   if (cacheItem) {
-    if (cacheItem.downloadAt) {
-      return
-    }
-    else if (cacheItem.duration || Number.MAX_SAFE_INTEGER > maxDuration) {
-      logger.warn(`Skip ${link} for duration ${fmtDuration(cacheItem.duration)}`)
+    const duration = cacheItem.duration || Number.MAX_SAFE_INTEGER
+    if (cacheItem.downloadAt || (duration > maxDuration)) {
       return
     }
   }

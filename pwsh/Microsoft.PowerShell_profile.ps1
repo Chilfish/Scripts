@@ -65,16 +65,25 @@ function wb {
 # bbdown: https://github.com/nilaoda/BBDown
 function danmu {
   bbdown --danmaku-only --work-dir="$videos/弹幕/" $args
-  rm -r "$videos/弹幕/*.xml"
+  Remove-Item "$videos/弹幕/*.xml"
 }
 function subtitle {
   bbdown --sub-only --skip-ai=false --work-dir=$videos $args
 }
+
+$bbdownArgs = @(
+  "-aria2", # 使用 Aria2 下载
+  "-mt", # 多线程下载
+  "-M", "<ownerName> - <videoTitle>/<pageNumber> - <pageTitle>", # 多分P文件名格式
+  "-F", "<ownerName> - <videoTitle>", # 单分P文件名格式
+  "--work-dir=$videos" # 下载目录
+)
+
 function downbb {
-  bbdown -aria2 -mt --aria2c-args="-x16 -s16 -j16" --work-dir=$videos $args
+  bbdown $bbdownArgs $args
 }
 function downbb-low {
-  bbdown -mt -e "hevc" -q "1080P 高清" --work-dir=$videos $args
+  downbb -e "hevc" -q "1080P 高清" $args
 }
 
 # https://github.com/eza-community/eza
@@ -167,7 +176,7 @@ function start-rss {
 }
 function start-rss-download {
   cd $scripts
-  runBg "tsx cli/rss-download.ts"
+  runBg "pnpm run:rss"
 }
 
 # sudo: https://github.com/gerardog/gsudo
