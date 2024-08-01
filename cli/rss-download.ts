@@ -1,7 +1,9 @@
 import { exec } from 'node:child_process'
 import { promisify } from 'node:util'
+import { createServer } from 'node:http'
 import { ofetch } from 'ofetch'
 import { load as loadXML } from 'cheerio'
+import { proxyFetch } from '~/utils/download'
 import { fmtDuration, now, setInterval_ } from '~/utils'
 import { createLogger } from '~/utils/logger'
 import { config } from '~/utils/config'
@@ -62,7 +64,16 @@ async function getBiliDuraiton(url: string) {
 }
 
 async function fetchRSS(url: string) {
-  const text = await ofetch<string>(url)
+  const text = await proxyFetch(url)
+    .then(res => res.text())
+    .catch((e) => {
+      logger.error(`Fetch ${url} failed: ${e.message}`)
+      return ''
+    })
+
+  if (!text) {
+    return []
+  }
 
   const $ = loadXML(text, {
     xml: true,
@@ -140,11 +151,28 @@ async function run() {
 }
 
 await cache.init()
-logger.info(`RSS download started, pid: ${process.pid}`)
 
+// just for test
+const port = 3456
+const server = createServer()
+server.listen(port, '127.0.0.1')
+server.on('request', (req, res) => {
+  res.setHeader('Content-Type', 'application/json')
+  res.end(JSON.stringify({ cache: cache.data }))
+})
+
+logger.info(`RSS download started, pid: ${process.pid}`)
 process.on('SIGINT', async () => {
   logger.warn('RSS download stopped')
+  server.close()
   process.exit(0)
 })
 
-setInterval_(run, rssInterval * 60 * 1000)
+setInterval_(async () => {
+  try {
+    await run()
+  }
+  catch (e) {
+    logger.error(e)
+  }
+}, rssInterval * 60 * 1000)

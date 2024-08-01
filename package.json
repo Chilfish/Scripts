@@ -10,8 +10,8 @@
   "license": "MIT",
   "scripts": {
     "build:monkey": "tsx monkey/build.ts",
-    "build:rss": "tsup ./crawler/twitter/rss.ts --format=esm --treeshake --target=esnext",
-    "run:rss": "pnpm build:rss && node dist/rss.js",
+    "build:rss": "tsup cli/rss-download.ts --format=esm --treeshake --target=esnext",
+    "run:rss": "pnpm build:rss && node dist/rss-download.js",
     "lint": "eslint .",
     "postinstall": "simple-git-hooks"
   },
@@ -22,15 +22,16 @@
     "c12": "^1.11.1",
     "cheerio": "1.0.0-rc.12",
     "citty": "^0.1.6",
+    "consola": "^3.2.3",
     "hono": "^4.5.3",
     "ofetch": "^1.3.4",
     "puppeteer": "^22.13.1",
+    "undici": "^6.19.4",
     "winston": "^3.13.1"
   },
   "devDependencies": {
     "@antfu/eslint-config": "^2.24.0",
     "@types/node": "^22.0.0",
-    "consola": "^3.2.3",
     "destr": "^2.0.3",
     "eslint-plugin-format": "^0.1.2",
     "lint-staged": "^15.2.7",
@@ -40,7 +41,6 @@
     "std-env": "^3.7.0",
     "tsx": "^4.16.2",
     "typescript": "^5.5.4",
-    "undici": "^6.19.4",
     "vite": "^5.3.5",
     "vite-plugin-monkey": "^4.0.6"
   },
