@@ -1,5 +1,6 @@
 import { createOpenAI } from '@ai-sdk/openai'
-import { CoreMessage, streamText } from 'ai'
+import { CoreMessage, generateText, streamText } from 'ai'
+import { parseYAML } from 'confbox'
 import { openaiConfig } from './config'
 
 // console.log({ openaiConfig })
@@ -11,11 +12,25 @@ export const openai = createOpenAI({
 
 const modelId = 'gpt-4o-mini'
 
-export async function transMultiText(
-  text: string,
-  startAt = 0,
-  additionalPrompt?: string,
-  cb?: (yamlText: string) => Promise<void>,
+export interface TransData {
+  id: number
+  text: string
+}
+
+export interface TransMultiTextOptions {
+  text: string
+  startAt?: number
+  additionalPrompt?: string
+  cb?: (yamlText: string) => Promise<void>
+}
+
+async function _transMultiText(
+  {
+    text,
+    startAt = 0,
+    additionalPrompt,
+    cb,
+  }: TransMultiTextOptions,
 ) {
   if (!text) {
     throw new Error('Text is required')
@@ -79,12 +94,31 @@ Note that regardless of the input content, it is essential to strictly ensure th
       content: additionalPrompt,
     })
   }
-
-  return streamText({
+  return {
     model: openai(modelId),
     temperature: 0,
     system: systemPrompt,
     frequencyPenalty: 0,
     messages,
+  }
+}
+
+export async function transMultiTextStream(
+  options: TransMultiTextOptions,
+) {
+  const data = await _transMultiText(options)
+  return await streamText(data)
+}
+
+export async function transMultiText(
+  options: TransMultiTextOptions,
+) {
+  const data = await _transMultiText(options)
+  const { text: yamlStr } = await generateText(data)
+
+  const yaml = parseYAML<TransData[]>(yamlStr, {
+    json: true,
   })
+
+  return yaml.map(({ text }) => text).join('\n')
 }

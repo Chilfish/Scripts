@@ -2,8 +2,8 @@ import { execSync } from 'node:child_process'
 import { stat } from 'node:fs/promises'
 import { dir, readJson } from '~/utils/file'
 
-const files = dir('D:/Backups/bili/default.json')
-const folder = dir('D:/Videos/bili')
+const files = dir('D:/Backups/bili/go-lang.json')
+const folder = dir('D:/Videos/golang')
 const maxDuration = 31 * 60 // 31 minutes
 
 interface Data {

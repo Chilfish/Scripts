@@ -34,7 +34,8 @@ export async function getAreasStoryByBand(bandId: number) {
 }
 
 /**
- * 获取所有角色的卡面剧情，@type {角色名: [资源文件名]}
+ * 获取所有角色的卡面剧情
+ * @type {角色名: [资源文件名]}
  */
 export async function getStories(
   isFetch = true,

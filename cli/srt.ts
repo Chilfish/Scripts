@@ -5,7 +5,7 @@ import { defineCommand, runMain } from 'citty'
 import { loadConfig } from 'c12'
 import { config } from '~/utils/config'
 import { chunkArray } from '~/utils/math'
-import { transMultiText } from '~/utils/openai'
+import { TransData, transMultiTextStream } from '~/utils/openai'
 import { dir } from '~/utils/file'
 
 runMain(defineCommand({
@@ -88,14 +88,15 @@ async function translate(
   let startAt = 0
   let lastLine = 0
   for (const chunk of chunks) {
-    const { textStream } = await transMultiText(
-      chunk.join('\n'),
+    const { textStream } = await transMultiTextStream({
+      text: chunk.join('\n'),
       startAt,
-      prompt,
-      async (yamlText) => {
+      additionalPrompt: prompt,
+      cb: async (yamlText) => {
         tmpStream.write(yamlText)
       },
-    )
+    })
+
     for await (const text of textStream) {
       writeStream.write(text)
     }
@@ -111,12 +112,6 @@ async function translate(
   }
 
   console.log('Translating done!')
-}
-
-interface TransData {
-  id: number
-  text: string
-
 }
 
 async function readTranslation() {

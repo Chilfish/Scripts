@@ -1,6 +1,8 @@
 import { readdir, writeFile } from 'node:fs/promises'
 import path from 'node:path'
 import { readJson } from '~/utils/file'
+import { transMultiText } from '~/utils/openai'
+import { config } from '~/utils/config'
 
 const dir = 'D:/Downloads/bestdori/birthday/'
 const textDir = path.join(dir, 'text')
@@ -22,10 +24,11 @@ async function extract(file: string) {
 
   const num = file.match(/(\d+)/)?.[0] || file
   await writeFile(`${textDir}/${num}.txt`, dataString)
+  return dataString
 }
 
-const num = process.argv[2] || '1'
-if (num === 'all') {
+const filename = process.argv[2] || '1'
+if (filename === 'all') {
   const files = await readdir(dir)
   for (const file of files) {
     // Scenario\d.json
@@ -33,7 +36,18 @@ if (num === 'all') {
       await extract(file)
     }
   }
+
+  process.exit(0)
 }
-else {
-  await extract(num)
-}
+
+const text = await extract(filename)
+const transText = await transMultiText({
+  text,
+  additionalPrompt: config.prompts.bestdori,
+})
+
+await writeFile(
+  path.join(textDir, `trans-${filename}.txt`),
+  transText,
+  'utf-8',
+)

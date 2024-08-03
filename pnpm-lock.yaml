@@ -51,6 +51,9 @@ importers:
       '@types/node':
         specifier: ^22.0.0
         version: 22.0.0
+      confbox:
+        specifier: ^0.1.7
+        version: 0.1.7
       destr:
         specifier: ^2.0.3
         version: 2.0.3

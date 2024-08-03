@@ -2,7 +2,7 @@ openai:
   key:
   url:
 cookie:
-  twitter:
+  twitter: auth_token=
   pixiv:
   bilbili:
 prompts:

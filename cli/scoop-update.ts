@@ -13,6 +13,8 @@ const skipList: string[] = await readFile(skipListFilePath, { encoding: 'utf-8' 
     return []
   })
 
+execSync('scoop update')
+
 const packages = execSync('scoop status').toString()
   .split('\n')
   .slice(4)

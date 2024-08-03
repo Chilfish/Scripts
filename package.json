@@ -32,6 +32,7 @@
   "devDependencies": {
     "@antfu/eslint-config": "^2.24.0",
     "@types/node": "^22.0.0",
+    "confbox": "^0.1.7",
     "destr": "^2.0.3",
     "eslint-plugin-format": "^0.1.2",
     "lint-staged": "^15.2.7",
