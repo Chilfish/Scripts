@@ -14,7 +14,8 @@ Set-PSReadLineKeyHandler -Key DownArrow -ScriptBlock {
 
 Invoke-Expression (&starship init powershell)
 Invoke-Expression (& { (zoxide init powershell | Out-String) })
-fnm env --use-on-cd | Out-String | Invoke-Expression
+
+# fnm env --use-on-cd | Out-String | Invoke-Expression
 
 New-Alias git hub
 New-Alias Set-LocationWithFnm z
@@ -23,8 +24,8 @@ New-Alias which Get-Command
 New-Alias code code-insiders
 New-Alias curl D:/Scoop/shims/curl.exe
 
-New-Alias pnpm D:\Dev\Node\pnpm.CMD
-New-Alias pnpx D:\Dev\Node\pnpx.CMD
+# New-Alias pnpm D:\Dev\Node\pnpm.CMD
+# New-Alias pnpx D:\Dev\Node\pnpx.CMD
 Remove-Item Alias:ni -Force -ErrorAction Ignore
 
 $hosts = "C:\Windows\System32\drivers\etc\hosts"
@@ -139,9 +140,9 @@ function subMp4 {
   )
   cd $videos
   $basename = get-filename $video
-  $subPath = get-relative $subtitle
+  $subPath = get-filename $subtitle
 
-  ffmpeg -i $video -vf "ass=$subPath" $smallArgs "sub-$basename.mp4"
+  ffmpeg -i $video -vf "ass=$subPath.ass" $smallArgs "sub-$basename.mp4"
 }
 function small-mp4 {
   param(

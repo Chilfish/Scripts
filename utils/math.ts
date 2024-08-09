@@ -15,12 +15,12 @@ export function randomDate(start?: Date, end?: Date) {
   return new Date(start.getTime() + Math.random() * (end.getTime() - start.getTime()))
 }
 
-export function uniqueObj<T extends Record<string, unknown>>(arr: T[], key: string) {
+export function uniqueObj<T extends Record<string, unknown>[]>(arr: T, key: string) {
   const map = new Map()
   arr.forEach((item) => {
     map.set(item[key], item)
   })
-  return Array.from(map.values()) as T[]
+  return Array.from(map.values()) as T
 }
 
 export function chunkArray<T>(array: T[], size: number) {

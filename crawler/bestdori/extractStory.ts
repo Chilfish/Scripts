@@ -20,7 +20,7 @@ async function extract(file: string) {
     text: talk.body.replace(/\n/g, '、'),
   })) as TalkData[]
 
-  const dataString = talkData.map(({ name, text }) => `${name}: ${text}`).join('\n')
+  const dataString = talkData.map(({ name, text }) => `${name}：${text}`).join('\n')
 
   const num = file.match(/(\d+)/)?.[0] || file
   await writeFile(`${textDir}/${num}.txt`, dataString)
