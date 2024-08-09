@@ -3,18 +3,16 @@ export * from './constant'
 export * from './cookie'
 export * from './date'
 export * from './fetch'
+export * from './url'
 
-export function buildUrl({ uri, query }: {
-  uri: string
-  query: Partial<Record<string, string | number | null>>
-}) {
-  const url = new URL(uri)
-  for (const [key, value] of Object.entries(query)) {
-    if (value !== null && value !== undefined) {
-      url.searchParams.set(key, `${value}`)
-    }
-  }
-  return url.href
+export function isJsonStr(str: string) {
+  const start = ['{', '[', '%7B', '%5B']
+  const end = ['}', ']', '%7D', '%5D']
+
+  const startChar = str[0]
+  const endChar = str[str.length - 1]
+
+  return start.includes(startChar) && end.includes(endChar)
 }
 
 /**

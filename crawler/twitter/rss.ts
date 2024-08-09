@@ -105,6 +105,7 @@ async function searchRss(keyword: string) {
         f: 'live',
       },
     })
+    logger.info(`Searching for ${keyword} at ${url}`)
     return await search(url)
   }
   catch (err: any) {

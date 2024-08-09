@@ -1,27 +1,41 @@
-import { readJson, writeJson } from '~/utils/file'
-import { uniqueObj } from '~/utils'
+import * as qs from 'neoqs'
+import {
+  buildUrl,
+  parseObjectQs,
+  stringifyObjectQs,
+} from '~/utils/url'
 
-interface History {
-  // title, url, time
-  rows: [string, string, string][]
+const query2 = {
+  data: {
+    name: 'hello',
+    key: true,
+  },
+  message: 'ok',
 }
+const query3 = `data=${JSON.stringify({ name: 'hello', arr: [{ key: 'valie' }, { key: '233' }] })}&array=${JSON.stringify([{ key: 'valie' }, { key: ['233'] }])}`
 
-interface Data {
-  title: string
-  url: string
-  time: string
-}
+console.log(
+  stringifyObjectQs(query2),
+  '\n',
+  qs.stringify(query2, {
 
-const data1 = await readJson<History>(`C:/Users/Chilfish/Desktop/bilibili-history.json`).then(toData)
+  }),
+  '\n',
+  JSON.stringify(parseObjectQs(query3), null, 2),
+  '\n',
+  qs.parse(query3, {
 
-const data2 = await readJson<History>(`D:/Backups/bili/bilibili-history.json`).then(toData)
-
-function toData(data: History): Data[] {
-  return data.rows.map(([title, url, time]) => ({ title, url, time }))
-}
-
-const data = data1.concat(data2).sort((a, b) => b.time.localeCompare(a.time))
-
-const data3 = uniqueObj(data, 'title')
-
-writeJson(`C:/Users/Chilfish/Desktop/1-bilibili-history.json`, data3)
+  }),
+  buildUrl({
+    uri: 'https://www.baidu.com/s',
+    query: {
+      wd: 'hello',
+      name: 'hello',
+      json: {
+        key: 'value',
+        arr: [1, 2, 3],
+      },
+    },
+    hash: 'hash',
+  }),
+)
