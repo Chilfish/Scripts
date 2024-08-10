@@ -20,6 +20,7 @@ Invoke-Expression (& { (zoxide init powershell | Out-String) })
 New-Alias git hub
 New-Alias Set-LocationWithFnm z
 New-Alias which Get-Command
+New-Alias open start-Process
 
 New-Alias code code-insiders
 New-Alias curl D:/Scoop/shims/curl.exe
@@ -212,7 +213,7 @@ function isSame {
     $hash1 = & openssl dgst -sha256 -binary $file1 | & openssl base64
     $hash2 = & openssl dgst -sha256 -binary $file2 | & openssl base64
 
-    if ($hash1 -eq $hash2) {
+   if ($hash1 -eq $hash2) {
         Write-Output "The files have the same hash.`n$hash1"
     } else {
         Write-Output "The files have different hashes.`n$hash1`n$hash2"
@@ -224,6 +225,14 @@ function update-scoop {
 }
 function ip {
   curl "ipinfo.io?token=$Env:ip_token"
+}
+function openx {
+  param([string]$str)
+  if ($str -match '(\d+)$') {
+    $id = $matches[1]
+    $url = "https://x.com/i/status/$id"
+    Start-Process $url
+  }
 }
 
 #f45873b3-b655-43a6-b217-97c00aa0db58 PowerToys CommandNotFound module

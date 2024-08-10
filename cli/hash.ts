@@ -1,96 +1,51 @@
-import path from 'node:path'
 import { createHash } from 'node:crypto'
-import { createReadStream } from 'node:fs'
-import { stat } from 'node:fs/promises'
-import { defineCommand, runMain } from 'citty'
-import { prompt } from '~/utils/cli'
-import { fmtFileSize } from '~/utils'
+import { Buffer } from 'node:buffer'
+import { readFile, writeFile } from 'node:fs/promises'
+import { execSync } from 'node:child_process'
+import { dir } from '~/utils/file'
+import { genToken, murmurHashV3, toBase62 } from '~/utils/math'
 
-runMain(defineCommand({
-  meta: {
-    name: 'hash',
-    description: 'get the hash of a file',
-  },
-  args: {
-    file: {
-      type: 'string',
-      description: 'the path to the file',
-    },
-    isSame: {
-      type: 'boolean',
-      description: 'compare the hash of two files',
-    },
-  },
-  run: async ({ args }) => {
-    let { file, isSame } = args
-    let file2: string
+// or use `openssl dgst -sha256 -binary $file1 | openssl base64` instead
+let str = process.argv.at(2)
+const isTest = process.argv.includes('--TEST')
 
-    if (!file?.trim())
-      file = await prompt('Enter the path to the file:')
-
-    file = normalizePath(file)
-    if (isSame) {
-      file2 = await prompt('Enter the path to the second file:')
-      file2 = normalizePath(file2)
-
-      const same = await isSameFile(file, file2)
-      console.log(`Hash1: ${same.hash1}`)
-      console.log(`Hash2: ${same.hash2}`)
-      console.log(`Is same: ${same.isSame}`)
-      return
-    }
-
-    console.log(`Hashing ${file}...`)
-
-    const { hash, size } = await hashFile(file)
-    console.log(`Hash: ${hash}`)
-    console.log(`Size: ${fmtFileSize(size)}`)
-  },
-}))
-
-function normalizePath(file: string) {
-  file = file
-    .replace(/\\/g, '/') // windows path
-    .replace(/[`"]/g, '') // powershell escape
-
-  if (!path.isAbsolute(file))
-    file = path.resolve(file)
-
-  return file
+if (!str && !isTest) {
+  console.error('Usage: tsx hash.ts <string>')
+  process.exit(1)
 }
 
-async function isSameFile(file1: string, file2: string) {
-  const { hash: hash1 } = await hashFile(file1)
-  const { hash: hash2 } = await hashFile(file2)
-  return {
-    isSame: hash1 === hash2,
-    hash1,
-    hash2,
+const tmpFile = dir('data/tmp/random.txt')
+str = await (async () => {
+  const size = process.argv.at(3)
+
+  async function write() {
+    const str = genToken(Number(size || 10_0000))
+    await writeFile(tmpFile, str)
+    return str
   }
-}
 
-async function hashFile(
-  path: string,
-): Promise<{ hash: string, size: number }> {
-  const fileSize = (await stat(path)).size
-  const chunkSize = 1024 * 1024 * 100 // 100MB
+  if (size)
+    return await write()
+  return await readFile(tmpFile, 'utf-8').catch(write)
+})()
 
-  const hash = createHash('sha256')
-  const stream = createReadStream(path, {
-    highWaterMark: chunkSize,
-  })
+console.log('Input len:', str.length)
 
-  stream.on('data', (data) => {
-    hash.update(data)
-  })
+console.time('openssl')
+const openssl = execSync(`openssl dgst -sha256 -binary ${tmpFile}`)
+console.timeEnd('openssl')
 
-  return new Promise((resolve, reject) => {
-    stream.on('end', () => {
-      resolve({
-        hash: hash.digest('hex'),
-        size: fileSize,
-      })
-    })
-    stream.on('error', reject)
-  })
-}
+console.time('nodeSha256')
+const nodeSha256 = createHash('sha256').update(str)
+console.timeEnd('nodeSha256')
+
+console.time('murmurHashV3')
+const murmurHash = murmurHashV3(str)
+console.timeEnd('murmurHashV3')
+
+console.log({
+  nodeSha256: nodeSha256.digest('base64'),
+  openssl: Buffer.from(openssl).toString('base64'),
+  murmurBase62: toBase62(murmurHash),
+  murmurBase64: Buffer.from(murmurHash.toString()).toString('base64'),
+})
