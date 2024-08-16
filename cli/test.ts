@@ -1,41 +1,24 @@
-import * as qs from 'neoqs'
-import {
-  buildUrl,
-  parseObjectQs,
-  stringifyObjectQs,
-} from '~/utils/url'
+import { load as loadHTML } from 'cheerio'
+import { ofetch } from 'ofetch'
 
-const query2 = {
-  data: {
-    name: 'hello',
-    key: true,
-  },
-  message: 'ok',
-}
-const query3 = `data=${JSON.stringify({ name: 'hello', arr: [{ key: 'valie' }, { key: '233' }] })}&array=${JSON.stringify([{ key: 'valie' }, { key: ['233'] }])}`
+const html = await ofetch('https://bushiroad-store.com/collections/mygo')
 
-console.log(
-  stringifyObjectQs(query2),
-  '\n',
-  qs.stringify(query2, {
+const $ = loadHTML(html)
+const goods = $('.product-list.product-list--collection .product-item')
 
-  }),
-  '\n',
-  JSON.stringify(parseObjectQs(query3), null, 2),
-  '\n',
-  qs.parse(query3, {
+const items = goods.map((_, el) => {
+  const $el = $(el)
+  const title = $el.find('.product-item__title').text().trim()
+  const link = $el.find('a').attr('href')
+  const price = $el.find('.price').text().trim().replace('販売価格', '')
+  const date = $el.find('.product__release-date').text().trim().replace('発売予定', '')
+    || $el.find('.product__show-text-sale').text().trim() || '未定'
 
-  }),
-  buildUrl({
-    uri: 'https://www.baidu.com/s',
-    query: {
-      wd: 'hello',
-      name: 'hello',
-      json: {
-        key: 'value',
-        arr: [1, 2, 3],
-      },
-    },
-    hash: 'hash',
-  }),
-)
+  return {
+    title,
+    price,
+    date,
+    link: `https://bushiroad-store.com${link}`,
+  }
+}).get()
+console.log(items)

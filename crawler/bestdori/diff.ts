@@ -7,7 +7,7 @@ import { explorerUrl, getFileDir } from '.'
 import { dir, readJson, writeJson } from '~/utils/file'
 import { formatDate, now } from '~/utils'
 
-const savePath = dir('data/bestdori.json')
+const savePath = dir('data/bestdori/dir.json')
 
 const [oldFile, newFile] = await Promise.all([
   readJson(savePath).catch(() => ({})),
@@ -36,7 +36,7 @@ for (const { newValue } of theDiff) {
 }
 
 await writeJson(
-  `data/bestdori-diff-${formatDate(now(), 'MM-DD')}.json`,
+  `data/bestdori/bestdori-diff-${formatDate(now(), 'MM-DD')}.json`,
   newData,
 )
 

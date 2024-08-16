@@ -28,10 +28,14 @@ const name = process.argv[2]
 /**
  * data.json exported from https://github.com/prinsss/twitter-web-exporter
  */
-let data = await readJson('data/data.json')
+let data = await readJson('D:/Downloads/merged.json')
   .then((data: any[]) => data.sort((a: any, b: any) => b.id.localeCompare(a.id)))
 
 data = data.map((el) => {
+  if (el.full_text.startsWith('RT @')) {
+    return null
+  }
+
   removed.forEach((key) => {
     delete el[key]
   })
@@ -64,6 +68,7 @@ data = data.map((el) => {
 
   return el
 })
+  .filter(Boolean)
   .sort((a, b) => a.created_at.localeCompare(b.created_at))
 
 if (name)
@@ -98,7 +103,7 @@ const imgs = data.flatMap(el => el.media.map((url: any, idx: number) => {
 }))
   .filter(Boolean)
 
-const saveImg = writeJson('data/imgs.json', uniqueObj(imgs, 'url'))
+const saveImg = writeJson('data/twitter/imgs.json', uniqueObj(imgs, 'url'))
 
 const user = {
   name: data[0].screen_name,
@@ -112,12 +117,12 @@ data.forEach((el) => {
   delete el.profile_image_url
 })
 
-const saveTweets = writeJson('data/data-after.json', {
+const saveTweets = writeJson('data/twitter/data-after.json', {
   user,
   tweets: data,
 })
 
-const saveText = writeJson('data/text.json', textData)
+const saveText = writeJson('data/twitter/text.json', textData)
 
 await Promise.all([saveImg, saveTweets, saveText])
 

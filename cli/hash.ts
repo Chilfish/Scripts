@@ -16,6 +16,11 @@ if (!str && !isTest) {
 
 const tmpFile = dir('data/tmp/random.txt')
 str = await (async () => {
+  if (!isTest && str) {
+    await writeFile(tmpFile, str)
+    return str
+  }
+
   const size = process.argv.at(3)
 
   async function write() {

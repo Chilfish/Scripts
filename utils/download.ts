@@ -1,6 +1,6 @@
 import path from 'node:path'
 import { existsSync } from 'node:fs'
-import { mkdir, writeFile } from 'node:fs/promises'
+import { mkdir, utimes, writeFile } from 'node:fs/promises'
 import { Buffer } from 'node:buffer'
 import { ProxyAgent, RequestInit, fetch } from 'undici'
 import { consola } from 'consola'
@@ -15,6 +15,7 @@ export interface DownloadOptions {
   dest?: string
   name?: string
   mime?: string
+  followRedirect?: boolean
   fetchOptions?: RequestInit
 }
 
@@ -28,6 +29,7 @@ export async function downloadBlob(
     mime,
     dest = 'D:/Downloads',
     fetchOptions,
+    followRedirect = false,
   } = options
 
   if (!url)
@@ -45,8 +47,8 @@ export async function downloadBlob(
   if (!name.includes('.'))
     name = `${name}.jpg`
 
-  const filename = path.resolve(`${dest}/${name}`)
-  if (existsSync(filename))
+  let filename = path.resolve(`${dest}/${name}`)
+  if (existsSync(filename) && !followRedirect)
     return true
 
   if (!existsSync(dest))
@@ -69,11 +71,17 @@ export async function downloadBlob(
       throw new Error('Invalid response, no body or not ok')
     }
 
-    const buffer = await res.arrayBuffer()
+    if (followRedirect && !options.name)
+      filename = path.resolve(`${dest}/${res.url.split('/').pop() || name}`)
 
+    const createdAt = new Date(res.headers.get('last-modified') || Date.now())
+
+    const buffer = await res.arrayBuffer()
     await writeFile(filename, Buffer.from(buffer))
 
-    consola.success(`Downloaded ${url}`)
+    await utimes(filename, createdAt, createdAt)
+
+    consola.success(`Downloaded ${res.url}`)
 
     return true
   }
