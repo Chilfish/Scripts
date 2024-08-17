@@ -1,24 +1,29 @@
-import { load as loadHTML } from 'cheerio'
-import { ofetch } from 'ofetch'
+import { writeFile } from 'node:fs/promises'
+import { dir, readJson } from '~/utils/file'
 
-const html = await ofetch('https://bushiroad-store.com/collections/mygo')
+const data = await readJson('data/twitter/text.json').then(r => r) as {
+  id: string
+  text: string
+  created_at: string
+}[]
 
-const $ = loadHTML(html)
-const goods = $('.product-list.product-list--collection .product-item')
+const prefixMd = `# Twitter data
 
-const items = goods.map((_, el) => {
-  const $el = $(el)
-  const title = $el.find('.product-item__title').text().trim()
-  const link = $el.find('a').attr('href')
-  const price = $el.find('.price').text().trim().replace('販売価格', '')
-  const date = $el.find('.product__release-date').text().trim().replace('発売予定', '')
-    || $el.find('.product__show-text-sale').text().trim() || '未定'
+`
 
-  return {
-    title,
-    price,
-    date,
-    link: `https://bushiroad-store.com${link}`,
-  }
-}).get()
-console.log(items)
+const md = data
+  .sort((a, b) => {
+    return new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
+  })
+  .map(({ text, created_at }) => {
+    if (text.startsWith('@')) {
+      text = `Reply to ${text}`
+    }
+
+    return `### ${created_at} GMT+0800
+  
+${text}
+`
+  })
+
+await writeFile(dir('data/twitter/text.md'), prefixMd + md.join('\n'))
