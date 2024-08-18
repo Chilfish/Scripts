@@ -4,6 +4,7 @@ export * from './cookie'
 export * from './date'
 export * from './fetch'
 export * from './url'
+export * from './progress'
 
 export function isJsonStr(str: string) {
   const start = ['{', '[', '%7B', '%5B']

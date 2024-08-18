@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Chill Script
 // @description  Hello! MyScript
-// @version      2024.07.13
+// @version      2024.08.18
 // @author       Chilfish
 // @match        *://*/*
 // @grant        GM_addStyle
@@ -56,7 +56,7 @@ let _css = css`
  */
 
 /**
- * @typedef {UrlAction[]} UrlAction
+ * @typedef {UrlAction[]} urlAction
  */
 const urlActions = [
   {
@@ -91,7 +91,7 @@ const urlActions = [
     },
   },
   {
-    pattern: /https:\/\/(twitter|x)\.com/,
+    pattern: /(twitter|x)\.com/,
     action: () => {
       $('link[rel=\'shortcut icon\']').href = 'https://abs.twimg.com/favicons/twitter.ico'
       _css += css`
@@ -104,7 +104,7 @@ const urlActions = [
         .css-175oi2r.r-15zivkp.r-1bymd8e.r-13qz1uu {
           max-width: fit-content !important; /* left nav label */
         }
-        .css-175oi2r.r-184id4b,
+        a[data-testid="jobs-tab-item"],
         a[aria-label="Premium"],
         a[aria-label="Grok"] {
           display: none !important;

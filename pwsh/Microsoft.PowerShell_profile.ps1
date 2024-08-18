@@ -1,5 +1,7 @@
 $OutputEncoding = [console]::InputEncoding = [console]::OutputEncoding = New-Object System.Text.UTF8Encoding
 
+Import-Module -Name Microsoft.WinGet.CommandNotFound
+
 Set-PSReadLineOption -PredictionSource History
 Set-PSReadlineKeyHandler -Key Tab -Function MenuComplete
 Set-PSReadLineKeyHandler -Chord Tab -Function MenuComplete
@@ -25,8 +27,6 @@ New-Alias open start-Process
 New-Alias code code-insiders
 New-Alias curl D:/Scoop/shims/curl.exe
 
-# New-Alias pnpm D:\Dev\Node\pnpm.CMD
-# New-Alias pnpx D:\Dev\Node\pnpx.CMD
 Remove-Item Alias:ni -Force -ErrorAction Ignore
 
 $hosts = "C:\Windows\System32\drivers\etc\hosts"
@@ -34,8 +34,8 @@ $me = "C:/Users/Chilfish"
 $videos = "D:/Videos"
 $download = "D:/Downloads"
 $scripts = "D:/Codes/Scripts"
+$subl = "D:\Dev\Sublime Text\sublime_text.exe"
 
-$Env:OLLAMA_ORIGINS="https://lobe.chilfish.top"
 $Env:IS_NODE="TRUE"
 
 # https://github.com/xampprocky/tokei
@@ -235,7 +235,8 @@ function openx {
   }
 }
 
-#f45873b3-b655-43a6-b217-97c00aa0db58 PowerToys CommandNotFound module
+function randomString($length = 16) {
+  $chars = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!@#$%^&*()_+-=[]{}|;:,.<>?`~"
+  return -join ((1..$length) | ForEach-Object { $chars[(Get-Random -Minimum 0 -Maximum $chars.Length)] })
+}
 
-Import-Module -Name Microsoft.WinGet.CommandNotFound
-#f45873b3-b655-43a6-b217-97c00aa0db58

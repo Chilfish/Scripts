@@ -1,13 +1,22 @@
 import path from 'node:path'
-import { existsSync } from 'node:fs'
-import { mkdir, utimes, writeFile } from 'node:fs/promises'
-import { Buffer } from 'node:buffer'
+import { createWriteStream, existsSync } from 'node:fs'
+import { pipeline } from 'node:stream'
+import { promisify } from 'node:util'
+import { utimes } from 'node:fs/promises'
 import { ProxyAgent, RequestInit, fetch } from 'undici'
 import { consola } from 'consola'
 import { proxyUrl } from './constant'
+import { dir } from './file'
 
 export const proxy = new ProxyAgent(proxyUrl)
-export const proxyFetch = (url: string, options?: RequestInit) => fetch(url, { ...options, dispatcher: proxy })
+export function proxyFetch(url: string, options?: RequestInit) {
+  return fetch(url, {
+    ...options,
+    dispatcher: proxy,
+  })
+}
+
+const streamPipeline = promisify(pipeline)
 
 export interface DownloadOptions {
   url: string
@@ -28,8 +37,8 @@ export async function downloadBlob(
     name,
     mime,
     dest = 'D:/Downloads',
+    followRedirect = true,
     fetchOptions,
-    followRedirect = false,
   } = options
 
   if (!url)
@@ -44,23 +53,14 @@ export async function downloadBlob(
   if (!name?.trim())
     name = new URL(url).pathname.split('/').pop() || 'image.jpg'
 
-  if (!name.includes('.'))
-    name = `${name}.jpg`
-
-  let filename = path.resolve(`${dest}/${name}`)
+  let filename = dir(`${dest}/${name}`)
   if (existsSync(filename) && !followRedirect)
     return true
 
-  if (!existsSync(dest))
-    await mkdir(dest, { recursive: true })
-
   try {
-    const res = await fetch(url, {
-      ...fetchOptions,
-      dispatcher: proxy,
-    })
-    const mimeType = res.headers.get('content-type') || 'image/jpeg'
+    const res = await proxyFetch(url, fetchOptions)
 
+    const mimeType = res.headers.get('content-type') || 'image/jpeg'
     if (
       !res.ok
       || !res.body
@@ -71,13 +71,14 @@ export async function downloadBlob(
       throw new Error('Invalid response, no body or not ok')
     }
 
+    // 有时服务器会将发起的链接重定向到实际的文件链接，导致原url丢失文件名信息
     if (followRedirect && !options.name)
       filename = path.resolve(`${dest}/${res.url.split('/').pop() || name}`)
 
+    // 设置文件创建时间为服务器返回的时间
     const createdAt = new Date(res.headers.get('last-modified') || Date.now())
 
-    const buffer = await res.arrayBuffer()
-    await writeFile(filename, Buffer.from(buffer))
+    await streamPipeline(res.body, createWriteStream(filename))
 
     await utimes(filename, createdAt, createdAt)
 
@@ -86,7 +87,7 @@ export async function downloadBlob(
     return true
   }
   catch (e) {
-    consola.error(`Failed to download ${url}，${e}`)
+    consola.error(`Failed to download ${url}, ${e}`)
     return false
   }
 }

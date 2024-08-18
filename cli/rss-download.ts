@@ -3,8 +3,9 @@ import { promisify } from 'node:util'
 import { createServer } from 'node:http'
 import { ofetch } from 'ofetch'
 import { load as loadXML } from 'cheerio'
+import { CronJob } from 'cron'
 import { proxyFetch } from '~/utils/download'
-import { fmtDuration, now, setInterval_ } from '~/utils'
+import { fmtDuration, now } from '~/utils'
 import { createLogger } from '~/utils/logger'
 import { config } from '~/utils/config'
 import { dir, readJson, writeJson } from '~/utils/file'
@@ -176,11 +177,14 @@ process.on('SIGINT', async () => {
   process.exit(0)
 })
 
-setInterval_(async () => {
-  try {
-    await run()
-  }
-  catch (e) {
-    logger.error(e)
-  }
-}, rssInterval * 60 * 1000)
+const job = CronJob.from({
+  cronTime: `0 */${rssInterval} * * * *`,
+  onTick: () => {
+    run().catch(logger.error)
+  },
+  runOnInit: true,
+  start: true,
+  timeZone: 'Asia/Shanghai',
+})
+
+job.start()
