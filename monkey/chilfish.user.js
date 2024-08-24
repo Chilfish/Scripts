@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Chill Script
 // @description  Hello! MyScript
-// @version      2024.08.18
+// @version      2024.08.25
 // @author       Chilfish
 // @match        *://*/*
 // @grant        GM_addStyle
@@ -58,61 +58,90 @@ let _css = css`
 /**
  * @typedef {UrlAction[]} urlAction
  */
-const urlActions = [
-  {
-    pattern: /msn\.com|enet\.10000\.gd\.cn/,
-    action: () => window.close(),
+const urlActions = [{
+  pattern: /zhihu\.com/,
+  action: () => {
+    _css += css`
+      .VideoAnswerPlayer, .ZVideoItem, .ZVideoItem-video {
+        display: none;
+      }
+      .RichContent-EntityWord.css-b8rgjk {
+        color: inherit;
+        cursor: default;
+      }
+      .RichContent-EntityWord.css-b8rgjk .css-1dvsrp {
+        display: none;
+      }
+    `
   },
-  {
-    pattern: /zhihu\.com/,
-    action: () => {
-      _css += css`
-        .VideoAnswerPlayer, .ZVideoItem, .ZVideoItem-video {
-          display: none;
-        }
-        .RichContent-EntityWord.css-b8rgjk {
-          color: inherit;
-          cursor: default;
-        }
-        .RichContent-EntityWord.css-b8rgjk .css-1dvsrp {
-          display: none;
-        }
-      `
-    },
+}, {
+  pattern: /weibo\.com/,
+  action: () => {
+    _css += css`
+      div, p, li, a, span {
+        font-size: 12.5px !important;
+      }
+    `
   },
-  {
-    pattern: /weibo\.com/,
-    action: () => {
-      _css += css`
-        div, p, li, a, span {
-          font-size: 12.5px !important;
-        }
-      `
-    },
+}, {
+  pattern: /(twitter|x)\.com/,
+  action: () => {
+    $('link[rel=\'shortcut icon\']').href = 'https://abs.twimg.com/favicons/twitter.ico'
+    _css += css`
+      div, span {
+        font-size: 14px !important;
+      }
+      .css-175oi2r.r-1pi2tsx.r-1wtj0ep.r-1rnoaur.r-o96wvk.r-is05cd {
+        width: auto !important; /* left nav item*/
+      }
+      .css-175oi2r.r-15zivkp.r-1bymd8e.r-13qz1uu {
+        max-width: fit-content !important; /* left nav label */
+      }
+      a[data-testid="jobs-tab-item"],
+      a[aria-label="Premium"],
+      a[aria-label="Grok"] {
+        display: none !important;
+      }
+    `
+
+    rmRetweet()
   },
-  {
-    pattern: /(twitter|x)\.com/,
-    action: () => {
-      $('link[rel=\'shortcut icon\']').href = 'https://abs.twimg.com/favicons/twitter.ico'
-      _css += css`
-        div, span {
-          font-size: 14px !important;
+}]
+
+function rmRetweet() {
+  function _rmRetweet(article) {
+    const retweetSvg = `svg.r-4qtqp9.r-yyyyoo.r-dnmrzs.r-bnwqim.r-lrvibr.r-m6rgpd.r-14j79pv.r-10ptun7.r-1janqcz`
+    const isRetweet = $(retweetSvg, article)
+    if (isRetweet) {
+      article.remove()
+    }
+  }
+
+  function isHomepage() {
+    const _url = document.URL.split('/')
+    return _url.length === 4 && _url.at(-1) !== 'home'
+  }
+
+  const observer = new MutationObserver(ms => ms.forEach((mutation) => {
+    if (isHomepage()) {
+      return
+    }
+
+    mutation.addedNodes.forEach((node) => {
+      if (node.nodeType === 1) {
+        const article = $(`article`, node)
+        if (article) {
+          _rmRetweet(article)
         }
-        .css-175oi2r.r-1pi2tsx.r-1wtj0ep.r-1rnoaur.r-o96wvk.r-is05cd {
-          width: auto !important; /* left nav item*/
-        }
-        .css-175oi2r.r-15zivkp.r-1bymd8e.r-13qz1uu {
-          max-width: fit-content !important; /* left nav label */
-        }
-        a[data-testid="jobs-tab-item"],
-        a[aria-label="Premium"],
-        a[aria-label="Grok"] {
-          display: none !important;
-        }
-      `
-    },
-  },
-]
+      }
+    })
+  }))
+
+  observer.observe(document.body, {
+    childList: true,
+    subtree: true,
+  })
+}
 
 window.onload = async function () {
   'use strict'
