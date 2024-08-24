@@ -199,8 +199,8 @@ function translateTextNodes() {
 // {"keyA": 1, "keyB": 2} => "?keyA=1&keyB=2"
 function buildQueryString(params) {
   return `?${Object.keys(params).map((k) => {
-        return `${encodeURIComponent(k)}=${encodeURIComponent(params[k])}`
-    }).join('&')}`
+    return `${encodeURIComponent(k)}=${encodeURIComponent(params[k])}`
+  }).join('&')}`
 }
 
 function translate(phrases) {

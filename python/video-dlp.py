@@ -32,7 +32,7 @@ args = parser.parse_args()
 
 
 def main(video_url: str):
-    out_dir = "D:/Downloads"
+    out_dir = "D:/Videos"
     temp_dir = os.environ.get("TEMP", out_dir)
 
     opt_format = "bestvideo/best+bestaudio/best"
@@ -82,7 +82,7 @@ def main(video_url: str):
         filename = f"{upload_date}_{title}"
 
     if args.audio:
-        ext = "mp3"
+        ext = "aac"
 
     ydl_opts["outtmpl"]["default"] = f"{filename}.{ext}"
     ydl.params.update(ydl_opts)

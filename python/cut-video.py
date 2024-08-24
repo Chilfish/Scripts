@@ -37,9 +37,10 @@ def clip_video(input_path, ranges, output_path):
     for i, (start, end) in enumerate(ranges):
         temp_output = os.path.join(output_path, f"clip_{i:03d}.mp4")
         cmd = [
-            "ffmpeg", "-i", input_path,
-            "-ss", str(start),
+            "ffmpeg", 
+            "-ss", str(start), # 似乎必须放在第一位参数
             "-to", str(end),
+            "-i", input_path,
             "-c", "copy", temp_output
         ]
         subprocess.run(cmd, check=True)

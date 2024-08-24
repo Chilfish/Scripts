@@ -38,17 +38,18 @@ export function viteConfig(
       monkey({
         ...monkeyConfig,
         userscript: {
+          ...monkeyConfig.userscript,
           name,
           namespace: 'chilfish/monkey',
           downloadURL,
           updateURL,
           version,
-          ...monkeyConfig.userscript,
         },
         server: {
           open: false,
         },
         build: {
+          ...monkeyConfig.build,
           fileName: `${filename}.user.js`,
           metaFileName: true,
         },
