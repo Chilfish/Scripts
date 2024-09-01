@@ -5,7 +5,7 @@
  */
 export function formatDate(
   time: string | number | Date,
-  fmt = 'YYYY-MM-DD HH:mm:ss',
+  fmt = 'YYYY-MM-DD HH:mm:ss:SSS',
 ) {
   if (typeof time === 'number' && time < 1e12)
     time *= 1000
@@ -22,6 +22,7 @@ export function formatDate(
   const hours = pad(date.getHours())
   const minutes = pad(date.getMinutes())
   const seconds = pad(date.getSeconds())
+  const milliseconds = pad(date.getMilliseconds())
 
   return fmt
     .replace('YYYY', year.toString())
@@ -30,6 +31,7 @@ export function formatDate(
     .replace('HH', hours)
     .replace('mm', minutes)
     .replace('ss', seconds)
+    .replace('SSS', milliseconds)
 }
 
 /**

@@ -1,5 +1,7 @@
-import { downloadBlob } from '~/utils/download'
+import { readJson } from '~/utils/file'
 
-await downloadBlob({
-  url: 'https://p.chilfish.top/v0.1.10.png',
-})
+const packages = await readJson('D:/Dev/Node/pnpm-modules/global/5/package.json')
+
+const dependencies = Object.keys(packages.dependencies)
+
+console.log(dependencies.join(' '))

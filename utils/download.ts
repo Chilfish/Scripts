@@ -54,7 +54,7 @@ export async function downloadBlob(
     name = new URL(url).pathname.split('/').pop() || 'image.jpg'
 
   let filename = dir(`${dest}/${name}`)
-  if (existsSync(filename) && !followRedirect)
+  if (existsSync(filename))
     return true
 
   try {

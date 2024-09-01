@@ -16,7 +16,6 @@ interface User {
 
 const removed = [
   'bookmark_count',
-  'favorite_count',
   'bookmarked',
   'favorited',
   'retweeted',
@@ -24,15 +23,16 @@ const removed = [
 ]
 
 const name = process.argv[2]
+const includeRT = process.argv[3] === '--RT'
 
 /**
  * data.json exported from https://github.com/prinsss/twitter-web-exporter
  */
-let data = await readJson('D:/Downloads/merged.json')
+let data = await readJson('D:/Downloads/data.json')
   .then((data: any[]) => data.sort((a: any, b: any) => b.id.localeCompare(a.id)))
 
 data = data.map((el) => {
-  if (el.full_text.startsWith('RT @')) {
+  if (el.full_text.startsWith('RT @') && !includeRT) {
     return null
   }
 
@@ -50,7 +50,7 @@ data = data.map((el) => {
   el.full_text = el.full_text
     .replace(/\xA0|\u3000/g, ' ') // 不可见空格
 
-  el.views_count = +el.view_count || 0
+  el.views_count = +el.views_count || 0
 
   if (el.in_reply_to) {
     const tweet = data.find(tweet => tweet.id === el.in_reply_to)

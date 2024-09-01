@@ -17,7 +17,7 @@ Set-PSReadLineKeyHandler -Key DownArrow -ScriptBlock {
 Invoke-Expression (&starship init powershell)
 Invoke-Expression (& { (zoxide init powershell | Out-String) })
 
-# fnm env --use-on-cd | Out-String | Invoke-Expression
+fnm env --use-on-cd | Out-String | Invoke-Expression
 
 New-Alias git hub
 New-Alias Set-LocationWithFnm z
@@ -176,9 +176,13 @@ function start-rss {
   cd D:/Codes/fork/RSSHub
   runBg "pnpm start"
 }
-function start-rss-download {
+function start-rss-twitter {
   cd $scripts
   runBg "pnpm run:rss"
+}
+function start-wb-checkin {
+  $cwd = "$scripts/cli/weibo-checkin.ts"
+  runBg "tsx $cwd"
 }
 
 # sudo: https://github.com/gerardog/gsudo
@@ -224,7 +228,7 @@ function update-scoop {
   tsx "$scripts/cli/scoop-update.ts"
 }
 function ip {
-  curl "ipinfo.io?token=$Env:ip_token"
+  curl "ipinfo.io?token=$Env:ip_token" | jq
 }
 function openx {
   param([string]$str)

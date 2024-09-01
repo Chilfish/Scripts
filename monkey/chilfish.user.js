@@ -128,7 +128,7 @@ function rmRetweet() {
     }
 
     mutation.addedNodes.forEach((node) => {
-      if (node.nodeType === 1) {
+      if (node.nodeType === 1 && node.tagName === 'DIV') {
         const article = $(`article`, node)
         if (article) {
           _rmRetweet(article)

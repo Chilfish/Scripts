@@ -6,6 +6,7 @@ interface Config {
     twitter: string
     pixiv: string
     bilibili: string
+    weibo: string
   }
   openai: {
     key: string

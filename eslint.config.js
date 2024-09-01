@@ -13,9 +13,11 @@ export default antfu({
     'no-cond-assign': 'warn',
     'unused-imports/no-unused-vars': 'warn',
     'no-undef': 'warn',
+    'unicorn/consistent-function-scoping': 'warn',
   },
   ignores: [
     '*.py',
     '*.ps1',
+    'pnpm-lock.yaml',
   ],
 })

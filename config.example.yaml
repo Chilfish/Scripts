@@ -5,6 +5,7 @@ cookie:
   twitter: auth_token=
   pixiv:
   bilbili:
+  weibo: SUB=; SUBP=
 prompts:
   key: value
 rss:
