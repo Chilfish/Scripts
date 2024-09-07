@@ -26,29 +26,30 @@ async function checkin() {
       },
     })
       .then(res => res.json())
-      .then(data => ({ msg: data.data.alert_title || data.msg }))
-      .catch(err => ({ msg: err.message }))
+      .then(data => data.data.alert_title || data.msg)
+      .catch(err => err.message || err)
   }
 
   await Promise.all(
     Object.entries(ids).map(async ([name, id]) => {
       const msg = await run(id)
 
-      logger.info(`${name}: ${msg.msg}`)
+      logger.info(`${name}: ${msg}`)
     }),
   )
 
   logger.info('超话签到完成')
 }
 
-// every day at 00:00
-const every24time = '0 0 0 * * *'
+// every day at 00:01:01，好孩子不玩挂
+const every24time = '1 1 0 * * *'
 const job = CronJob.from({
   cronTime: every24time,
   onTick: checkin,
   start: true,
-  runOnInit: true,
+  // runOnInit: true,
   timeZone: 'Asia/Shanghai',
 })
 
+logger.info('微博超话签到任务已启动')
 job.start()
