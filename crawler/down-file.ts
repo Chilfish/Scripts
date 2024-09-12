@@ -1,7 +1,7 @@
+import { readFile } from 'node:fs/promises'
 import path from 'node:path'
-import fs from 'node:fs'
 import PQueue from 'p-queue'
-import { downloadBlob, readJson } from '~/utils/index.node'
+import { dir, downloadBlob } from '~/utils/index.node'
 
 const file = process.argv[2]
 if (!file) {
@@ -9,12 +9,17 @@ if (!file) {
   process.exit(1)
 }
 
-const dest = process.argv[3] || 'D:/Downloads/imgs'
-if (!fs.existsSync(dest)) {
-  fs.mkdirSync(dest, { recursive: true })
-}
+const dest = dir(process.argv[3] || 'D:/Downloads/imgs')
 
-const data = await readJson(path.resolve(file)).then(parseImgs)
+const data = await readFile(path.resolve(file), 'utf-8').then((data) => {
+  const urls = data.split('\r\n')
+  return urls.map((url, idx) => ({
+    url,
+    name: url.split('/').pop() || `img-${idx}.jpg`,
+  }))
+})
+
+// const data = await readJson(path.resolve(file)).then(parseImgs)
 
 console.log('Total images:', data.length)
 

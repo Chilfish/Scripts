@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Chill Script
 // @description  Hello! MyScript
-// @version      2024.08.25
+// @version      2024.09.12
 // @author       Chilfish
 // @match        *://*/*
 // @grant        GM_addStyle
@@ -106,16 +106,21 @@ const urlActions = [{
 
     rmRetweet()
   },
+}, {
+  pattern: /youtube\.com/,
+  action: () => {
+    _css += css`
+      .ytp-gradient-bottom {
+        display: none !important;
+      }
+    `
+  },
 }]
 
+// TODO: 加一个config列表来指定博主
 function rmRetweet() {
-  function _rmRetweet(article) {
-    const retweetSvg = `svg.r-4qtqp9.r-yyyyoo.r-dnmrzs.r-bnwqim.r-lrvibr.r-m6rgpd.r-14j79pv.r-10ptun7.r-1janqcz`
-    const isRetweet = $(retweetSvg, article)
-    if (isRetweet) {
-      article.remove()
-    }
-  }
+  const svgWapper = '.css-175oi2r.r-18kxxzh.r-ogg1b9.r-1mrc8m9.r-obd0qt.r-1777fci'
+  const retweetSvg = `svg.r-4qtqp9.r-yyyyoo.r-dnmrzs.r-bnwqim.r-lrvibr.r-m6rgpd.r-14j79pv.r-1pexk7n.r-1mcorv5`
 
   function isHomepage() {
     const _url = document.URL.split('/')
@@ -123,16 +128,17 @@ function rmRetweet() {
   }
 
   const observer = new MutationObserver(ms => ms.forEach((mutation) => {
-    if (isHomepage()) {
-      return
-    }
-
     mutation.addedNodes.forEach((node) => {
-      if (node.nodeType === 1 && node.tagName === 'DIV') {
-        const article = $(`article`, node)
-        if (article) {
-          _rmRetweet(article)
-        }
+      if (mutation.type !== 'childList')
+        return
+
+      if (
+        node.nodeType === Node.ELEMENT_NODE
+        && node.tagName === 'DIV'
+      ) {
+        const retweet = $(svgWapper, node)
+        if (retweet)
+          retweet.closest('article').remove()
       }
     })
   }))
@@ -140,6 +146,7 @@ function rmRetweet() {
   observer.observe(document.body, {
     childList: true,
     subtree: true,
+    attributes: false,
   })
 }
 
