@@ -1,7 +1,7 @@
+import { unsafeWindow } from '$'
 import { Signal } from '@preact/signals-core'
 import logger from '../utils/logger'
 import { Extension, ExtensionConstructor } from './extension'
-import { unsafeWindow } from '$'
 
 /**
  * Global object reference. In some cases, the `unsafeWindow` is not available.

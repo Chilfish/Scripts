@@ -1,7 +1,7 @@
 import { ExtensionManager } from './manager'
 
-export * from './manager'
 export * from './extension'
+export * from './manager'
 
 /**
  * Global extension manager singleton instance.

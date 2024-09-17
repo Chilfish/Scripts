@@ -1,5 +1,5 @@
-import { ofetch } from 'ofetch'
 import { load as loadHTML } from 'cheerio'
+import { ofetch } from 'ofetch'
 import { downloadBlob } from '~/utils/download'
 
 const url = 'https://api.fesapp.jp/api/news_articles/5981'

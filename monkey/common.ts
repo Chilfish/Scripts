@@ -1,7 +1,7 @@
-import path from 'node:path'
 import os from 'node:os'
+import path from 'node:path'
 import { fileURLToPath } from 'node:url'
-import { UserConfig, defineConfig } from 'vite'
+import { defineConfig, UserConfig } from 'vite'
 import monkey, { MonkeyOption } from 'vite-plugin-monkey'
 import { version } from '../package.json'
 

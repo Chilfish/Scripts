@@ -1,10 +1,10 @@
 import extensions from './extensions'
-import logger from './utils/logger'
-
 import HomeTimelineModule from './modules/home-timeline'
+
+import LikesModule from './modules/likes'
 import ListTimelineModule from './modules/list-timeline'
 import UserTweetsModule from './modules/user-tweets'
-import LikesModule from './modules/likes'
+import logger from './utils/logger'
 
 extensions.add(HomeTimelineModule)
 extensions.add(ListTimelineModule)

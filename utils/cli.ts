@@ -1,5 +1,5 @@
-import path from 'node:path'
 import { execSync } from 'node:child_process'
+import path from 'node:path'
 import { consola } from 'consola'
 
 export async function prompt(msg: string) {

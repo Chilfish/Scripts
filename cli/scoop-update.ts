@@ -15,11 +15,7 @@ const skipList: string[] = await readFile(skipListFilePath, { encoding: 'utf-8' 
 
 execSync('scoop update')
 
-const packages = execSync('scoop status').toString()
-  .split('\n')
-  .slice(4)
-  .map(line => line.trim().split(/\s+/)[0])
-  .filter(pkg => !skipList.includes(pkg) && pkg)
+const packages = execSync('scoop status').toString().split('\n').slice(4).map(line => line.trim().split(/\s+/)[0]).filter(pkg => !skipList.includes(pkg) && pkg)
 
 if (packages.length > 0) {
   console.log(`Found ${packages.length} packages to update`)

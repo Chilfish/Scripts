@@ -1,10 +1,10 @@
-import { httpHooks } from './httpHook'
-import { getTweets } from './modules/user-tweets'
 import {
   GM_getValue,
   GM_registerMenuCommand,
   GM_setValue,
 } from '$'
+import { httpHooks } from './httpHook'
+import { getTweets } from './modules/user-tweets'
 
 import './media-dl'
 

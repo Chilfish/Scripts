@@ -35,3 +35,39 @@ export function saveAs(
   saveBlobUrl(url, filename)
   URL.revokeObjectURL(url)
 }
+
+/**
+ * Wait for an element to be added to the DOM.
+ */
+export function waitForElement(
+  selector: string,
+  textContent = false,
+) {
+  return new Promise((resolve) => {
+    function got(el: HTMLElement) {
+      if (textContent && el.textContent)
+        resolve(el)
+      return resolve(el)
+    }
+
+    const el = $(selector)
+    if (el) {
+      got(el)
+      return
+    }
+
+    const observer = new MutationObserver(() => {
+      const el = $(selector)
+      if (el) {
+        observer.disconnect()
+        got(el)
+      }
+    })
+
+    observer.observe(document.body, {
+      childList: true,
+      subtree: true,
+      attributes: false,
+    })
+  })
+}

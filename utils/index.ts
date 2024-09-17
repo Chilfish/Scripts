@@ -1,10 +1,10 @@
-export * from './math'
 export * from './constant'
 export * from './cookie'
 export * from './date'
 export * from './fetch'
-export * from './url'
+export * from './math'
 export * from './progress'
+export * from './url'
 
 export function isJsonStr(str: string) {
   const start = ['{', '[', '%7B', '%5B']

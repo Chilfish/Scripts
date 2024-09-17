@@ -1,10 +1,10 @@
-import path from 'node:path'
 import { createWriteStream, existsSync } from 'node:fs'
+import { utimes } from 'node:fs/promises'
+import path from 'node:path'
 import { pipeline } from 'node:stream'
 import { promisify } from 'node:util'
-import { utimes } from 'node:fs/promises'
-import { ProxyAgent, RequestInit, fetch } from 'undici'
 import { consola } from 'consola'
+import { fetch, ProxyAgent, RequestInit } from 'undici'
 import { proxyUrl } from './constant'
 import { dir } from './file'
 

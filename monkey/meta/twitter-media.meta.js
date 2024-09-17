@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Twitter media downloader
 // @namespace    chilfish/monkey
-// @version      2024.07.13
+// @version      2024.09.17
 // @author       monkey
 // @description  Download Twitter media
 // @icon         https://abs.twimg.com/favicons/twitter.ico

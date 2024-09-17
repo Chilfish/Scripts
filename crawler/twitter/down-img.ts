@@ -6,8 +6,8 @@
  */
 
 import path from 'node:path'
-import PQueue from 'p-queue'
 import { consola } from 'consola'
+import PQueue from 'p-queue'
 import {
   downloadBlob,
   readJson,

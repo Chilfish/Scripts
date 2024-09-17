@@ -1,5 +1,5 @@
-import { getCookie } from '~/utils/cookie'
 import { GM_getValue, GM_setValue } from '$'
+import { getCookie } from '~/utils/cookie'
 
 /**
  * fetch the tweet detail by the status_id

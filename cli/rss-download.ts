@@ -1,14 +1,14 @@
 import { exec } from 'node:child_process'
-import { promisify } from 'node:util'
 import { createServer } from 'node:http'
-import { ofetch } from 'ofetch'
+import { promisify } from 'node:util'
 import { load as loadXML } from 'cheerio'
 import { CronJob } from 'cron'
-import { proxyFetch } from '~/utils/download'
+import { ofetch } from 'ofetch'
 import { fmtDuration, now } from '~/utils'
-import { createLogger } from '~/utils/logger'
 import { config } from '~/utils/config'
+import { proxyFetch } from '~/utils/download'
 import { dir, readJson, writeJson } from '~/utils/file'
+import { createLogger } from '~/utils/logger'
 
 interface Cache {
   title: string

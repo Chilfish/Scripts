@@ -43,6 +43,11 @@ export function fmtFileSize(size: number) {
   return `${size.toFixed(2)} ${units[i]}`
 }
 
+// 用于格式化数字, 1,000,000 => 100,0000
+export function numFmt(num: number | string) {
+  return num.toString().replace(/\B(?=(\d{4})+(?!\d))/g, ',')
+}
+
 /**
  * format duration to hh:mm:ss
  * @param duration in seconds

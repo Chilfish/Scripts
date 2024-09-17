@@ -1,6 +1,6 @@
-import { fileURLToPath } from 'node:url'
 import { readdir, rename } from 'node:fs/promises'
 import path from 'node:path'
+import { fileURLToPath } from 'node:url'
 import { runCommand } from '~/utils/cli'
 
 const cwd = path.dirname(fileURLToPath(import.meta.url))
@@ -10,6 +10,9 @@ await runCommand(`cd ${cwd}/twitter-media && vite build`)
 
 console.log('build ins-exporter')
 await runCommand(`cd ${cwd}/ins-export && vite build`)
+
+console.log('build chilfish')
+await runCommand(`cd ${cwd}/chilfish && vite build`)
 
 console.log('move meta files')
 const metaFiles = await readdir(`${cwd}`, { withFileTypes: true })

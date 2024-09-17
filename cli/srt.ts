@@ -1,12 +1,12 @@
-import { readFile, writeFile } from 'node:fs/promises'
 import { createWriteStream } from 'node:fs'
+import { readFile, writeFile } from 'node:fs/promises'
 import path from 'node:path'
-import { defineCommand, runMain } from 'citty'
 import { loadConfig } from 'c12'
+import { defineCommand, runMain } from 'citty'
 import { config } from '~/utils/config'
+import { dir } from '~/utils/file'
 import { chunkArray } from '~/utils/math'
 import { TransData, transMultiTextStream } from '~/utils/openai'
-import { dir } from '~/utils/file'
 
 runMain(defineCommand({
   meta: {

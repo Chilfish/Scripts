@@ -1,4 +1,4 @@
-import path from 'node:path'
+import { Buffer } from 'node:buffer'
 import {
   createPrivateKey,
   createPublicKey,
@@ -6,8 +6,8 @@ import {
   privateDecrypt,
   publicEncrypt,
 } from 'node:crypto'
-import { Buffer } from 'node:buffer'
 import { readFile, writeFile } from 'node:fs/promises'
+import path from 'node:path'
 import { defineCommand, runMain } from 'citty'
 import { consola } from 'consola'
 import { prompt } from '~/utils/cli'

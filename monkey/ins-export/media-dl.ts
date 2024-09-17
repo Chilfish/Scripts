@@ -1,7 +1,7 @@
-import { formatDate } from '~/utils/date'
-import { $, $$, saveAs } from '~/monkey/utils'
-import { delay } from '~/utils/math'
 import { GM_registerMenuCommand } from '$'
+import { $, $$, saveAs } from '~/monkey/utils'
+import { formatDate } from '~/utils/date'
+import { delay } from '~/utils/math'
 
 function findImgBox() {
   let imgBox = $('.x6s0dn4.x1dqoszc.xu3j5b3.xm81vs4.x78zum5.x1iyjqo2.x1tjbqro')

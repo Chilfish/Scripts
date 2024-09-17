@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Instagram Exporter
 // @namespace    chilfish/monkey
-// @version      2024.07.13
+// @version      2024.09.17
 // @author       monkey
 // @description  Export Instagram posts
 // @icon         https://www.instagram.com/static/images/ico/favicon-192.png/68d99ba29cc8.png
@@ -129,7 +129,7 @@
     saveBlobUrl(url, filename)
     URL.revokeObjectURL(url)
   }
-  function formatDate(time, fmt = 'YYYY-MM-DD HH:mm:ss') {
+  function formatDate(time, fmt = 'YYYY-MM-DD HH:mm:ss:SSS') {
     if (typeof time === 'number' && time < 1e12)
       time *= 1e3
     const date = new Date(time)
@@ -142,7 +142,8 @@
     const hours = pad(date.getHours())
     const minutes = pad(date.getMinutes())
     const seconds = pad(date.getSeconds())
-    return fmt.replace('YYYY', year.toString()).replace('MM', month).replace('DD', day).replace('HH', hours).replace('mm', minutes).replace('ss', seconds)
+    const milliseconds = pad(date.getMilliseconds())
+    return fmt.replace('YYYY', year.toString()).replace('MM', month).replace('DD', day).replace('HH', hours).replace('mm', minutes).replace('ss', seconds).replace('SSS', milliseconds)
   }
   const urlMatch = 'graphql/query'
   const tweetKey = 'xdt_api__v1__feed__user_timeline_graphql_connection'

@@ -1,5 +1,5 @@
-import { User } from './user'
 import { EntityURL } from './index'
+import { User } from './user'
 
 export interface TimelineTweet {
   itemType: 'TimelineTweet'

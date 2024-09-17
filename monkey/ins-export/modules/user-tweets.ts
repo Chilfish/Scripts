@@ -1,7 +1,7 @@
 import { destr } from 'destr'
-import { Interceptor, Tweet, User, UserFeed } from '../types'
 import { saveAs } from '~/monkey/utils'
 import { formatDate } from '~/utils/date'
+import { Interceptor, Tweet, User, UserFeed } from '../types'
 
 const urlMatch = 'graphql/query'
 const tweetKey = 'xdt_api__v1__feed__user_timeline_graphql_connection'

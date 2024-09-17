@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Twitter media downloader
 // @namespace    chilfish/monkey
-// @version      2024.07.13
+// @version      2024.09.17
 // @author       monkey
 // @description  Download Twitter media
 // @icon         https://abs.twimg.com/favicons/twitter.ico
@@ -17,6 +17,24 @@
 (function () {
   'use strict'
 
+  const $ = (selector, root = document) => root == null ? void 0 : root.querySelector(selector)
+  const $$ = (selector, root = document) => Array.from((root == null ? void 0 : root.querySelectorAll(selector)) || [])
+  function formatDate(time, fmt = 'YYYY-MM-DD HH:mm:ss:SSS') {
+    if (typeof time === 'number' && time < 1e12)
+      time *= 1e3
+    const date = new Date(time)
+    if (Number.isNaN(date.getTime()))
+      return ''
+    const pad = num => num.toString().padStart(2, '0')
+    const year = date.getFullYear()
+    const month = pad(date.getMonth() + 1)
+    const day = pad(date.getDate())
+    const hours = pad(date.getHours())
+    const minutes = pad(date.getMinutes())
+    const seconds = pad(date.getSeconds())
+    const milliseconds = pad(date.getMilliseconds())
+    return fmt.replace('YYYY', year.toString()).replace('MM', month).replace('DD', day).replace('HH', hours).replace('mm', minutes).replace('ss', seconds).replace('SSS', milliseconds)
+  }
   const _GM_download = /* @__PURE__ */ (() => typeof GM_download != 'undefined' ? GM_download : void 0)()
   const _GM_getValue = /* @__PURE__ */ (() => typeof GM_getValue != 'undefined' ? GM_getValue : void 0)()
   const _GM_setValue = /* @__PURE__ */ (() => typeof GM_setValue != 'undefined' ? GM_setValue : void 0)()
@@ -120,23 +138,6 @@
     idHistory.push(value)
     _GM_setValue(historyKey, idHistory)
   }
-  function formatDate(time, fmt = 'YYYY-MM-DD HH:mm:ss') {
-    if (typeof time === 'number' && time < 1e12)
-      time *= 1e3
-    const date = new Date(time)
-    if (Number.isNaN(date.getTime()))
-      return ''
-    const pad = num => num.toString().padStart(2, '0')
-    const year = date.getFullYear()
-    const month = pad(date.getMonth() + 1)
-    const day = pad(date.getDate())
-    const hours = pad(date.getHours())
-    const minutes = pad(date.getMinutes())
-    const seconds = pad(date.getSeconds())
-    return fmt.replace('YYYY', year.toString()).replace('MM', month).replace('DD', day).replace('HH', hours).replace('mm', minutes).replace('ss', seconds)
-  }
-  const $ = (selector, root = document) => root == null ? void 0 : root.querySelector(selector)
-  const $$ = (selector, root = document) => Array.from((root == null ? void 0 : root.querySelectorAll(selector)) || [])
   const downBtn = `
 <svg viewBox="0 0 24 24" style="width: 18px; height: 18px;"><g class="download"><path d="M3,14 v5 q0,2 2,2 h14 q2,0 2,-2 v-5 M7,10 l4,4 q1,1 2,0 l4,-4 M12,3 v11" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" /></g>
 <g class="completed"><path d="M3,14 v5 q0,2 2,2 h14 q2,0 2,-2 v-5 M7,10 l3,4 q1,1 2,0 l8,-11" fill="none" stroke="#1DA1F2" stroke-width="2" stroke-linecap="round" /></g>

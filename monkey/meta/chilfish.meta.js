@@ -1,13 +1,15 @@
 // ==UserScript==
-// @name         Chill Script
-// @description  Hello! MyScript
+// @name         Chilfish's script
+// @namespace    chilfish/monkey
 // @version      2024.09.17
-// @author       Chilfish
-// @match        *://*/*
-// @grant        GM_addStyle
-// @run-at       document-end
-// @homepageURL  https://github.com/Chilfish
+// @author       monkey
+// @description  Chilfish's script
+// @icon         https://github.com/chilfish.png
 // @downloadURL  https://github.com/Chilfish/Scripts/raw/main/monkey/chilfish.user.js
 // @updateURL    https://github.com/Chilfish/Scripts/raw/main/monkey/meta/chilfish.meta.js
-// @license      MIT
+// @match        *://*/*
+// @grant        GM_addStyle
+// @grant        GM_getValue
+// @grant        GM_setValue
+// @run-at       document-end
 // ==/UserScript==

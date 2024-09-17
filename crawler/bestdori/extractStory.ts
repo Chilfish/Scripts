@@ -1,8 +1,8 @@
 import { readdir, writeFile } from 'node:fs/promises'
 import path from 'node:path'
+import { config } from '~/utils/config'
 import { readJson } from '~/utils/file'
 import { transMultiText } from '~/utils/openai'
-import { config } from '~/utils/config'
 
 const dir = 'D:/Downloads/bestdori/birthday/'
 const textDir = path.join(dir, 'text')

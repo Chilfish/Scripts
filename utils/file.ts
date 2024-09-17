@@ -1,15 +1,15 @@
-import path from 'node:path'
-import os from 'node:os'
 import { existsSync } from 'node:fs'
 import {
   appendFile,
   mkdir,
-  readFile,
   readdir,
+  readFile,
   rename,
   stat,
   writeFile,
 } from 'node:fs/promises'
+import os from 'node:os'
+import path from 'node:path'
 import { fileURLToPath } from 'node:url'
 
 export const root = path.resolve(fileURLToPath(import.meta.url), '../../')

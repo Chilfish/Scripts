@@ -1,5 +1,5 @@
-import { consola } from 'consola'
 import { defineCommand, runMain } from 'citty'
+import { consola } from 'consola'
 import { fetchIntercept, newBrowser, prompt } from '~/utils/index.node'
 
 runMain(defineCommand({

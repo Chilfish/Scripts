@@ -1,7 +1,7 @@
-import { ProxyAgent, fetch } from 'undici'
 import PQueue from 'p-queue'
-import { dir, downloadBlob, readCookie } from '~/utils/index.node'
+import { fetch, ProxyAgent } from 'undici'
 import { buildUrl, proxyUrl, randomUserAgent } from '~/utils'
+import { dir, downloadBlob, readCookie } from '~/utils/index.node'
 
 const proxy = new ProxyAgent(proxyUrl)
 

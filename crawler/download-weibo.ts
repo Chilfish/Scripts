@@ -1,12 +1,12 @@
 import { defineCommand, runMain } from 'citty'
-import { ofetch } from 'ofetch'
 import { consola } from 'consola'
+import { ofetch } from 'ofetch'
+import { getWeiboAnonToken } from '~/utils'
 import {
   downloadBlob,
   prompt,
   runCommand,
 } from '~/utils/index.node'
-import { getWeiboAnonToken } from '~/utils'
 
 interface PicInfo {
   largest: {

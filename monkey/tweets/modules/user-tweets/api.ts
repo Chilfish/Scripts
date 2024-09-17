@@ -73,9 +73,7 @@ export const UserTweetsInterceptor: Interceptor = (req, res, ext) => {
 
       // Extract conversations.
       if (isTimelineEntryProfileConversation(entry)) {
-        const tweetsInConversation = entry.content.items
-          .map(i => extractTimelineTweet(i.item.itemContent))
-          .filter((t): t is Tweet => !!t)
+        const tweetsInConversation = entry.content.items.map(i => extractTimelineTweet(i.item.itemContent)).filter((t): t is Tweet => !!t)
 
         newData.push(...tweetsInConversation)
       }
