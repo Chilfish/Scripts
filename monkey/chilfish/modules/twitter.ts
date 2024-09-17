@@ -1,4 +1,4 @@
-import { $, waitForElement } from '~/monkey/utils'
+import { $, $$, waitForElement } from '~/monkey/utils'
 import { numFmt } from '~/utils/math'
 import { UrlActions } from '../types'
 import { css, store } from '../utils'

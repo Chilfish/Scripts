@@ -20,7 +20,8 @@
   const _GM_addStyle = /* @__PURE__ */ (() => typeof GM_addStyle != 'undefined' ? GM_addStyle : void 0)()
   const _GM_getValue = /* @__PURE__ */ (() => typeof GM_getValue != 'undefined' ? GM_getValue : void 0)()
   const _GM_setValue = /* @__PURE__ */ (() => typeof GM_setValue != 'undefined' ? GM_setValue : void 0)()
-  const $$1 = (selector, root = document) => root == null ? void 0 : root.querySelector(selector)
+  const $ = (selector, root = document) => root == null ? void 0 : root.querySelector(selector)
+  const $$ = (selector, root = document) => Array.from((root == null ? void 0 : root.querySelectorAll(selector)) || [])
   function waitForElement(selector, textContent = false) {
     return new Promise((resolve) => {
       function got(el2) {
@@ -28,13 +29,13 @@
           resolve(el2)
         return resolve(el2)
       }
-      const el = $$1(selector)
+      const el = $(selector)
       if (el) {
         got(el)
         return
       }
       const observer = new MutationObserver(() => {
-        const el2 = $$1(selector)
+        const el2 = $(selector)
         if (el2) {
           observer.disconnect()
           got(el2)
@@ -52,10 +53,10 @@
   }
   const bilibili = {
     pattern: /space\.bilibili\.com/,
-    action: async () => {
+    action: () => window.addEventListener('load', async () => {
       await waitForElement('.n-fs', true)
       $('#n-fs').textContent = numFmt($('.n-fs').title.replaceAll(',', ''))
-    },
+    }),
   }
   let _baseCss = ``
   function css(strings, ...values) {
@@ -110,7 +111,7 @@
           return
         const el = node
         if (node.nodeType === Node.ELEMENT_NODE && el.tagName === 'DIV') {
-          const svg = $$1(svgWapper, el)
+          const svg = $(svgWapper, el)
           if (!svg)
             return
           const username = ((_b = (_a = svg.nextElementSibling) == null ? void 0 : _a.textContent) == null ? void 0 : _b.split(' ')[0]) || ''
@@ -136,7 +137,7 @@
     const script = 'script[data-testid="UserProfileSchema-test"]'
     await waitForElement(selector, true)
     await waitForElement(script)
-    const data = JSON.parse(((_a = $$1(script)) == null ? void 0 : _a.textContent) || '{}')
+    const data = JSON.parse(((_a = $(script)) == null ? void 0 : _a.textContent) || '{}')
     if (!data.author)
       return
     const follows = data.author.interactionStatistic[0].userInteractionCount
