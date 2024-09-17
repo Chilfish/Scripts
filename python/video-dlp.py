@@ -35,7 +35,7 @@ def main(video_url: str):
     out_dir = "D:/Videos"
     temp_dir = os.environ.get("TEMP", out_dir)
 
-    opt_format = "bestvideo/best+bestaudio/best"
+    opt_format = "bestvideo+bestaudio"
     proxy = "http://127.0.0.1:7890"
 
     # starBeat 番剧画质超分辨率
