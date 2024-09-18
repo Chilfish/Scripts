@@ -1,5 +1,5 @@
+import type { UrlActions } from './types'
 import { GM_addStyle } from '$'
-import { modules } from './modules'
 import { baseCss, css } from './utils'
 
 css`
@@ -29,10 +29,15 @@ body {
 
 const url = document.location.href
 
-modules.forEach((module) => {
+const modules = import.meta.glob('./modules/*.ts', {
+  eager: true,
+}) as Record<string, () => UrlActions>
+
+for (const path in modules) {
+  const module = modules[path]()
   if (module.pattern.test(url)) {
     module.action()
   }
-})
+}
 
 GM_addStyle(baseCss())

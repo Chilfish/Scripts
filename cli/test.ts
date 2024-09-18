@@ -1,7 +1,9 @@
 import { readJson } from '~/utils/file'
 
-const packages = await readJson('D:/Dev/Node/pnpm-modules/global/5/package.json')
+const data = await readJson('data/twitter/data-after.json')
 
-const dependencies = Object.keys(packages.dependencies)
+const replyCount = data.tweets.reduce((acc, tweet) => {
+  return acc + tweet.reply_count
+}, 0)
 
-console.log(dependencies.join(' '))
+console.log(replyCount)

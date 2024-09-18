@@ -1,15 +1,14 @@
-import extensions from './extensions'
-import HomeTimelineModule from './modules/home-timeline'
-
-import LikesModule from './modules/likes'
-import ListTimelineModule from './modules/list-timeline'
-import UserTweetsModule from './modules/user-tweets'
+import extensions, { ExtensionConstructor } from './extensions'
 import logger from './utils/logger'
 
-extensions.add(HomeTimelineModule)
-extensions.add(ListTimelineModule)
-extensions.add(UserTweetsModule)
-extensions.add(LikesModule)
+const modules = import.meta.glob('./modules/*/index.ts', {
+  eager: true,
+}) as Record<string, () => ExtensionConstructor>
+
+for (const path in modules) {
+  const module = modules[path]()
+  extensions.add(module)
+}
 
 extensions.start()
 

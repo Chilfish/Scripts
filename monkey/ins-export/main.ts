@@ -4,14 +4,19 @@ import {
   GM_setValue,
 } from '$'
 import { httpHooks } from './httpHook'
-import { getTweets } from './modules/user-tweets'
+import { Interceptor } from './types'
 
 import './media-dl'
 
 const enableAllTweets = GM_getValue('enableAllTweets', false)
 
-if (enableAllTweets)
-  httpHooks([getTweets])
+const modules = import.meta.glob('./modules/*.ts', {
+  eager: true,
+}) as Record<string, () => Interceptor>
+
+if (enableAllTweets) {
+  httpHooks(Object.values(modules).map(m => m()))
+}
 
 console.debug('ins-export loaded', { enableAllTweets })
 

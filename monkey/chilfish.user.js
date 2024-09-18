@@ -17,9 +17,6 @@
 (function () {
   'use strict'
 
-  const _GM_addStyle = /* @__PURE__ */ (() => typeof GM_addStyle != 'undefined' ? GM_addStyle : void 0)()
-  const _GM_getValue = /* @__PURE__ */ (() => typeof GM_getValue != 'undefined' ? GM_getValue : void 0)()
-  const _GM_setValue = /* @__PURE__ */ (() => typeof GM_setValue != 'undefined' ? GM_setValue : void 0)()
   const $ = (selector, root = document) => root == null ? void 0 : root.querySelector(selector)
   const $$ = (selector, root = document) => Array.from((root == null ? void 0 : root.querySelectorAll(selector)) || [])
   function waitForElement(selector, textContent = false) {
@@ -58,6 +55,13 @@
       $('#n-fs').textContent = numFmt($('.n-fs').title.replaceAll(',', ''))
     }),
   }
+  const __vite_glob_0_0 = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
+    __proto__: null,
+    default: bilibili,
+  }, Symbol.toStringTag, { value: 'Module' }))
+  const _GM_addStyle = /* @__PURE__ */ (() => typeof GM_addStyle != 'undefined' ? GM_addStyle : void 0)()
+  const _GM_getValue = /* @__PURE__ */ (() => typeof GM_getValue != 'undefined' ? GM_getValue : void 0)()
+  const _GM_setValue = /* @__PURE__ */ (() => typeof GM_setValue != 'undefined' ? GM_setValue : void 0)()
   let _baseCss = ``
   function css(strings, ...values) {
     _baseCss += String.raw(strings, ...values)
@@ -76,7 +80,7 @@
       _GM_setValue(key, value)
     },
   }
-  const Twitter = {
+  const twitter = {
     pattern: /(twitter|x)\.com/,
     action() {
       css`
@@ -143,6 +147,10 @@
     const follows = data.author.interactionStatistic[0].userInteractionCount
     $$(selector)[1].textContent = numFmt(follows)
   }
+  const __vite_glob_0_1 = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
+    __proto__: null,
+    default: twitter,
+  }, Symbol.toStringTag, { value: 'Module' }))
   const weibo = {
     pattern: /weibo\.com/,
     action: () => {
@@ -153,6 +161,10 @@
     `
     },
   }
+  const __vite_glob_0_2 = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
+    __proto__: null,
+    default: weibo,
+  }, Symbol.toStringTag, { value: 'Module' }))
   const youtube = {
     pattern: /youtube\.com/,
     action: () => {
@@ -163,6 +175,10 @@
     `
     },
   }
+  const __vite_glob_0_3 = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
+    __proto__: null,
+    default: youtube,
+  }, Symbol.toStringTag, { value: 'Module' }))
   const zhihu = {
     pattern: /zhihu\.com/,
     action: () => {
@@ -180,13 +196,10 @@
     `
     },
   }
-  const modules = [
-    Twitter,
-    bilibili,
-    weibo,
-    youtube,
-    zhihu,
-  ]
+  const __vite_glob_0_4 = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
+    __proto__: null,
+    default: zhihu,
+  }, Symbol.toStringTag, { value: 'Module' }))
   css`
 html::-webkit-scrollbar {
   width: 8px;height: 8px;
@@ -212,10 +225,18 @@ body {
 }
 `
   const url = document.location.href
-  modules.forEach((module) => {
+  const modules = /* @__PURE__ */ Object.assign({
+    './modules/bilibili.ts': __vite_glob_0_0,
+    './modules/twitter.ts': __vite_glob_0_1,
+    './modules/weibo.ts': __vite_glob_0_2,
+    './modules/youtube.ts': __vite_glob_0_3,
+    './modules/zhihu.ts': __vite_glob_0_4,
+  })
+  for (const path in modules) {
+    const module = modules[path]()
     if (module.pattern.test(url)) {
       module.action()
     }
-  })
+  }
   _GM_addStyle(baseCss())
 })()

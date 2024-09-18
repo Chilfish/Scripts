@@ -17,20 +17,6 @@
 (function () {
   'use strict'
 
-  const _GM_getValue = /* @__PURE__ */ (() => typeof GM_getValue != 'undefined' ? GM_getValue : void 0)()
-  const _GM_registerMenuCommand = /* @__PURE__ */ (() => typeof GM_registerMenuCommand != 'undefined' ? GM_registerMenuCommand : void 0)()
-  const _GM_setValue = /* @__PURE__ */ (() => typeof GM_setValue != 'undefined' ? GM_setValue : void 0)()
-  const _unsafeWindow = /* @__PURE__ */ (() => typeof unsafeWindow != 'undefined' ? unsafeWindow : void 0)()
-  const globalObject = _unsafeWindow ?? window ?? globalThis
-  const xhrOpen = globalObject.XMLHttpRequest.prototype.open
-  function httpHooks(interceptors = []) {
-    globalObject.XMLHttpRequest.prototype.open = function (method, url) {
-      this.addEventListener('load', () => {
-        interceptors.forEach(func => func({ method, url }, this))
-      })
-      xhrOpen.apply(this, arguments)
-    }
-  }
   const suspectProtoRx = /"(?:_|\\u0{2}5[Ff]){2}(?:p|\\u0{2}70)(?:r|\\u0{2}72)(?:o|\\u0{2}6[Ff])(?:t|\\u0{2}74)(?:o|\\u0{2}6[Ff])(?:_|\\u0{2}5[Ff]){2}"\s*:/
   const suspectConstructorRx = /"(?:c|\\u0063)(?:o|\\u006[Ff])(?:n|\\u006[Ee])(?:s|\\u0073)(?:t|\\u0074)(?:r|\\u0072)(?:u|\\u0075)(?:c|\\u0063)(?:t|\\u0074)(?:o|\\u006[Ff])(?:r|\\u0072)"\s*:/
   const JsonSigRx = /^\s*["[{]|^\s*-?\d{1,16}(\.\d{1,17})?(E[+-]?\d+)?\s*$/i
@@ -186,6 +172,24 @@
       )
     }
   }
+  const __vite_glob_0_0 = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
+    __proto__: null,
+    getTweets,
+  }, Symbol.toStringTag, { value: 'Module' }))
+  const _GM_getValue = /* @__PURE__ */ (() => typeof GM_getValue != 'undefined' ? GM_getValue : void 0)()
+  const _GM_registerMenuCommand = /* @__PURE__ */ (() => typeof GM_registerMenuCommand != 'undefined' ? GM_registerMenuCommand : void 0)()
+  const _GM_setValue = /* @__PURE__ */ (() => typeof GM_setValue != 'undefined' ? GM_setValue : void 0)()
+  const _unsafeWindow = /* @__PURE__ */ (() => typeof unsafeWindow != 'undefined' ? unsafeWindow : void 0)()
+  const globalObject = _unsafeWindow ?? window ?? globalThis
+  const xhrOpen = globalObject.XMLHttpRequest.prototype.open
+  function httpHooks(interceptors = []) {
+    globalObject.XMLHttpRequest.prototype.open = function (method, url) {
+      this.addEventListener('load', () => {
+        interceptors.forEach(func => func({ method, url }, this))
+      })
+      xhrOpen.apply(this, arguments)
+    }
+  }
   const delay = (ms = 1e3) => new Promise(resolve => setTimeout(resolve, ms))
   function findImgBox() {
     let imgBox = $('.x6s0dn4.x1dqoszc.xu3j5b3.xm81vs4.x78zum5.x1iyjqo2.x1tjbqro')
@@ -236,8 +240,12 @@
   }
   _GM_registerMenuCommand('下载媒体', main)
   const enableAllTweets = _GM_getValue('enableAllTweets', false)
-  if (enableAllTweets)
-    httpHooks([getTweets])
+  const modules = /* @__PURE__ */ Object.assign({
+    './modules/user-tweets.ts': __vite_glob_0_0,
+  })
+  if (enableAllTweets) {
+    httpHooks(Object.values(modules).map(m => m()))
+  }
   console.debug('ins-export loaded', { enableAllTweets })
   _GM_registerMenuCommand(
     `导出所有推文 ${enableAllTweets ? '（已启用）' : ''}`,
