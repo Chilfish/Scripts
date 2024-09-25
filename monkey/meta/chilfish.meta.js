@@ -1,10 +1,10 @@
 // ==UserScript==
 // @name         Chilfish's script
 // @namespace    chilfish/monkey
-// @version      2024.09.17
+// @version      2024.09.18
 // @author       monkey
 // @description  Chilfish's script
-// @icon         https://github.com/chilfish.png
+// @icon         https://unavatar.io/chilfish
 // @downloadURL  https://github.com/Chilfish/Scripts/raw/main/monkey/chilfish.user.js
 // @updateURL    https://github.com/Chilfish/Scripts/raw/main/monkey/meta/chilfish.meta.js
 // @match        *://*/*

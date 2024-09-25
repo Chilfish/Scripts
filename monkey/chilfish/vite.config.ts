@@ -6,11 +6,10 @@ export default viteConfig({
   entry: 'main.ts',
   userscript: {
     'description': 'Chilfish\'s script',
-    'icon': 'https://github.com/chilfish.png',
     'match': [
       '*://*/*',
     ],
-    'version': '2024.09.17-rc1',
+    'version': '2024.09.18',
     'run-at': 'document-end',
   },
 })

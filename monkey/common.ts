@@ -9,6 +9,8 @@ export const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '
 
 export const desktop = path.resolve(os.homedir(), 'Desktop')
 
+export const icon = 'https://unavatar.io/chilfish'
+
 /**
  * define vite config for monkey script
  */
@@ -38,12 +40,13 @@ export function viteConfig(
       monkey({
         ...monkeyConfig,
         userscript: {
-          ...monkeyConfig.userscript,
           name,
           namespace: 'chilfish/monkey',
           downloadURL,
           updateURL,
           version,
+          icon,
+          ...monkeyConfig.userscript,
         },
         server: {
           open: false,

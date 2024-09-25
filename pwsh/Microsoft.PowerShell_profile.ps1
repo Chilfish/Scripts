@@ -35,19 +35,14 @@ $videos = "D:/Videos"
 $download = "D:/Downloads"
 $scripts = "D:/Codes/Scripts"
 $subl = "D:\Dev\Sublime Text\sublime_text.exe"
+$proxy = "http://127.0.0.1:7890"
 
 $Env:IS_NODE="TRUE"
+$Env:PROXY=$proxy
 
 # https://github.com/xampprocky/tokei
 function code-count {
   tokei -s lines -e pnpm-lock.yaml $args . 
-}
-
-# nestjs/cli
-function nest-gen($name) {
-  nest g mo $name modules
-  nest g co $name modules --no-spec 
-  nest g s $name modules --no-spec 
 }
 
 # https://github.com/Chilfish/Scripts/blob/main/python/video-dlp.py
@@ -55,7 +50,7 @@ function yt {
   python $scripts/python/video-dlp.py $args
 }
 function ytd {
-  yt-dlp --cookies-from-browser chrome -f 'bestvideo+bestaudio' -o "$videos/%(title)s.%(ext)s" $args
+  yt-dlp --cookies "$me/cookies.txt" -o "$videos/%(title)s.mp4" $args
 }
 
 # https://github.com/Chilfish/Weibo-archiver/blob/main/scripts/server.mjs
@@ -181,8 +176,8 @@ function start-rss-twitter {
   runBg "pnpm run:rss"
 }
 function start-wb-checkin {
-  $cwd = "$scripts/cli/weibo-checkin.ts"
-  runBg "tsx $cwd"
+  $cwd = "$scripts/dist/weibo-checkin.js"
+  runBg "node $cwd"
 }
 
 # sudo: https://github.com/gerardog/gsudo
@@ -228,7 +223,7 @@ function update-scoop {
   tsx "$scripts/cli/scoop-update.ts"
 }
 function ip {
-  curl "ipinfo.io?token=$Env:ip_token" | jq
+  curl -x $proxy "https://ipinfo.io?token=$Env:ip_token"
 }
 function openx {
   param([string]$str)
