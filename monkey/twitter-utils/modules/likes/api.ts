@@ -1,5 +1,5 @@
+import { TimelineInstructions, Tweet } from '~/types'
 import { Interceptor } from '../../extensions'
-import { TimelineInstructions, Tweet } from '../../types'
 import { extractDataFromResponse, extractTimelineTweet } from '../../utils/api'
 import logger from '../../utils/logger'
 

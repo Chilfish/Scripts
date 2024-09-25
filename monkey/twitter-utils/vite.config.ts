@@ -21,7 +21,7 @@ export default viteConfig({
   build: {
     externalGlobals: {
       'dayjs': 'dayjs',
-      '@preact/signals-core': 'preactSignals',
+      '@preact/signals-core': 'preactSignalsCore',
     },
   },
 })

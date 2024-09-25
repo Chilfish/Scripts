@@ -16,6 +16,9 @@ export default antfu({
     'unicorn/consistent-function-scoping': 'warn',
     'ts/no-unused-expressions': 'warn',
     'no-var': 'warn',
+    'antfu/no-top-level-await': 'off',
+    'vars-on-top': 'off',
+    'no-use-before-define': 'warn',
   },
   ignores: [
     '*.py',

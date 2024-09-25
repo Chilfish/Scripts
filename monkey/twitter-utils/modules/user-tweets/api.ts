@@ -1,11 +1,11 @@
-import { Interceptor } from '../../extensions'
 import {
   TimelineAddEntriesInstruction,
   TimelineInstructions,
   TimelinePinEntryInstruction,
   TimelineTweet,
   Tweet,
-} from '../../types'
+} from '~/types'
+import { Interceptor } from '../../extensions'
 import {
   extractTimelineTweet,
   isTimelineEntryProfileConversation,
@@ -82,7 +82,7 @@ export const UserTweetsInterceptor: Interceptor = (req, res, ext) => {
     const tweets = rmRetweets(newData)
     console.log(tweets)
 
-    res.responseText = JSON.stringify(tweets)
+    // res.responseText = JSON.stringify(tweets)
 
     function rmRetweets(tweets: Tweet[]) {
       const isRetweet = (tweet: Tweet) => tweet.legacy.full_text.startsWith('RT @')

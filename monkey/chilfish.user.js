@@ -64,6 +64,8 @@
   const _GM_setValue = /* @__PURE__ */ (() => typeof GM_setValue != 'undefined' ? GM_setValue : void 0)()
   let _baseCss = ``
   function css(strings, ...values) {
+    if (!strings.length)
+      return
     _baseCss += String.raw(strings, ...values)
   }
   const baseCss = () => _baseCss

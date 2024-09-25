@@ -1,4 +1,4 @@
-import { signal } from '@preact/signals-core'
+// import { signal } from '@preact/signals-core'
 
 export interface LogLine {
   type: 'info' | 'warn' | 'error'
@@ -6,7 +6,7 @@ export interface LogLine {
   index: number
 }
 
-export const logLinesSignal = signal<LogLine[]>([])
+// export const logLinesSignal = signal<LogLine[]>([])
 
 const appname = '[twitter-utils]'
 
@@ -68,7 +68,7 @@ class Logger {
    * Flush buffered log lines and update the UI.
    */
   private flushBuffer() {
-    logLinesSignal.value = [...logLinesSignal.value, ...this.buffer]
+    // logLinesSignal.value = [...logLinesSignal.value, ...this.buffer]
     this.buffer = []
   }
 }

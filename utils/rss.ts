@@ -47,17 +47,17 @@ export function json2rss(
     <description>${feed.description}</description>
     <link>${feed.link}</link>
     ${items.map(item =>
-    `<item>
+        `<item>
         <title>${encode2Safe(item.title)}</title>
         <author>${encode2Safe(item.author)}</author>
         <link>${item.link}</link>
         <pubDate>${item.pubDate}</pubDate>
         <content:encoded type="html">${text2html(item.content)}</content:encoded>
         ${item.image
-    ? `<enclosure url="${encode2Safe(item.image)}" type="image/jpeg" length="0"/>`
-    : ''}
+            ? `<enclosure url="${encode2Safe(item.image)}" type="image/jpeg" length="0"/>`
+            : ''}
       </item>`,
-  ).join('\n')}
+      ).join('\n')}
   </channel>
 </rss>`
 

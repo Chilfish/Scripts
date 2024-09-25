@@ -12,7 +12,7 @@ import {
   Tweet,
   TweetUnion,
   User,
-} from '../types'
+} from '~/types'
 import logger from './logger'
 
 /**
