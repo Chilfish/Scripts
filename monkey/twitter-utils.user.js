@@ -308,6 +308,7 @@
     return `https://web.archive.org/web/${date2webArchive(pubTime(id))}/${tweetUrl(id, name)}`
   }
   const TweetDetailInterceptor = (req, res, ext) => {
+    let _a, _b
     if (!/\/graphql\/.+\/TweetDetail/.test(req.url)) {
       return
     }
@@ -327,7 +328,9 @@
           }
           else {
             const tweetId = entry.entryId.split('-')[1]
-            const archiveUrl = webArchiveUrl(tweetId)
+            const replyItem = timelineAddEntriesInstructionEntries[1]
+            const name = ((_b = (_a = replyItem.content) == null ? void 0 : _a.itemContent.tweet_results.result.legacy.entities.user_mentions[0]) == null ? void 0 : _b.screen_name) || 'i'
+            const archiveUrl = webArchiveUrl(tweetId, name)
             console.log(`The main tweet is deleted. Archive: ${archiveUrl}`)
             waitForElement('article span>a').then((node) => {
               const a = node

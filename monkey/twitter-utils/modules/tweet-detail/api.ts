@@ -70,7 +70,12 @@ export const TweetDetailInterceptor: Interceptor = (req, res, ext) => {
         // The main tweet is deleted.
         else {
           const tweetId = entry.entryId.split('-')[1]
-          const archiveUrl = webArchiveUrl(tweetId)
+          const replyItem = timelineAddEntriesInstructionEntries[1]
+
+          // @ts-expect-error user_mentions
+          const name = replyItem.content?.itemContent.tweet_results.result.legacy.entities.user_mentions[0]?.screen_name || 'i'
+
+          const archiveUrl = webArchiveUrl(tweetId, name)
           console.log(`The main tweet is deleted. Archive: ${archiveUrl}`)
 
           waitForElement('article span>a').then((node) => {
