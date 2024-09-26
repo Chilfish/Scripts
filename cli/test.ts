@@ -20,10 +20,7 @@ for (const file of files) {
 
   const data = await readJson(file)
   const key = `${filename}` as Key
-
-  if (versions[key] === undefined) {
-    versions[key] = hash(data)
-  }
+  versions[key] = hash(data)
 }
 
 await writeJson(`${folder}/versions.json`, versions)

@@ -31,10 +31,10 @@ const url = document.location.href
 
 const modules = import.meta.glob('./modules/*.ts', {
   eager: true,
-}) as Record<string, () => UrlActions>
+}) as Record<string, { default: UrlActions }>
 
 for (const path in modules) {
-  const module = modules[path]()
+  const module = modules[path].default
   if (module.pattern.test(url)) {
     module.action()
   }

@@ -4,7 +4,7 @@ import { uniqueObj } from '~/utils/math'
 
 type ObjArr = Record<string, any>[]
 
-const folder = 'D:/Downloads/西尾夕香'
+const folder = 'D:/Downloads/data'
 
 const jsons = await glob(`${folder}/*.json`)
 
@@ -17,7 +17,7 @@ for (const json of jsons) {
 
 const mergedData = uniqueObj(data, 'id')
   .sort((a, b) => {
-    return new Date(a.created_at).getTime() - new Date(b.created_at).getTime()
+    return b.id.localeCompare(a.id)
   })
 
 console.log(mergedData.length, data.length)

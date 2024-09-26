@@ -3,7 +3,6 @@ import {
   TimelineAddEntriesInstruction,
   TimelineInstructions,
   TimelineTweet,
-  Tweet,
 } from '~/types'
 import { Interceptor } from '../../extensions'
 import {
@@ -50,8 +49,6 @@ export const TweetDetailInterceptor: Interceptor = (req, res, ext) => {
     const json: TweetDetailResponse = JSON.parse(res.responseText)
     const instructions = json.data.threaded_conversation_with_injections_v2.instructions
 
-    const newData: Tweet[] = []
-
     const timelineAddEntriesInstruction = instructions.find(
       i => i.type === 'TimelineAddEntries',
     ) as TimelineAddEntriesInstruction<TimelineTweet>
@@ -86,7 +83,7 @@ export const TweetDetailInterceptor: Interceptor = (req, res, ext) => {
         }
       }
 
-      // // The conversation thread.
+      // The conversation thread.
       // if (isTimelineEntryConversationThread(entry)) {
       //   // Be careful about the "conversationthread-{id}-cursor-showmore-{cid}" item.
       //   const tweetsInConversation = entry.content.items.map((i) => {

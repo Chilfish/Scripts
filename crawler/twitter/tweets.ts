@@ -1,5 +1,5 @@
 import { uniqueObj } from '~/utils'
-import { readJson, writeJson } from '~/utils/index.node'
+import { dir, readJson, writeJson } from '~/utils/index.node'
 
 // `2023-04-26 18:41:52` to `20230426_184152`
 function formatTime(time: string) {
@@ -10,8 +10,8 @@ function formatTime(time: string) {
 
 interface User {
   name: string // as id
-  nickname: string
-  avatar: string
+  screen_name: string
+  avatar_url: string
 }
 
 const removed = [
@@ -25,10 +25,12 @@ const removed = [
 const name = process.argv[2]
 const includeRT = process.argv[3] === '--RT'
 
+const folder = dir('D:/Downloads/data')
+
 /**
  * data.json exported from https://github.com/prinsss/twitter-web-exporter
  */
-let data = await readJson('D:/Downloads/data.json')
+let data = await readJson(`${folder}/merged.json`)
   .then((data: any[]) => data.sort((a: any, b: any) => b.id.localeCompare(a.id)))
 
 data = data.map((el) => {
@@ -107,8 +109,8 @@ const saveImg = writeJson('data/twitter/imgs.json', uniqueObj(imgs, 'url'))
 
 const user = {
   name: data[0].screen_name,
-  nickname: data[0].name,
-  avatar: data[0].profile_image_url,
+  screen_name: data[0].name,
+  avatar_url: data[0].profile_image_url,
 } as User
 
 data.forEach((el) => {
@@ -117,10 +119,10 @@ data.forEach((el) => {
   delete el.profile_image_url
 })
 
-const saveTweets = writeJson('data/twitter/data-after.json', {
+const saveTweets = writeJson(`${folder}/data-${user.name}.json`, {
   user,
   tweets: data,
-})
+}, 'write', 0)
 
 const saveText = writeJson('data/twitter/text.json', textData)
 

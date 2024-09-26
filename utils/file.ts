@@ -52,6 +52,7 @@ export async function writeJson(
   file: string,
   data: any,
   mode: 'write' | 'append' = 'write',
+  indent = 2,
 ) {
   file = dir(file)
 
@@ -65,7 +66,7 @@ export async function writeJson(
   // console.log(`Writing to ${file}`)
 
   if (mode === 'write') {
-    data = JSON.stringify(data, null, 2)
+    data = JSON.stringify(data, null, indent)
     await writeFile(file, data)
   }
   else {
