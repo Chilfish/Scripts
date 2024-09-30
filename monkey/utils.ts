@@ -43,7 +43,7 @@ export function waitForElement(
   selector: string,
   textContent = false,
 ) {
-  return new Promise((resolve) => {
+  return new Promise<HTMLElement>((resolve) => {
     function got(el: HTMLElement) {
       if (textContent && el.textContent)
         resolve(el)

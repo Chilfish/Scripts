@@ -315,7 +315,6 @@
     try {
       const json = JSON.parse(res.responseText)
       const instructions = json.data.threaded_conversation_with_injections_v2.instructions
-      const newData = []
       const timelineAddEntriesInstruction = instructions.find(
         i => i.type === 'TimelineAddEntries',
       )
