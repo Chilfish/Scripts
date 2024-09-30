@@ -9,7 +9,7 @@ export default viteConfig({
     'match': [
       '*://*/*',
     ],
-    'version': '2024.09.30',
+    'version': '2024.09.31',
     'run-at': 'document-end',
   },
 })

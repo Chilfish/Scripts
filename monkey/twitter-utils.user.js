@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         推特小工具
 // @namespace    chilfish/monkey
-// @version      2024.09.17
+// @version      2024.09.30
 // @author       monkey
 // @description  推特小工具
 // @icon         https://abs.twimg.com/favicons/twitter.ico
@@ -220,6 +220,7 @@
   }
   const extensionManager = new ExtensionManager()
   const $ = (selector, root = document) => root == null ? void 0 : root.querySelector(selector)
+  const $$ = (selector, root = document) => Array.from((root == null ? void 0 : root.querySelectorAll(selector)) || [])
   function waitForElement(selector, textContent = false) {
     return new Promise((resolve) => {
       function got(el2) {
@@ -289,6 +290,44 @@
     }
     return null
   }
+  function processTweet() {
+    let _a
+    const oldElement = $('div[role="link"]')
+    if (oldElement) {
+      const newElement = oldElement.cloneNode(true);
+      (_a = oldElement.parentNode) == null ? void 0 : _a.replaceChild(newElement, oldElement)
+    }
+    $$('div[data-testid="tweetText"]').splice(0, 2).forEach((div) => {
+      div.contentEditable = 'true'
+      div.style.removeProperty('-webkit-line-clamp')
+      const transBtn = div.nextElementSibling
+      if (transBtn)
+        transBtn.style.display = 'none'
+    })
+    const showmore = $('div[data-testid="tweet-text-show-more-link"]')
+    if (showmore)
+      showmore.style.display = 'none'
+  }
+  async function editTweet() {
+    let _a, _b
+    const isInjected = document.getElementById('edit-tweet') !== null
+    if (isInjected)
+      return
+    const newBtn = document.createElement('button')
+    const btn = $('button[data-testid="app-bar-back"]')
+    newBtn.textContent = '编辑'
+    newBtn.title = '编辑推文'
+    newBtn.id = 'edit-tweet'
+    newBtn.style = `
+  border: none;
+  background: none;
+  font-size: 1rem;
+  margin-left: 6px;
+  cursor: pointer;
+`;
+    (_b = (_a = btn.parentElement) == null ? void 0 : _a.parentElement) == null ? void 0 : _b.appendChild(newBtn)
+    newBtn.onclick = processTweet
+  }
   function tweetUrl(id, name = 'i') {
     return `https://twitter.com/${name}/status/${id}`
   }
@@ -339,6 +378,7 @@
           }
         }
       }
+      editTweet()
     }
     catch (err) {
       logger.debug(req.method, req.url, res.status, res.responseText)

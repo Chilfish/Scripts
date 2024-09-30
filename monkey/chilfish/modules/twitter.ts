@@ -27,14 +27,6 @@ export default {
 
     rmRetweet()
 
-    waitForElement('div[data-testid="inline_reply_offscreen"]', true).then(() => {
-      setTimeout(() => scrollTo({
-        top: 2000,
-        behavior: 'smooth',
-      }), 1000)
-      setTimeout(editTweet, 2000)
-    })
-
     if (isHomepage())
       fixFollows()
   },
@@ -94,42 +86,4 @@ async function fixFollows() {
   const follows = data.author.interactionStatistic[0].userInteractionCount
 
   $$(selector)[1].textContent = numFmt(follows)
-}
-
-function processTweet() {
-  const oldElement = $('div[role="link"]')
-  if (oldElement) {
-    const newElement = oldElement.cloneNode(true)
-    oldElement.parentNode?.replaceChild(newElement, oldElement)
-  }
-
-  $$('div[data-testid="tweetText"]').splice(0, 2).forEach((div) => {
-    div.contentEditable = 'true'
-    div.style.removeProperty('-webkit-line-clamp')
-
-    const transBtn = div.nextElementSibling as HTMLElement
-    if (transBtn)
-      transBtn.style.display = 'none'
-  })
-  const showmore = $('div[data-testid="tweet-text-show-more-link"]')
-  if (showmore)
-    showmore.style.display = 'none'
-}
-
-async function editTweet() {
-  window.scrollTo({
-    top: 0,
-    behavior: 'smooth',
-  })
-
-  const btnSelector = '.css-175oi2r.r-sdzlij.r-1phboty.r-rs99b7.r-lrvibr.r-1sp3mco.r-mxifo9.r-gu64tb.r-1loqt21.r-o7ynqc.r-6416eg.r-1ny4l3l'
-  const btn = await waitForElement(btnSelector, true)
-
-  if (!btn)
-    return
-
-  const newBtn = btn.cloneNode(true) as HTMLElement
-  newBtn.querySelector('span')!.textContent = '编辑'
-  btn.parentNode?.appendChild(newBtn)
-  newBtn.onclick = processTweet
 }

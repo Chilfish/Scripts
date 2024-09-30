@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Chilfish's script
 // @namespace    chilfish/monkey
-// @version      2024.09.30
+// @version      2024.09.31
 // @author       monkey
 // @description  Chilfish's script
 // @icon         https://unavatar.io/chilfish
@@ -104,13 +104,6 @@
       }
   `
       rmRetweet()
-      waitForElement('div[data-testid="inline_reply_offscreen"]', true).then(() => {
-        setTimeout(() => scrollTo({
-          top: 2e3,
-          behavior: 'smooth',
-        }), 1e3)
-        setTimeout(editTweet, 2e3)
-      })
       if (isHomepage())
         fixFollows()
     },
@@ -156,39 +149,6 @@
       return
     const follows = data.author.interactionStatistic[0].userInteractionCount
     $$(selector)[1].textContent = numFmt(follows)
-  }
-  function processTweet() {
-    let _a
-    const oldElement = $('div[role="link"]')
-    if (oldElement) {
-      const newElement = oldElement.cloneNode(true);
-      (_a = oldElement.parentNode) == null ? void 0 : _a.replaceChild(newElement, oldElement)
-    }
-    $$('div[data-testid="tweetText"]').splice(0, 2).forEach((div) => {
-      div.contentEditable = 'true'
-      div.style.removeProperty('-webkit-line-clamp')
-      const transBtn = div.nextElementSibling
-      if (transBtn)
-        transBtn.style.display = 'none'
-    })
-    const showmore = $('div[data-testid="tweet-text-show-more-link"]')
-    if (showmore)
-      showmore.style.display = 'none'
-  }
-  async function editTweet() {
-    let _a
-    window.scrollTo({
-      top: 0,
-      behavior: 'smooth',
-    })
-    const btnSelector = '.css-175oi2r.r-sdzlij.r-1phboty.r-rs99b7.r-lrvibr.r-1sp3mco.r-mxifo9.r-gu64tb.r-1loqt21.r-o7ynqc.r-6416eg.r-1ny4l3l'
-    const btn = await waitForElement(btnSelector, true)
-    if (!btn)
-      return
-    const newBtn = btn.cloneNode(true)
-    newBtn.querySelector('span').textContent = '编辑';
-    (_a = btn.parentNode) == null ? void 0 : _a.appendChild(newBtn)
-    newBtn.onclick = processTweet
   }
   const __vite_glob_0_1 = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
     __proto__: null,

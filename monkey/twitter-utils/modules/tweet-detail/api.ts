@@ -10,6 +10,7 @@ import {
   isTimelineEntryTweet,
 } from '../../utils/api'
 import logger from '../../utils/logger'
+import { editTweet } from './dom'
 
 interface TweetDetailResponse {
   data: {
@@ -111,6 +112,8 @@ export const TweetDetailInterceptor: Interceptor = (req, res, ext) => {
     // }
 
     // logger.info(`TweetDetail: ${newData.length} items received`)
+
+    editTweet()
   }
   catch (err) {
     logger.debug(req.method, req.url, res.status, res.responseText)
