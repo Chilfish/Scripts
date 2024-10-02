@@ -1,4 +1,5 @@
-import { $, $$ } from '~/monkey/utils'
+import { $, $$, waitForElement } from '~/monkey/utils'
+import { formatDate } from '~/utils/date'
 
 function processTweet() {
   const oldElement = $('div[role="link"]')
@@ -56,4 +57,57 @@ export async function editTweet() {
 `
   btn!.parentElement?.parentElement?.appendChild(newBtn)
   newBtn.onclick = processTweet
+}
+
+function tweetUrl(id: string, name = 'i') {
+  return `https://twitter.com/${name}/status/${id}`
+}
+function snowId2millis(id: string) {
+  return (BigInt(id) >> BigInt(22)) + BigInt(1288834974657)
+}
+function pubTime(id: string) {
+  return new Date(Number(snowId2millis(id)))
+}
+
+// =>20240000000000
+function date2webArchive(date: Date) {
+  const year = date.getFullYear()
+  const month = date.getMonth()
+  const day = date.getDate()
+  return `${year}${month}${day}000000`
+}
+function webArchiveUrl(id: string, name = 'i') {
+  return `https://web.archive.org/${tweetUrl(id, name)}`
+}
+
+export function viewInArchiver(id: string, name: string) {
+  const pub = formatDate(pubTime(id))
+  const archiveUrl = webArchiveUrl(id, name)
+  console.log(`The main tweet is deleted. Archive: ${archiveUrl}`)
+
+  const text = `发布时间：${pub}\n查看互联网档案馆存档 ↗`
+
+  waitForElement('article span>a').then((node) => {
+    const a = node as HTMLAnchorElement
+    a.textContent = text.replace(/\n/g, '，')
+    a.href = archiveUrl
+  })
+
+  waitForElement('div[data-testid="error-detail"] span').then((node) => {
+    const a = document.createElement('a')
+    a.textContent = text
+    a.target = '_blank'
+
+    // @ts-expect-error it's fine
+    a.style = `
+      color: #1da1f2;
+      margin-top: 6px;
+      text-decoration: none;
+      display: block;
+      font-weight: 700;
+    `
+    a.href = archiveUrl
+
+    node?.append(a)
+  })
 }

@@ -4,13 +4,12 @@ import {
   isTimelineEntryTweet,
 } from '@/utils/api'
 import logger from '@/utils/logger'
-import { waitForElement } from '~/monkey/utils'
 import {
   TimelineAddEntriesInstruction,
   TimelineInstructions,
   TimelineTweet,
 } from '~/types'
-import { editTweet } from './dom'
+import { editTweet, viewInArchiver } from './dom'
 
 interface TweetDetailResponse {
   data: {
@@ -18,26 +17,6 @@ interface TweetDetailResponse {
       instructions: TimelineInstructions
     }
   }
-}
-
-function tweetUrl(id: string, name = 'i') {
-  return `https://twitter.com/${name}/status/${id}`
-}
-function snowId2millis(id: string) {
-  return (BigInt(id) >> BigInt(22)) + BigInt(1288834974657)
-}
-function pubTime(id: string) {
-  return new Date(Number(snowId2millis(id)))
-}
-// =>20240000000000
-function date2webArchive(date: Date) {
-  const year = date.getFullYear()
-  const month = date.getMonth()
-  const day = date.getDate()
-  return `${year}${month}${day}000000`
-}
-function webArchiveUrl(id: string, name = 'i') {
-  return `https://web.archive.org/web/${date2webArchive(pubTime(id))}/${tweetUrl(id, name)}`
 }
 
 // https://twitter.com/i/api/graphql/8sK2MBRZY9z-fgmdNpR3LA/TweetDetail
@@ -73,14 +52,7 @@ export const TweetDetailInterceptor: Interceptor = (req, res, ext) => {
           // @ts-expect-error user_mentions
           const name = replyItem.content?.itemContent.tweet_results.result.legacy.entities.user_mentions[0]?.screen_name || 'i'
 
-          const archiveUrl = webArchiveUrl(tweetId, name)
-          console.log(`The main tweet is deleted. Archive: ${archiveUrl}`)
-
-          waitForElement('article span>a').then((node) => {
-            const a = node as HTMLAnchorElement
-            a.textContent = '查看互联网档案馆存档 ↗'
-            a.href = archiveUrl
-          })
+          viewInArchiver(tweetId, name)
         }
       }
 
@@ -118,5 +90,11 @@ export const TweetDetailInterceptor: Interceptor = (req, res, ext) => {
   catch (err) {
     logger.debug(req.method, req.url, res.status, res.responseText)
     logger.errorWithBanner('TweetDetail: Failed to parse API response', err as Error)
+
+    const urls = location.pathname.split('/')
+    const name = urls[1]
+    const id = urls.at(-1) || ''
+
+    viewInArchiver(id, name)
   }
 }

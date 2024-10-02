@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         推特小工具
 // @namespace    chilfish/monkey
-// @version      2024.10.02
+// @version      2024.10.03
 // @author       monkey
 // @description  推特小工具
 // @icon         https://abs.twimg.com/favicons/twitter.ico
@@ -296,6 +296,22 @@
       })
     })
   }
+  function formatDate(time, fmt = 'YYYY-MM-DD HH:mm:ss:SSS') {
+    if (typeof time === 'number' && time < 1e12)
+      time *= 1e3
+    const date = new Date(time)
+    if (Number.isNaN(date.getTime()))
+      return ''
+    const pad = num => num.toString().padStart(2, '0')
+    const year = date.getFullYear()
+    const month = pad(date.getMonth() + 1)
+    const day = pad(date.getDate())
+    const hours = pad(date.getHours())
+    const minutes = pad(date.getMinutes())
+    const seconds = pad(date.getSeconds())
+    const milliseconds = pad(date.getMilliseconds())
+    return fmt.replace('YYYY', year.toString()).replace('MM', month).replace('DD', day).replace('HH', hours).replace('mm', minutes).replace('ss', seconds).replace('SSS', milliseconds)
+  }
   function processTweet() {
     let _a, _b
     const oldElement = $('div[role="link"]')
@@ -351,14 +367,34 @@
   function pubTime(id) {
     return new Date(Number(snowId2millis(id)))
   }
-  function date2webArchive(date) {
-    const year = date.getFullYear()
-    const month = date.getMonth()
-    const day = date.getDate()
-    return `${year}${month}${day}000000`
-  }
   function webArchiveUrl(id, name = 'i') {
-    return `https://web.archive.org/web/${date2webArchive(pubTime(id))}/${tweetUrl(id, name)}`
+    return `https://web.archive.org/${tweetUrl(id, name)}`
+  }
+  function viewInArchiver(id, name) {
+    const pub = formatDate(pubTime(id))
+    const archiveUrl = webArchiveUrl(id, name)
+    console.log(`The main tweet is deleted. Archive: ${archiveUrl}`)
+    const text = `发布时间：${pub}
+查看互联网档案馆存档 ↗`
+    waitForElement('article span>a').then((node) => {
+      const a = node
+      a.textContent = text.replace(/\n/g, '，')
+      a.href = archiveUrl
+    })
+    waitForElement('div[data-testid="error-detail"] span').then((node) => {
+      const a = document.createElement('a')
+      a.textContent = text
+      a.target = '_blank'
+      a.style = `
+      color: #1da1f2;
+      margin-top: 6px;
+      text-decoration: none;
+      display: block;
+      font-weight: 700;
+    `
+      a.href = archiveUrl
+      node == null ? void 0 : node.append(a)
+    })
   }
   const TweetDetailInterceptor = (req, res, ext) => {
     let _a, _b
@@ -382,13 +418,7 @@
             const tweetId = entry.entryId.split('-')[1]
             const replyItem = timelineAddEntriesInstructionEntries[1]
             const name = ((_b = (_a = replyItem.content) == null ? void 0 : _a.itemContent.tweet_results.result.legacy.entities.user_mentions[0]) == null ? void 0 : _b.screen_name) || 'i'
-            const archiveUrl = webArchiveUrl(tweetId, name)
-            console.log(`The main tweet is deleted. Archive: ${archiveUrl}`)
-            waitForElement('article span>a').then((node) => {
-              const a = node
-              a.textContent = '查看互联网档案馆存档 ↗'
-              a.href = archiveUrl
-            })
+            viewInArchiver(tweetId, name)
           }
         }
       }
@@ -397,6 +427,10 @@
     catch (err) {
       logger.debug(req.method, req.url, res.status, res.responseText)
       logger.errorWithBanner('TweetDetail: Failed to parse API response', err)
+      const urls = location.pathname.split('/')
+      const name = urls[1]
+      const id = urls.at(-1) || ''
+      viewInArchiver(id, name)
     }
   }
   class TweetDetailModule extends Extension {
