@@ -1,4 +1,4 @@
-import { Extension, ExtensionType } from '../../extensions'
+import { Extension, ExtensionType } from '@/extensions'
 import { LikesInterceptor } from './api'
 
 export default class LikesModule extends Extension {

@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         推特小工具
 // @namespace    chilfish/monkey
-// @version      2024.09.30
+// @version      2024.10.02
 // @author       monkey
 // @description  推特小工具
 // @icon         https://abs.twimg.com/favicons/twitter.ico
@@ -219,34 +219,6 @@
     }
   }
   const extensionManager = new ExtensionManager()
-  const $ = (selector, root = document) => root == null ? void 0 : root.querySelector(selector)
-  const $$ = (selector, root = document) => Array.from((root == null ? void 0 : root.querySelectorAll(selector)) || [])
-  function waitForElement(selector, textContent = false) {
-    return new Promise((resolve) => {
-      function got(el2) {
-        if (textContent && el2.textContent)
-          resolve(el2)
-        return resolve(el2)
-      }
-      const el = $(selector)
-      if (el) {
-        got(el)
-        return
-      }
-      const observer = new MutationObserver(() => {
-        const el2 = $(selector)
-        if (el2) {
-          observer.disconnect()
-          got(el2)
-        }
-      })
-      observer.observe(document.body, {
-        childList: true,
-        subtree: true,
-        attributes: false,
-      })
-    })
-  }
   function extractTimelineTweet(itemContent) {
     const tweetUnion = itemContent.tweet_results.result
     if (!tweetUnion) {
@@ -263,6 +235,12 @@
   }
   function isTimelineEntryTweet(entry) {
     return isTimelineEntryItem(entry) && entry.entryId.startsWith('tweet-') && entry.content.itemContent.__typename === 'TimelineTweet'
+  }
+  function isTimelineEntryModule(entry) {
+    return entry.content.entryType === 'TimelineTimelineModule'
+  }
+  function isTimelineEntryProfileConversation(entry) {
+    return isTimelineEntryModule(entry) && entry.entryId.startsWith('profile-conversation-') && Array.isArray(entry.content.items)
   }
   function extractTweetUnion(tweet) {
     let _a, _b
@@ -290,23 +268,59 @@
     }
     return null
   }
+  const $ = (selector, root = document) => root == null ? void 0 : root.querySelector(selector)
+  const $$ = (selector, root = document) => Array.from((root == null ? void 0 : root.querySelectorAll(selector)) || [])
+  function waitForElement(selector, textContent = true) {
+    return new Promise((resolve) => {
+      function got(el2) {
+        if (textContent && el2.textContent)
+          resolve(el2)
+        return resolve(el2)
+      }
+      const el = $(selector)
+      if (el) {
+        got(el)
+        return
+      }
+      const observer = new MutationObserver(() => {
+        const el2 = $(selector)
+        if (el2) {
+          observer.disconnect()
+          got(el2)
+        }
+      })
+      observer.observe(document.body, {
+        childList: true,
+        subtree: true,
+        attributes: false,
+      })
+    })
+  }
   function processTweet() {
-    let _a
+    let _a, _b
     const oldElement = $('div[role="link"]')
     if (oldElement) {
       const newElement = oldElement.cloneNode(true);
       (_a = oldElement.parentNode) == null ? void 0 : _a.replaceChild(newElement, oldElement)
     }
-    $$('div[data-testid="tweetText"]').splice(0, 2).forEach((div) => {
+    const tweetTexts = $$('div[data-testid="tweetText"]').splice(0, 2).map((div) => {
       div.contentEditable = 'true'
       div.style.removeProperty('-webkit-line-clamp')
       const transBtn = div.nextElementSibling
       if (transBtn)
         transBtn.style.display = 'none'
+      return div
     })
     const showmore = $('div[data-testid="tweet-text-show-more-link"]')
     if (showmore)
       showmore.style.display = 'none'
+    const time = $('a time')
+    time.style = `
+    margin-top: 8px;
+    color: #536471;
+    font-size: 0.9rem;
+  `;
+    (_b = tweetTexts[0].parentElement) == null ? void 0 : _b.appendChild(time.cloneNode(true))
   }
   async function editTweet() {
     let _a, _b
@@ -319,11 +333,11 @@
     newBtn.title = '编辑推文'
     newBtn.id = 'edit-tweet'
     newBtn.style = `
-  border: none;
-  background: none;
-  font-size: 1rem;
-  margin-left: 6px;
-  cursor: pointer;
+    border: none;
+    background: none;
+    font-size: 1rem;
+    margin-left: 6px;
+    cursor: pointer;
 `;
     (_b = (_a = btn.parentElement) == null ? void 0 : _a.parentElement) == null ? void 0 : _b.appendChild(newBtn)
     newBtn.onclick = processTweet
@@ -396,6 +410,76 @@
       return TweetDetailInterceptor
     }
   }
+  function numFmt(num) {
+    return num.toString().replace(/\B(?=(\d{4})+(?!\d))/g, ',')
+  }
+  function fixFollowers(followers) {
+    if (!followers || followers < 1e3)
+      return
+    const selector = 'a span.css-1jxf684.r-bcqeeo.r-1ttztb7.r-qvutc0.r-poiln3.r-n6v787.r-1f529hi.r-b88u0q'
+    const el = $$(selector)
+    const followersEl = el.at(1)
+    if (followersEl) {
+      followersEl.textContent = numFmt(followers)
+    }
+  }
+  const UserTweetsInterceptor = (req, res, ext) => {
+    if (!/\/graphql\/.+\/UserTweets/.test(req.url)) {
+      return
+    }
+    try {
+      const json = JSON.parse(res.responseText)
+      const instructions = json.data.user.result.timeline_v2.timeline.instructions
+      const newData = []
+      const timelinePinEntryInstruction = instructions.find(
+        i => i.type === 'TimelinePinEntry',
+      )
+      if (timelinePinEntryInstruction) {
+        const tweet = extractTimelineTweet(timelinePinEntryInstruction.entry.content.itemContent)
+        if (tweet) {
+          newData.push(tweet)
+        }
+      }
+      const timelineAddEntriesInstruction = instructions.find(
+        i => i.type === 'TimelineAddEntries',
+      )
+      const timelineAddEntriesInstructionEntries = (timelineAddEntriesInstruction == null ? void 0 : timelineAddEntriesInstruction.entries) ?? []
+      let followersCount = 0
+      for (const entry of timelineAddEntriesInstructionEntries) {
+        if (isTimelineEntryTweet(entry)) {
+          const tweet = extractTimelineTweet(entry.content.itemContent)
+          if (tweet) {
+            newData.push(tweet)
+          }
+          if (followersCount === 0) {
+            followersCount = (tweet == null ? void 0 : tweet.core.user_results.result.legacy.followers_count) ?? 0
+            fixFollowers(followersCount)
+          }
+        }
+        if (isTimelineEntryProfileConversation(entry)) {
+          const tweetsInConversation = entry.content.items.map(i => extractTimelineTweet(i.item.itemContent)).filter(t => !!t)
+          newData.push(...tweetsInConversation)
+        }
+      }
+      logger.info(`UserTweets: ${newData.length} items received`)
+    }
+    catch (err) {
+      logger.debug(req.method, req.url, res.status, res.responseText)
+      logger.errorWithBanner('UserTweets: Failed to parse API response', err)
+    }
+  }
+  class UserTweetsModule extends Extension {
+    constructor() {
+      super(...arguments)
+      __publicField(this, 'name', 'UserTweetsModule')
+      __publicField(this, 'type', ExtensionType.TWEET)
+    }
+
+    intercept() {
+      return UserTweetsInterceptor
+    }
+  }
+  extensionManager.add(UserTweetsModule)
   extensionManager.add(TweetDetailModule)
   extensionManager.start()
 })(preactSignalsCore)

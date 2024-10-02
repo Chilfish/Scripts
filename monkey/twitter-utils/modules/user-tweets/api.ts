@@ -1,3 +1,10 @@
+import { Interceptor } from '@/extensions'
+import {
+  extractTimelineTweet,
+  isTimelineEntryProfileConversation,
+  isTimelineEntryTweet,
+} from '@/utils/api'
+import logger from '@/utils/logger'
 import {
   TimelineAddEntriesInstruction,
   TimelineInstructions,
@@ -5,13 +12,7 @@ import {
   TimelineTweet,
   Tweet,
 } from '~/types'
-import { Interceptor } from '../../extensions'
-import {
-  extractTimelineTweet,
-  isTimelineEntryProfileConversation,
-  isTimelineEntryTweet,
-} from '../../utils/api'
-import logger from '../../utils/logger'
+import { fixFollowers } from './dom'
 
 interface UserTweetsResponse {
   data: {
@@ -61,6 +62,7 @@ export const UserTweetsInterceptor: Interceptor = (req, res, ext) => {
 
     // The "TimelineAddEntries" instruction may not exist in some cases.
     const timelineAddEntriesInstructionEntries = timelineAddEntriesInstruction?.entries ?? []
+    let followersCount = 0
 
     for (const entry of timelineAddEntriesInstructionEntries) {
       // Extract normal tweets.
@@ -68,6 +70,11 @@ export const UserTweetsInterceptor: Interceptor = (req, res, ext) => {
         const tweet = extractTimelineTweet(entry.content.itemContent)
         if (tweet) {
           newData.push(tweet)
+        }
+
+        if (followersCount === 0) {
+          followersCount = tweet?.core.user_results.result.legacy.followers_count ?? 0
+          fixFollowers(followersCount)
         }
       }
 
@@ -77,17 +84,6 @@ export const UserTweetsInterceptor: Interceptor = (req, res, ext) => {
 
         newData.push(...tweetsInConversation)
       }
-    }
-
-    const tweets = rmRetweets(newData)
-    console.log(tweets)
-
-    // res.responseText = JSON.stringify(tweets)
-
-    function rmRetweets(tweets: Tweet[]) {
-      const isRetweet = (tweet: Tweet) => tweet.legacy.full_text.startsWith('RT @')
-
-      return tweets.filter(tweet => !isRetweet(tweet))
     }
 
     logger.info(`UserTweets: ${newData.length} items received`)

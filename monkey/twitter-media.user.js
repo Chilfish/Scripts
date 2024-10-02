@@ -17,6 +17,9 @@
 (function () {
   'use strict'
 
+  const _GM_download = /* @__PURE__ */ (() => typeof GM_download != 'undefined' ? GM_download : void 0)()
+  const _GM_getValue = /* @__PURE__ */ (() => typeof GM_getValue != 'undefined' ? GM_getValue : void 0)()
+  const _GM_setValue = /* @__PURE__ */ (() => typeof GM_setValue != 'undefined' ? GM_setValue : void 0)()
   const $ = (selector, root = document) => root == null ? void 0 : root.querySelector(selector)
   const $$ = (selector, root = document) => Array.from((root == null ? void 0 : root.querySelectorAll(selector)) || [])
   function formatDate(time, fmt = 'YYYY-MM-DD HH:mm:ss:SSS') {
@@ -35,9 +38,6 @@
     const milliseconds = pad(date.getMilliseconds())
     return fmt.replace('YYYY', year.toString()).replace('MM', month).replace('DD', day).replace('HH', hours).replace('mm', minutes).replace('ss', seconds).replace('SSS', milliseconds)
   }
-  const _GM_download = /* @__PURE__ */ (() => typeof GM_download != 'undefined' ? GM_download : void 0)()
-  const _GM_getValue = /* @__PURE__ */ (() => typeof GM_getValue != 'undefined' ? GM_getValue : void 0)()
-  const _GM_setValue = /* @__PURE__ */ (() => typeof GM_setValue != 'undefined' ? GM_setValue : void 0)()
   const downloader = /* @__PURE__ */ (() => {
     const tasks = []
     const MAX_RETRY = 2

@@ -1,4 +1,4 @@
-import { Extension, ExtensionType } from '../../extensions'
+import { Extension, ExtensionType } from '@/extensions'
 import { SearchTimelineInterceptor } from './api'
 
 export default class SearchTimelineModule extends Extension {

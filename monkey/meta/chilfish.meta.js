@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Chilfish's script
 // @namespace    chilfish/monkey
-// @version      2024.09.31
+// @version      2024.10.02
 // @author       monkey
 // @description  Chilfish's script
 // @icon         https://unavatar.io/chilfish

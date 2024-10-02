@@ -23,9 +23,9 @@
     "skipLibCheck": true
   },
   "include": [
-    "*.ts",
-    "*.tsx",
-    "*.d.ts"
+    "**/*.ts",
+    "**/*.tsx",
+    "**/*.d.ts"
   ],
   "exclude": [
     "dist",

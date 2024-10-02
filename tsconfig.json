@@ -18,6 +18,11 @@
     "esModuleInterop": true,
     "skipLibCheck": true
   },
+  "include": [
+    "**/*.ts",
+    "**/*.tsx",
+    "**/*.d.ts"
+  ],
   "exclude": [
     "dist",
     "node_modules"

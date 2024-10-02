@@ -1,3 +1,5 @@
+import { GM_getValue, GM_setValue } from '$'
+
 export const $ = <T = HTMLElement>(selector: string, root: any = document) => root?.querySelector(selector) as T | null
 
 export const $$ = <T = HTMLElement>(selector: string, root: any = document) => Array.from(root?.querySelectorAll(selector) || []) as T[]
@@ -41,7 +43,7 @@ export function saveAs(
  */
 export function waitForElement(
   selector: string,
-  textContent = false,
+  textContent = true,
 ) {
   return new Promise<HTMLElement>((resolve) => {
     function got(el: HTMLElement) {
@@ -70,4 +72,18 @@ export function waitForElement(
       attributes: false,
     })
   })
+}
+
+export const store = {
+  get<T>(key: string) {
+    const data = GM_getValue(key)
+    if (!data) {
+      this.set(key, null)
+      return null
+    }
+    return data as T
+  },
+  set(key: string, value: any) {
+    GM_setValue(key, value)
+  },
 }

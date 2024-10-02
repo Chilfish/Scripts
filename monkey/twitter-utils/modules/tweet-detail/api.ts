@@ -1,15 +1,15 @@
+import { Interceptor } from '@/extensions'
+import {
+  extractTimelineTweet,
+  isTimelineEntryTweet,
+} from '@/utils/api'
+import logger from '@/utils/logger'
 import { waitForElement } from '~/monkey/utils'
 import {
   TimelineAddEntriesInstruction,
   TimelineInstructions,
   TimelineTweet,
 } from '~/types'
-import { Interceptor } from '../../extensions'
-import {
-  extractTimelineTweet,
-  isTimelineEntryTweet,
-} from '../../utils/api'
-import logger from '../../utils/logger'
 import { editTweet } from './dom'
 
 interface TweetDetailResponse {

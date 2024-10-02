@@ -1,4 +1,4 @@
-import { $, $$ } from '../../../utils'
+import { $, $$ } from '~/monkey/utils'
 
 function processTweet() {
   const oldElement = $('div[role="link"]')
@@ -7,17 +7,31 @@ function processTweet() {
     oldElement.parentNode?.replaceChild(newElement, oldElement)
   }
 
-  $$('div[data-testid="tweetText"]').splice(0, 2).forEach((div) => {
-    div.contentEditable = 'true'
-    div.style.removeProperty('-webkit-line-clamp')
+  const tweetTexts = $$('div[data-testid="tweetText"]')
+    .splice(0, 2)
+    .map((div) => {
+      div.contentEditable = 'true'
+      div.style.removeProperty('-webkit-line-clamp')
 
-    const transBtn = div.nextElementSibling as HTMLElement
-    if (transBtn)
-      transBtn.style.display = 'none'
-  })
+      const transBtn = div.nextElementSibling as HTMLElement
+      if (transBtn)
+        transBtn.style.display = 'none'
+
+      return div
+    })
+
   const showmore = $('div[data-testid="tweet-text-show-more-link"]')
   if (showmore)
     showmore.style.display = 'none'
+
+  const time = $('a time')!
+  // @ts-expect-error it's fine
+  time.style = `
+    margin-top: 8px;
+    color: #536471;
+    font-size: 0.9rem;
+  `
+  tweetTexts[0].parentElement?.appendChild(time.cloneNode(true))
 }
 
 export async function editTweet() {
@@ -34,11 +48,11 @@ export async function editTweet() {
 
   // @ts-expect-error it's fine
   newBtn.style = `
-  border: none;
-  background: none;
-  font-size: 1rem;
-  margin-left: 6px;
-  cursor: pointer;
+    border: none;
+    background: none;
+    font-size: 1rem;
+    margin-left: 6px;
+    cursor: pointer;
 `
   btn!.parentElement?.parentElement?.appendChild(newBtn)
   newBtn.onclick = processTweet

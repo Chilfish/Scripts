@@ -1,3 +1,10 @@
+import { Interceptor } from '@/extensions'
+import {
+  extractTimelineTweet,
+  isTimelineEntrySearchGrid,
+  isTimelineEntryTweet,
+} from '@/utils/api'
+import logger from '@/utils/logger'
 import { $$, waitForElement } from '~/monkey/utils'
 import {
   ItemContentUnion,
@@ -7,13 +14,6 @@ import {
   TimelineTweet,
   Tweet,
 } from '~/types'
-import { Interceptor } from '../../extensions'
-import {
-  extractTimelineTweet,
-  isTimelineEntrySearchGrid,
-  isTimelineEntryTweet,
-} from '../../utils/api'
-import logger from '../../utils/logger'
 
 interface SearchTimelineResponse {
   data: {

@@ -1,7 +1,7 @@
+import { Interceptor } from '@/extensions'
+import { extractDataFromResponse, extractTimelineTweet } from '@/utils/api'
+import logger from '@/utils/logger'
 import { TimelineInstructions, Tweet } from '~/types'
-import { Interceptor } from '../../extensions'
-import { extractDataFromResponse, extractTimelineTweet } from '../../utils/api'
-import logger from '../../utils/logger'
 
 interface LikesResponse {
   data: {

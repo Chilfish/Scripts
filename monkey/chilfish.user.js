@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Chilfish's script
 // @namespace    chilfish/monkey
-// @version      2024.09.31
+// @version      2024.10.02
 // @author       monkey
 // @description  Chilfish's script
 // @icon         https://unavatar.io/chilfish
@@ -17,9 +17,11 @@
 (function () {
   'use strict'
 
+  const _GM_addStyle = /* @__PURE__ */ (() => typeof GM_addStyle != 'undefined' ? GM_addStyle : void 0)()
+  const _GM_getValue = /* @__PURE__ */ (() => typeof GM_getValue != 'undefined' ? GM_getValue : void 0)()
+  const _GM_setValue = /* @__PURE__ */ (() => typeof GM_setValue != 'undefined' ? GM_setValue : void 0)()
   const $ = (selector, root = document) => root == null ? void 0 : root.querySelector(selector)
-  const $$ = (selector, root = document) => Array.from((root == null ? void 0 : root.querySelectorAll(selector)) || [])
-  function waitForElement(selector, textContent = false) {
+  function waitForElement(selector, textContent = true) {
     return new Promise((resolve) => {
       function got(el2) {
         if (textContent && el2.textContent)
@@ -45,6 +47,19 @@
       })
     })
   }
+  const store = {
+    get(key) {
+      const data = _GM_getValue(key)
+      if (!data) {
+        this.set(key, null)
+        return null
+      }
+      return data
+    },
+    set(key, value) {
+      _GM_setValue(key, value)
+    },
+  }
   function numFmt(num) {
     return num.toString().replace(/\B(?=(\d{4})+(?!\d))/g, ',')
   }
@@ -59,9 +74,6 @@
     __proto__: null,
     default: bilibili,
   }, Symbol.toStringTag, { value: 'Module' }))
-  const _GM_addStyle = /* @__PURE__ */ (() => typeof GM_addStyle != 'undefined' ? GM_addStyle : void 0)()
-  const _GM_getValue = /* @__PURE__ */ (() => typeof GM_getValue != 'undefined' ? GM_getValue : void 0)()
-  const _GM_setValue = /* @__PURE__ */ (() => typeof GM_setValue != 'undefined' ? GM_setValue : void 0)()
   let _baseCss = ``
   function css(strings, ...values) {
     if (!strings.length)
@@ -69,19 +81,6 @@
     _baseCss += String.raw(strings, ...values)
   }
   const baseCss = () => _baseCss
-  const store = {
-    get(key) {
-      const data = _GM_getValue(key)
-      if (!data) {
-        this.set(key, null)
-        return null
-      }
-      return data
-    },
-    set(key, value) {
-      _GM_setValue(key, value)
-    },
-  }
   const twitter = {
     pattern: /(twitter|x)\.com/,
     action() {
@@ -104,8 +103,6 @@
       }
   `
       rmRetweet()
-      if (isHomepage())
-        fixFollows()
     },
   }
   function rmRetweet() {
@@ -133,22 +130,6 @@
       subtree: true,
       attributes: false,
     })
-  }
-  function isHomepage() {
-    const _url = document.URL.split('/')
-    return _url.length === 4 && _url.at(-1) !== 'home'
-  }
-  async function fixFollows() {
-    let _a
-    const selector = 'a span.css-1jxf684.r-bcqeeo.r-1ttztb7.r-qvutc0.r-poiln3.r-n6v787.r-1f529hi.r-b88u0q'
-    const script = 'script[data-testid="UserProfileSchema-test"]'
-    await waitForElement(selector, true)
-    await waitForElement(script)
-    const data = JSON.parse(((_a = $(script)) == null ? void 0 : _a.textContent) || '{}')
-    if (!data.author)
-      return
-    const follows = data.author.interactionStatistic[0].userInteractionCount
-    $$(selector)[1].textContent = numFmt(follows)
   }
   const __vite_glob_0_1 = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
     __proto__: null,

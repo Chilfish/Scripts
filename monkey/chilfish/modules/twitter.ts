@@ -1,7 +1,6 @@
-import { $, $$, waitForElement } from '~/monkey/utils'
-import { numFmt } from '~/utils/math'
+import { $, store } from '~/monkey/utils'
 import { UrlActions } from '../types'
-import { css, store } from '../utils'
+import { css } from '../utils'
 
 export default {
   pattern: /(twitter|x)\.com/,
@@ -26,9 +25,6 @@ export default {
   `
 
     rmRetweet()
-
-    if (isHomepage())
-      fixFollows()
   },
 } satisfies UrlActions
 
@@ -66,24 +62,4 @@ function rmRetweet() {
     subtree: true,
     attributes: false,
   })
-}
-
-function isHomepage() {
-  const _url = document.URL.split('/')
-  return _url.length === 4 && _url.at(-1) !== 'home'
-}
-
-async function fixFollows() {
-  const selector = 'a span.css-1jxf684.r-bcqeeo.r-1ttztb7.r-qvutc0.r-poiln3.r-n6v787.r-1f529hi.r-b88u0q'
-  const script = 'script[data-testid="UserProfileSchema-test"]'
-  await waitForElement(selector, true)
-  await waitForElement(script)
-
-  const data = JSON.parse($(script)?.textContent || '{}')
-  if (!data.author)
-    return
-
-  const follows = data.author.interactionStatistic[0].userInteractionCount
-
-  $$(selector)[1].textContent = numFmt(follows)
 }
