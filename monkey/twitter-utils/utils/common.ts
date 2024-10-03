@@ -53,3 +53,15 @@ export function formatVideoDuration(durationInMs?: number): string {
 
   return `${minutes}:${seconds.toString().padStart(2, '0')}`
 }
+
+export function tweetUrl(id: string, name = 'i') {
+  return `https://twitter.com/${name}/status/${id}`
+}
+
+export function snowId2millis(id: string) {
+  return (BigInt(id) >> BigInt(22)) + BigInt(1288834974657)
+}
+
+export function pubTime(id: string) {
+  return new Date(Number(snowId2millis(id)))
+}

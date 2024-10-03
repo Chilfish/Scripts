@@ -7,6 +7,7 @@
 - [cli/srt](cli/srt.ts)：提取字幕或翻译 srt 字幕文件
 - [bestdori](crawler/bestdori/)：BanG Dream！bestdori 相关爬虫
 - [monkey](monkey/)：一些油猴脚本
+  - [twitter-utls](monkey/twitter-utils/README.md)：推特相关的小工具
   - [twitter-media.user.js](monkey/twitter-media.user.js)：下载推特原图（改自 [twitter-media-downloader](https://greasyfork.org/zh-CN/scripts/423001-twitter-media-downloader)）
   - [ins-download.user.js](monkey/ins-download.user.js)：下载 ins 图片、快拍
   - [ins-exporter.user.js](monkey/ins-exporter.user.js)：导出 ins 用户的帖子数据

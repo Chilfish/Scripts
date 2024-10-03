@@ -5,7 +5,7 @@ export default viteConfig({
   filename: 'twitter-utils',
   entry: 'main.ts',
   userscript: {
-    'version': '2024.10.03',
+    'version': '2024.10.04',
     'grant': ['unsafeWindow'],
     'run-at': 'document-start',
     'description': '推特小工具',

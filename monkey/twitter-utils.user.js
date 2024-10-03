@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         推特小工具
 // @namespace    chilfish/monkey
-// @version      2024.10.03
+// @version      2024.10.04
 // @author       monkey
 // @description  推特小工具
 // @icon         https://abs.twimg.com/favicons/twitter.ico
@@ -268,6 +268,66 @@
     }
     return null
   }
+  function tweetUrl(id, name = 'i') {
+    return `https://twitter.com/${name}/status/${id}`
+  }
+  function snowId2millis(id) {
+    return (BigInt(id) >> BigInt(22)) + BigInt(1288834974657)
+  }
+  function pubTime(id) {
+    return new Date(Number(snowId2millis(id)))
+  }
+  function linkify(url, text) {
+    const style = `
+    color: rgb(27, 149, 224);
+    text-decoration: none;
+    display: inline-block;
+  `.replace(/\s+/g, ' ').trim()
+    return `<a target="_blank" href="${url}" style="${style}"> ${text || url} </a>`
+  }
+  function hashTagLink(tag) {
+    return linkify(`https://x.com/tags/${tag}`, `#${tag}`)
+  }
+  function mentionLink(name) {
+    return linkify(`https://x.com/${name}`, `@${name}`)
+  }
+  class TextParser {
+    constructor(text) {
+      __publicField(this, 'text')
+      this.text = text
+    }
+
+    parse() {
+      return this.links().mentionInfo().hashTags().text
+    }
+
+    mentionInfo() {
+      const regex = /@(?<username>\w+)\s/g
+      this.text = this.text.replace(regex, (_match, username) => {
+        return mentionLink(username)
+      })
+      return this
+    }
+
+    hashTags() {
+      const regex = /#([\p{L}\p{N}]+)/gu
+      this.text = this.text.replace(regex, (_match, tag) => {
+        return hashTagLink(tag)
+      })
+      return this
+    }
+
+    links() {
+      const regex = /https?:\/\/\S+/g
+      this.text = this.text.replace(regex, (match) => {
+        return linkify(match)
+      })
+      return this
+    }
+  }
+  function parseText(text) {
+    return new TextParser(text).parse()
+  }
   const $ = (selector, root = document) => root == null ? void 0 : root.querySelector(selector)
   const $$ = (selector, root = document) => Array.from((root == null ? void 0 : root.querySelectorAll(selector)) || [])
   function waitForElement(selector, textContent = true) {
@@ -319,12 +379,17 @@
       const newElement = oldElement.cloneNode(true);
       (_a = oldElement.parentNode) == null ? void 0 : _a.replaceChild(newElement, oldElement)
     }
-    const tweetTexts = $$('div[data-testid="tweetText"]').splice(0, 2).map((div) => {
+    const tweetTexts = $$('div[data-testid="tweetText"]').splice(0, 2).map((div, idx) => {
       div.contentEditable = 'true'
       div.style.removeProperty('-webkit-line-clamp')
       const transBtn = div.nextElementSibling
       if (transBtn)
         transBtn.style.display = 'none'
+      if (idx > 0) {
+        const text = div.textContent
+        div.innerHTML = parseText(`${text}
+`)
+      }
       return div
     })
     const showmore = $('div[data-testid="tweet-text-show-more-link"]')
@@ -357,15 +422,6 @@
 `;
     (_b = (_a = btn.parentElement) == null ? void 0 : _a.parentElement) == null ? void 0 : _b.appendChild(newBtn)
     newBtn.onclick = processTweet
-  }
-  function tweetUrl(id, name = 'i') {
-    return `https://twitter.com/${name}/status/${id}`
-  }
-  function snowId2millis(id) {
-    return (BigInt(id) >> BigInt(22)) + BigInt(1288834974657)
-  }
-  function pubTime(id) {
-    return new Date(Number(snowId2millis(id)))
   }
   function webArchiveUrl(id, name = 'i') {
     return `https://web.archive.org/${tweetUrl(id, name)}`

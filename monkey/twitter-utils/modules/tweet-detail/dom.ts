@@ -1,3 +1,5 @@
+import { pubTime, tweetUrl } from '@/utils/common'
+import { parseText } from '@/utils/textParser'
 import { $, $$, waitForElement } from '~/monkey/utils'
 import { formatDate } from '~/utils/date'
 
@@ -10,13 +12,18 @@ function processTweet() {
 
   const tweetTexts = $$('div[data-testid="tweetText"]')
     .splice(0, 2)
-    .map((div) => {
+    .map((div, idx) => {
       div.contentEditable = 'true'
       div.style.removeProperty('-webkit-line-clamp')
 
       const transBtn = div.nextElementSibling as HTMLElement
       if (transBtn)
         transBtn.style.display = 'none'
+
+      if (idx > 0) {
+        const text = div.textContent
+        div.innerHTML = parseText(`${text}\n`)
+      }
 
       return div
     })
@@ -59,23 +66,6 @@ export async function editTweet() {
   newBtn.onclick = processTweet
 }
 
-function tweetUrl(id: string, name = 'i') {
-  return `https://twitter.com/${name}/status/${id}`
-}
-function snowId2millis(id: string) {
-  return (BigInt(id) >> BigInt(22)) + BigInt(1288834974657)
-}
-function pubTime(id: string) {
-  return new Date(Number(snowId2millis(id)))
-}
-
-// =>20240000000000
-function date2webArchive(date: Date) {
-  const year = date.getFullYear()
-  const month = date.getMonth()
-  const day = date.getDate()
-  return `${year}${month}${day}000000`
-}
 function webArchiveUrl(id: string, name = 'i') {
   return `https://web.archive.org/${tweetUrl(id, name)}`
 }
