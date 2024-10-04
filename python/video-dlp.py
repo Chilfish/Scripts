@@ -48,8 +48,8 @@ def main(video_url: str):
 
     # 设置下载参数
     ydl_opts = {
-        # "cookiesfrombrowser": ("chrome",),
-        "cookies": os.path.join(os.path.expanduser("~"), "cookies.txt"),
+        "cookiesfrombrowser": ("edge",),
+        #"cookies": os.path.join(os.path.expanduser("~"), "cookies.txt"),
         "paths": {
             "home": out_dir,
             "temp": temp_dir,

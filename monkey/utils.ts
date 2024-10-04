@@ -1,4 +1,4 @@
-import { GM_getValue, GM_setValue } from '$'
+import { GM_deleteValue, GM_getValue, GM_setValue } from '$'
 
 export const $ = <T = HTMLElement>(selector: string, root: any = document) => root?.querySelector(selector) as T | null
 
@@ -40,37 +40,54 @@ export function saveAs(
 
 /**
  * Wait for an element to be added to the DOM.
+ * @param selector - CSS selector for the element
+ * @param options - Optional configuration
+ * @returns Promise that resolves with the found element
  */
 export function waitForElement(
   selector: string,
-  textContent = true,
-) {
-  return new Promise<HTMLElement>((resolve) => {
-    function got(el: HTMLElement) {
-      if (textContent && el.textContent)
-        resolve(el)
-      return resolve(el)
-    }
+  options: {
+    root?: Element | Document
+    timeout?: number
+    checkTextContent?: boolean
+  } = {},
+): Promise<Element | null> {
+  const {
+    root = document.body,
+    timeout = 1000 * 60,
+    checkTextContent = true,
+  } = options
 
-    const el = $(selector)
-    if (el) {
-      got(el)
+  return new Promise((resolve) => {
+    // Check if element already exists
+    const existingElement = $(selector, root)
+    if (existingElement && (!checkTextContent || existingElement.textContent)) {
+      resolve(existingElement)
       return
     }
 
     const observer = new MutationObserver(() => {
-      const el = $(selector)
-      if (el) {
+      const element = $(selector, root)
+      if (element && (!checkTextContent || element.textContent)) {
         observer.disconnect()
-        got(el)
+        resolve(element)
       }
     })
 
-    observer.observe(document.body, {
+    observer.observe(root, {
       childList: true,
       subtree: true,
-      attributes: false,
+      attributes: true,
     })
+
+    // Set timeout to avoid waiting indefinitely
+    if (timeout > 0) {
+      setTimeout(() => {
+        observer.disconnect()
+        console.warn(`Timeout waiting for element: ${selector}`)
+        resolve(null)
+      }, timeout)
+    }
   })
 }
 
@@ -85,5 +102,8 @@ export const store = {
   },
   set(key: string, value: any) {
     GM_setValue(key, value)
+  },
+  remove(key: string) {
+    GM_deleteValue(key)
   },
 }

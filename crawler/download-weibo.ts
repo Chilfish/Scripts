@@ -1,10 +1,8 @@
-import { defineCommand, runMain } from 'citty'
 import { consola } from 'consola'
 import { ofetch } from 'ofetch'
 import { getWeiboAnonToken } from '~/utils'
 import {
   downloadBlob,
-  prompt,
   runCommand,
 } from '~/utils/index.node'
 
@@ -36,26 +34,6 @@ interface PicData {
   }
 }
 
-runMain(defineCommand({
-  meta: {
-    name: 'download-weibo',
-    description: 'Download images/videos from a weibo post',
-  },
-  args: {
-    url: {
-      type: 'string',
-      description: 'URL of the weibo post',
-    },
-  },
-  run: async ({ args }) => {
-    let { url } = args
-    if (!url)
-      url = await prompt('Enter URL: ')
-
-    await main(url)
-  },
-}))
-
 async function main(url: string) {
   const pidMatch = url.match(/https:\/\/weibo\.com\/\d+\/([a-zA-Z0-9]+)\/?/)
   if (!pidMatch) {
@@ -83,7 +61,7 @@ async function main(url: string) {
       }
 
       else if (item.type === 'video') {
-        await runCommand(`yt-dlp --cookies-from-browser chrome -N 16 -P D:/downloads ${item.data.media_info.h5_url}`)
+        await runCommand(`yt-dlp --cookies-from-browser edge -N 16 -P D:/downloads ${item.data.media_info.h5_url}`)
       }
     }
 
@@ -109,3 +87,11 @@ async function main(url: string) {
 
   consola.success('Downloaded all images', imageList.length)
 }
+
+const url = process.argv[2]
+if (!url) {
+  console.error('Usage: download-weibo.ts <url>')
+  process.exit(1)
+}
+
+await main(url)

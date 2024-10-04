@@ -5,7 +5,7 @@ import { dir, downloadBlob, readCookie } from '~/utils/index.node'
 
 const proxy = new ProxyAgent(proxyUrl)
 
-const cookie = await readCookie('pixiv')
+const cookie = readCookie('pixiv')
 const uid = 70847616
 const dest = dir('D:/Downloads/pixiv')
 const queue = new PQueue({ concurrency: 4 })

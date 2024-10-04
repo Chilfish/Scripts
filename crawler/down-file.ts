@@ -3,15 +3,10 @@ import path from 'node:path'
 import PQueue from 'p-queue'
 import { dir, downloadBlob } from '~/utils/index.node'
 
-const file = process.argv[2]
-if (!file) {
-  console.error('Usage: down-json-img.ts <json-file> [dest]')
-  process.exit(1)
-}
+const fileList = process.argv[2] || 'D:/Downloads/files.json'
+const dest = dir(process.argv[3] || 'D:/Downloads/tmp')
 
-const dest = dir(process.argv[3] || 'D:/Downloads/imgs')
-
-const data = await readFile(path.resolve(file), 'utf-8').then((data) => {
+const data = await readFile(path.resolve(fileList), 'utf-8').then((data) => {
   const urls = data.split('\r\n')
   return urls.map((url, idx) => ({
     url,
@@ -19,9 +14,7 @@ const data = await readFile(path.resolve(file), 'utf-8').then((data) => {
   }))
 })
 
-// const data = await readJson(path.resolve(file)).then(parseImgs)
-
-console.log('Total images:', data.length)
+console.log('Total files:', data.length)
 
 const queue = new PQueue({ concurrency: 10 })
 
@@ -35,24 +28,3 @@ for (const { url, name } of data) {
 
 await queue.onIdle()
 console.log('All images downloaded')
-
-interface ImgData {
-  url: string
-  name: string
-}
-
-/**
- * Parse images from JSON data
- */
-function parseImgs(data: any): ImgData[] {
-  const { tweets } = data
-
-  return tweets.map((tweet: any) => {
-    const name = tweet.created_at.split(' ').join('_').replace(/:/g, '-')
-    return tweet.images.map((img: string, idx: number) => ({
-      url: img,
-      name: `${name}_${tweet.id}_${idx}.jpg`,
-    }))
-  })
-    .flat()
-}

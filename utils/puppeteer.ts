@@ -28,7 +28,7 @@ export async function newBrowser() {
   const browser = await puppeteer.launch({
     headless: 'shell',
     // headless: false,
-    executablePath: chromePath,
+    // executablePath: chromePath,
     // userDataDir: chromeUserData,
     args: [
       '--no-sandbox',
@@ -46,17 +46,34 @@ export async function fetchIntercept<T = any>(
   browser: Browser,
   url: string,
   match: string,
+  timeout = 30000, // Add a default timeout
 ) {
   const page = await browser.newPage()
-  await page.goto(url, {
-    waitUntil: 'domcontentloaded',
-  })
+  try {
+    await page.goto(url, {
+      waitUntil: 'networkidle0', // Wait until network is idle
+      timeout,
+    })
 
-  return await page.waitForResponse(res =>
-  // FIX ProtocolError: Could not load body for this request. This might happen if the request is a preflight request.
-    res.request().method().toUpperCase() !== 'OPTIONS'
-    && res.url().includes(match),
-  )
-    .then(res => res.json() as Promise<T>)
-    .finally(() => page.close())
+    const response = await page.waitForResponse(
+      res =>
+        res.request().method().toUpperCase() !== 'OPTIONS'
+        && res.url().includes(match),
+      { timeout },
+    )
+
+    // Check if the response is valid
+    if (!response.ok()) {
+      throw new Error(`HTTP error! status: ${response.status()}`)
+    }
+
+    return await response.json() as T
+  }
+  catch (error) {
+    console.error('Error in fetchIntercept:', error)
+    throw error // Re-throw the error for the caller to handle
+  }
+  finally {
+    await page.close()
+  }
 }

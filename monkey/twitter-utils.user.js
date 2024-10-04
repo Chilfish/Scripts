@@ -11,6 +11,7 @@
 // @match        https://x.com/*
 // @require      https://cdn.jsdelivr.net/npm/dayjs@1.11.10/dayjs.min.js
 // @require      https://cdn.jsdelivr.net/npm/@preact/signals-core@1.5.1/dist/signals-core.min.js
+// @grant        GM_addStyle
 // @grant        unsafeWindow
 // @run-at       document-start
 // ==/UserScript==
@@ -21,6 +22,7 @@
   const __defProp = Object.defineProperty
   const __defNormalProp = (obj, key, value) => key in obj ? __defProp(obj, key, { enumerable: true, configurable: true, writable: true, value }) : obj[key] = value
   const __publicField = (obj, key, value) => __defNormalProp(obj, typeof key !== 'symbol' ? `${key}` : key, value)
+  const _GM_addStyle = /* @__PURE__ */ (() => typeof GM_addStyle != 'undefined' ? GM_addStyle : void 0)()
   const _unsafeWindow = /* @__PURE__ */ (() => typeof unsafeWindow != 'undefined' ? unsafeWindow : void 0)()
   const appname = '[twitter-utils]'
   class Logger {
@@ -278,12 +280,12 @@
     return new Date(Number(snowId2millis(id)))
   }
   function linkify(url, text) {
-    const style = `
+    const style2 = `
     color: rgb(27, 149, 224);
     text-decoration: none;
     display: inline-block;
   `.replace(/\s+/g, ' ').trim()
-    return `<a target="_blank" href="${url}" style="${style}"> ${text || url} </a>`
+    return `<a target="_blank" href="${url}" style="${style2}"> ${text || url} </a>`
   }
   function hashTagLink(tag) {
     return linkify(`https://x.com/tags/${tag}`, `#${tag}`)
@@ -569,6 +571,15 @@
       return UserTweetsInterceptor
     }
   }
+  function css(strings) {
+    return String.raw(strings)
+  }
+  const style = css`
+div, span {
+  font-family: 'Microsoft YaHei' !important;
+}
+`
+  _GM_addStyle(style)
   extensionManager.add(UserTweetsModule)
   extensionManager.add(TweetDetailModule)
   extensionManager.start()

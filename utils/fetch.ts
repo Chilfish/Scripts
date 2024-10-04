@@ -43,7 +43,13 @@ export function checkNetwork(domain = 'x.com') {
     fetch(`https://${domain}`)
       .then(_ => res('ok'))
       .catch(err => res(
-        `${err.cause}`.replace('Error: ', 'NetworkError: '),
+        `${err.cause}`,
       ))
   })
+}
+
+if (process.argv.includes('--TEST')) {
+  checkNetwork('x.com').then(console.log)
+  getBiliAnonToken().then(console.log)
+  getWeiboAnonToken().then(console.log)
 }

@@ -11,6 +11,7 @@
 // @match        https://x.com/*
 // @require      https://cdn.jsdelivr.net/npm/dayjs@1.11.10/dayjs.min.js
 // @require      https://cdn.jsdelivr.net/npm/@preact/signals-core@1.5.1/dist/signals-core.min.js
+// @grant        GM_addStyle
 // @grant        unsafeWindow
 // @run-at       document-start
 // ==/UserScript==

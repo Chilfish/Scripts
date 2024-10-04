@@ -8,7 +8,6 @@ export default {
     css`
       div, span {
         font-size: 14px !important;
-        font-family: 'Microsoft YaHei' !important;
       }
       .css-175oi2r.r-1pi2tsx.r-1wtj0ep.r-1rnoaur.r-o96wvk.r-is05cd {
         width: auto !important; /* left nav item*/

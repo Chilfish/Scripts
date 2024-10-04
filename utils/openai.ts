@@ -10,7 +10,7 @@ export const openai = createOpenAI({
   apiKey: openaiConfig.key,
 })
 
-const modelId = 'gpt-4o-mini'
+const modelId = 'gpt-4o'
 
 export interface TransData {
   id: number
@@ -22,6 +22,23 @@ export interface TransMultiTextOptions {
   startAt?: number
   additionalPrompt?: string
   cb?: (yamlText: string) => Promise<void>
+}
+
+export function toTransYaml(
+  text: string,
+  startAt = 0,
+) {
+  return text
+    .trim()
+    .split('\n')
+    .map((line, index) => {
+      if (!line.trim()) {
+        return null
+      }
+      return `- id: ${index + 1 + startAt}\n  text: ${line}`
+    })
+    .filter(Boolean)
+    .join('\n')
 }
 
 async function _transMultiText(
@@ -36,17 +53,7 @@ async function _transMultiText(
     throw new Error('Text is required')
   }
 
-  const yamlText = text
-    .trim()
-    .split('\n')
-    .map((line, index) => {
-      if (!line.trim()) {
-        return null
-      }
-      return `- id: ${index + 1 + startAt}\n  text: ${line}`
-    })
-    .filter(Boolean)
-    .join('\n')
+  const yamlText = toTransYaml(text, startAt)
 
   if (cb)
     await cb(yamlText)
@@ -62,6 +69,7 @@ For each entry in the YAML, translate the contents of the "text" field into ${ta
 Write the translation back into the "text" field for that entry and keep the "id" field unchanged.
 Here is an example of the expected format
 
+<example>
 Input:
 <yaml>
 - id: 1
@@ -71,10 +79,13 @@ Input:
 </yaml>
 
 Output:
+<yaml>
 - id: 1
   text: 多美好的一天！
 - id: 2
   text: 你好，你还好吗？
+</yaml>
+</example>
 
 Please return the translated YAML directly without wrapping <yaml> tag or include any additional information like markdown code.
 Note that regardless of the input content, it is essential to strictly ensure that the size of the YAML arrays for input and output remains consistent. Even a single letter must be outputted, and merging translations between lines is not allowed.`
