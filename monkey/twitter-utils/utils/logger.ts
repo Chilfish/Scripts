@@ -76,6 +76,14 @@ class Logger {
 /**
  * Global logger singleton instance.
  */
-const logger = new Logger()
+const logger = {
+  info: console.info,
+  warn: console.warn,
+  error: console.error,
+  errorWithBanner: (msg: string, err?: Error, ...args: LogExtraArgs) => {
+    console.error(appname, msg, err?.message ?? 'none', ...args)
+  },
+  debug: console.debug,
+}
 
 export default logger

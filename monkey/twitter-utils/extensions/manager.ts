@@ -1,5 +1,4 @@
 import { unsafeWindow } from '$'
-import { Signal } from '@preact/signals-core'
 import logger from '../utils/logger'
 import { Extension, ExtensionConstructor } from './extension'
 
@@ -19,11 +18,6 @@ const xhrOpen = globalObject.XMLHttpRequest.prototype.open
 export class ExtensionManager {
   private extensions: Map<string, Extension> = new Map()
   private disabledExtensions: Set<string> = new Set()
-
-  /**
-   * Signal for subscribing to extension changes.
-   */
-  public signal = new Signal(1)
 
   constructor() {
     this.installHttpHooks()
@@ -68,7 +62,6 @@ export class ExtensionManager {
       ext.setup()
 
       logger.debug(`Enabled extension: ${name}`)
-      this.signal.value++
     }
     catch (err) {
       logger.error(`Failed to enable extension: ${name}`, err)
@@ -84,7 +77,6 @@ export class ExtensionManager {
       ext.dispose()
 
       logger.debug(`Disabled extension: ${name}`)
-      this.signal.value++
     }
     catch (err) {
       logger.error(`Failed to disable extension: ${name}`, err)

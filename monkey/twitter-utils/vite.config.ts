@@ -16,13 +16,11 @@ export default viteConfig({
     ],
     'require': [
       'https://cdn.jsdelivr.net/npm/dayjs@1.11.10/dayjs.min.js',
-      'https://cdn.jsdelivr.net/npm/@preact/signals-core@1.5.1/dist/signals-core.min.js',
     ],
   },
   build: {
     externalGlobals: {
-      'dayjs': 'dayjs',
-      '@preact/signals-core': 'preactSignalsCore',
+      dayjs: 'dayjs',
     },
   },
 })

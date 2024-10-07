@@ -1,4 +1,3 @@
-import { $, store } from '~/monkey/utils'
 import { UrlActions } from '../types'
 import { css } from '../utils'
 
@@ -22,43 +21,5 @@ export default {
         display: none !important;
       }
   `
-
-    rmRetweet()
   },
 } satisfies UrlActions
-
-// TODO: 加一个config列表来指定博主
-function rmRetweet() {
-  const svgWapper = '.css-175oi2r.r-18kxxzh.r-ogg1b9.r-1mrc8m9.r-obd0qt.r-1777fci'
-
-  const whiteList = store.get<string[]>('whiteList') || []
-
-  const observer = new MutationObserver(ms => ms.forEach((mutation) => {
-    mutation.addedNodes.forEach((node) => {
-      if (mutation.type !== 'childList')
-        return
-
-      const el = node as HTMLElement
-      if (
-        node.nodeType === Node.ELEMENT_NODE
-        && el.tagName === 'DIV'
-      ) {
-        const svg = $(svgWapper, el)
-        if (!svg)
-          return
-
-        const username = svg.nextElementSibling?.textContent?.split(' ')[0] || ''
-        if (whiteList.includes(username))
-          return
-
-        svg.closest('article')?.remove()
-      }
-    })
-  }))
-
-  observer.observe(document.body, {
-    childList: true,
-    subtree: true,
-    attributes: false,
-  })
-}

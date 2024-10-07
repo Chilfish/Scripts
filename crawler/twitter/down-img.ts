@@ -20,7 +20,7 @@ if (!name) {
   process.exit(1)
 }
 
-const imgs = await readJson<{ name: string, url: string }[]>('data/imgs.json')
+const imgs = await readJson<{ name: string, url: string }[]>('data/twitter/imgs.json')
 
 const dest = path.resolve('D:/Downloads', name)
 
