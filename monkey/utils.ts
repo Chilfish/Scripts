@@ -4,6 +4,11 @@ export const $ = <T = HTMLElement>(selector: string, root: any = document) => ro
 
 export const $$ = <T = HTMLElement>(selector: string, root: any = document) => Array.from(root?.querySelectorAll(selector) || []) as T[]
 
+// 配合 https://github.com/pushqrdx/vscode-inline-html 插件来高亮语法
+export function css(raw: TemplateStringsArray) {
+  return String.raw(raw)
+}
+
 export function saveBlobUrl(url: string, filename: string) {
   console.log(`Downloaded: ${filename} (${url})`)
   const a = document.createElement('a')
@@ -38,12 +43,6 @@ export function saveAs(
   URL.revokeObjectURL(url)
 }
 
-/**
- * Wait for an element to be added to the DOM.
- * @param selector - CSS selector for the element
- * @param options - Optional configuration
- * @returns Promise that resolves with the found element
- */
 export function waitForElement(
   selector: string,
   options: {

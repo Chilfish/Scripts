@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Chilfish's script
 // @namespace    chilfish/monkey
-// @version      2024.10.02
+// @version      2024.10.07
 // @author       monkey
 // @description  Chilfish's script
 // @icon         https://unavatar.io/chilfish
@@ -9,8 +9,6 @@
 // @updateURL    https://github.com/Chilfish/Scripts/raw/main/monkey/meta/chilfish.meta.js
 // @match        *://*/*
 // @grant        GM_addStyle
-// @grant        GM_getValue
-// @grant        GM_setValue
 // @run-at       document-end
 // ==/UserScript==
 
@@ -18,47 +16,39 @@
   'use strict'
 
   const _GM_addStyle = /* @__PURE__ */ (() => typeof GM_addStyle != 'undefined' ? GM_addStyle : void 0)()
-  const _GM_getValue = /* @__PURE__ */ (() => typeof GM_getValue != 'undefined' ? GM_getValue : void 0)()
-  const _GM_setValue = /* @__PURE__ */ (() => typeof GM_setValue != 'undefined' ? GM_setValue : void 0)()
   const $ = (selector, root = document) => root == null ? void 0 : root.querySelector(selector)
-  function waitForElement(selector, textContent = true) {
+  function waitForElement(selector, options = {}) {
+    const {
+      root = document.body,
+      timeout = 1e3 * 60,
+      checkTextContent = true,
+    } = options
     return new Promise((resolve) => {
-      function got(el2) {
-        if (textContent && el2.textContent)
-          resolve(el2)
-        return resolve(el2)
-      }
-      const el = $(selector)
-      if (el) {
-        got(el)
+      const existingElement = $(selector, root)
+      if (existingElement && (!checkTextContent || existingElement.textContent)) {
+        resolve(existingElement)
         return
       }
       const observer = new MutationObserver(() => {
-        const el2 = $(selector)
-        if (el2) {
+        const element = $(selector, root)
+        if (element && (!checkTextContent || element.textContent)) {
           observer.disconnect()
-          got(el2)
+          resolve(element)
         }
       })
-      observer.observe(document.body, {
+      observer.observe(root, {
         childList: true,
         subtree: true,
-        attributes: false,
+        attributes: true,
       })
-    })
-  }
-  const store = {
-    get(key) {
-      const data = _GM_getValue(key)
-      if (!data) {
-        this.set(key, null)
-        return null
+      if (timeout > 0) {
+        setTimeout(() => {
+          observer.disconnect()
+          console.warn(`Timeout waiting for element: ${selector}`)
+          resolve(null)
+        }, timeout)
       }
-      return data
-    },
-    set(key, value) {
-      _GM_setValue(key, value)
-    },
+    })
   }
   function numFmt(num) {
     return num.toString().replace(/\B(?=(\d{4})+(?!\d))/g, ',')
@@ -87,7 +77,6 @@
       css`
       div, span {
         font-size: 14px !important;
-        font-family: 'Microsoft YaHei' !important;
       }
       .css-175oi2r.r-1pi2tsx.r-1wtj0ep.r-1rnoaur.r-o96wvk.r-is05cd {
         width: auto !important; /* left nav item*/
@@ -102,34 +91,7 @@
         display: none !important;
       }
   `
-      rmRetweet()
     },
-  }
-  function rmRetweet() {
-    const svgWapper = '.css-175oi2r.r-18kxxzh.r-ogg1b9.r-1mrc8m9.r-obd0qt.r-1777fci'
-    const whiteList = store.get('whiteList') || []
-    const observer = new MutationObserver(ms => ms.forEach((mutation) => {
-      mutation.addedNodes.forEach((node) => {
-        let _a, _b, _c
-        if (mutation.type !== 'childList')
-          return
-        const el = node
-        if (node.nodeType === Node.ELEMENT_NODE && el.tagName === 'DIV') {
-          const svg = $(svgWapper, el)
-          if (!svg)
-            return
-          const username = ((_b = (_a = svg.nextElementSibling) == null ? void 0 : _a.textContent) == null ? void 0 : _b.split(' ')[0]) || ''
-          if (whiteList.includes(username))
-            return;
-          (_c = svg.closest('article')) == null ? void 0 : _c.remove()
-        }
-      })
-    }))
-    observer.observe(document.body, {
-      childList: true,
-      subtree: true,
-      attributes: false,
-    })
   }
   const __vite_glob_0_1 = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
     __proto__: null,

@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         推特小工具
 // @namespace    chilfish/monkey
-// @version      2024.10.04
+// @version      2024.10.07
 // @author       monkey
 // @description  推特小工具
 // @icon         https://abs.twimg.com/favicons/twitter.ico
@@ -9,9 +9,11 @@
 // @updateURL    https://github.com/Chilfish/Scripts/raw/main/monkey/meta/twitter-utils.meta.js
 // @match        https://twitter.com/*
 // @match        https://x.com/*
-// @require      https://cdn.jsdelivr.net/npm/dayjs@1.11.10/dayjs.min.js
-// @require      https://cdn.jsdelivr.net/npm/@preact/signals-core@1.5.1/dist/signals-core.min.js
 // @grant        GM_addStyle
+// @grant        GM_deleteValue
+// @grant        GM_download
+// @grant        GM_getValue
+// @grant        GM_setValue
 // @grant        unsafeWindow
 // @run-at       document-start
 // ==/UserScript==

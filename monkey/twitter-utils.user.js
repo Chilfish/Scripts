@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         推特小工具
 // @namespace    chilfish/monkey
-// @version      2024.10.04
+// @version      2024.10.07
 // @author       monkey
 // @description  推特小工具
 // @icon         https://abs.twimg.com/favicons/twitter.ico
@@ -9,90 +9,43 @@
 // @updateURL    https://github.com/Chilfish/Scripts/raw/main/monkey/meta/twitter-utils.meta.js
 // @match        https://twitter.com/*
 // @match        https://x.com/*
-// @require      https://cdn.jsdelivr.net/npm/dayjs@1.11.10/dayjs.min.js
-// @require      https://cdn.jsdelivr.net/npm/@preact/signals-core@1.5.1/dist/signals-core.min.js
 // @grant        GM_addStyle
+// @grant        GM_deleteValue
+// @grant        GM_download
+// @grant        GM_getValue
+// @grant        GM_setValue
 // @grant        unsafeWindow
 // @run-at       document-start
 // ==/UserScript==
 
-(function (signalsCore) {
+(function () {
   'use strict'
 
   const __defProp = Object.defineProperty
   const __defNormalProp = (obj, key, value) => key in obj ? __defProp(obj, key, { enumerable: true, configurable: true, writable: true, value }) : obj[key] = value
   const __publicField = (obj, key, value) => __defNormalProp(obj, typeof key !== 'symbol' ? `${key}` : key, value)
   const _GM_addStyle = /* @__PURE__ */ (() => typeof GM_addStyle != 'undefined' ? GM_addStyle : void 0)()
+  const _GM_deleteValue = /* @__PURE__ */ (() => typeof GM_deleteValue != 'undefined' ? GM_deleteValue : void 0)()
+  const _GM_download = /* @__PURE__ */ (() => typeof GM_download != 'undefined' ? GM_download : void 0)()
+  const _GM_getValue = /* @__PURE__ */ (() => typeof GM_getValue != 'undefined' ? GM_getValue : void 0)()
+  const _GM_setValue = /* @__PURE__ */ (() => typeof GM_setValue != 'undefined' ? GM_setValue : void 0)()
   const _unsafeWindow = /* @__PURE__ */ (() => typeof unsafeWindow != 'undefined' ? unsafeWindow : void 0)()
   const appname = '[twitter-utils]'
-  class Logger {
-    constructor() {
-      __publicField(this, 'index', 0)
-      __publicField(this, 'buffer', [])
-      __publicField(this, 'bufferTimer', null)
-    }
-
-    info(line, ...args) {
-      console.info(appname, line, ...args)
-      this.writeBuffer({ type: 'info', line, index: this.index++ })
-    }
-
-    warn(line, ...args) {
-      console.warn(appname, line, ...args)
-      this.writeBuffer({ type: 'warn', line, index: this.index++ })
-    }
-
-    error(line, ...args) {
-      console.error(appname, line, ...args)
-      this.writeBuffer({ type: 'error', line, index: this.index++ })
-    }
-
-    errorWithBanner(msg, err, ...args) {
-      this.error(
-        `${msg} (Message: ${(err == null ? void 0 : err.message) ?? 'none'})
-  This may be a problem caused by Twitter updates.
-  Please file an issue on GitHub:
-  https://github.com/prinsss/twitter-web-exporter/issues`,
-        ...args,
-      )
-    }
-
-    debug(...args) {
-      console.debug(...args)
-    }
-
-    /**
-     * Buffer log lines to reduce the number of signal and DOM updates.
-     */
-    writeBuffer(log) {
-      this.buffer.push(log)
-      if (this.bufferTimer) {
-        clearTimeout(this.bufferTimer)
-      }
-      this.bufferTimer = window.setTimeout(() => {
-        this.bufferTimer = null
-        this.flushBuffer()
-      }, 0)
-    }
-
-    /**
-     * Flush buffered log lines and update the UI.
-     */
-    flushBuffer() {
-      this.buffer = []
-    }
+  const logger = {
+    info: console.info,
+    warn: console.warn,
+    error: console.error,
+    errorWithBanner: (msg, err, ...args) => {
+      console.error(appname, msg, (err == null ? void 0 : err.message) ?? 'none', ...args)
+    },
+    debug: console.debug,
   }
-  const logger = new Logger()
   const globalObject = _unsafeWindow ?? window ?? globalThis
   const xhrOpen = globalObject.XMLHttpRequest.prototype.open
   class ExtensionManager {
     constructor() {
       __publicField(this, 'extensions', /* @__PURE__ */ new Map())
       __publicField(this, 'disabledExtensions', /* @__PURE__ */ new Set())
-      /**
-       * Signal for subscribing to extension changes.
-       */
-      __publicField(this, 'signal', new signalsCore.Signal(1))
       this.installHttpHooks()
     }
 
@@ -133,7 +86,6 @@
         ext.enabled = true
         ext.setup()
         logger.debug(`Enabled extension: ${name}`)
-        this.signal.value++
       }
       catch (err) {
         logger.error(`Failed to enable extension: ${name}`, err)
@@ -147,7 +99,6 @@
         ext.enabled = false
         ext.dispose()
         logger.debug(`Disabled extension: ${name}`)
-        this.signal.value++
       }
       catch (err) {
         logger.error(`Failed to disable extension: ${name}`, err)
@@ -221,6 +172,379 @@
     }
   }
   const extensionManager = new ExtensionManager()
+  const $ = (selector, root = document) => root == null ? void 0 : root.querySelector(selector)
+  const $$ = (selector, root = document) => Array.from((root == null ? void 0 : root.querySelectorAll(selector)) || [])
+  function waitForElement(selector, options = {}) {
+    const {
+      root = document.body,
+      timeout = 1e3 * 60,
+      checkTextContent = true,
+    } = options
+    return new Promise((resolve) => {
+      const existingElement = $(selector, root)
+      if (existingElement && (!checkTextContent || existingElement.textContent)) {
+        resolve(existingElement)
+        return
+      }
+      const observer = new MutationObserver(() => {
+        const element = $(selector, root)
+        if (element && (!checkTextContent || element.textContent)) {
+          observer.disconnect()
+          resolve(element)
+        }
+      })
+      observer.observe(root, {
+        childList: true,
+        subtree: true,
+        attributes: true,
+      })
+      if (timeout > 0) {
+        setTimeout(() => {
+          observer.disconnect()
+          console.warn(`Timeout waiting for element: ${selector}`)
+          resolve(null)
+        }, timeout)
+      }
+    })
+  }
+  const store = {
+    get(key, fallback) {
+      const data = _GM_getValue(key)
+      if (!data) {
+        this.set(key, fallback)
+        return fallback
+      }
+      return data
+    },
+    set(key, value) {
+      _GM_setValue(key, value)
+    },
+    remove(key) {
+      _GM_deleteValue(key)
+    },
+  }
+  const downloader = /* @__PURE__ */ (() => {
+    const tasks = []
+    const MAX_RETRY = 2
+    const MAX_THREADS = 2
+    let activeThreads = 0
+    let retryCount = 0
+    function addTask(task) {
+      tasks.push(task)
+      if (activeThreads < MAX_THREADS) {
+        activeThreads++
+        processNextTask()
+      }
+    }
+    async function processNextTask() {
+      const task = tasks.shift()
+      if (!task)
+        return
+      await executeTask(task)
+      if (tasks.length > 0 && activeThreads <= MAX_THREADS)
+        processNextTask()
+      else
+        activeThreads--
+    }
+    const handleRetry = (task, result) => {
+      let _a
+      retryCount++
+      if (retryCount === 3)
+        activeThreads = 1
+      if (task.retry && task.retry >= MAX_RETRY || ((_a = result.details) == null ? void 0 : _a.current) === 'USER_CANCELED') {
+        task.onerror(result)
+      }
+      else {
+        if (activeThreads === 1)
+          task.retry = (task.retry || 0) + 1
+        addTask(task)
+      }
+    }
+    function executeTask(task) {
+      return new Promise(
+        resolve => _GM_download({
+          url: task.url,
+          name: task.name,
+          onload: () => {
+            task.onload()
+            resolve()
+          },
+          onerror: (result) => {
+            handleRetry(task, result)
+            resolve()
+          },
+          ontimeout: () => {
+            handleRetry(task, { details: { current: 'TIMEOUT' } })
+            resolve()
+          },
+        }),
+      )
+    }
+    return { add: addTask }
+  })()
+  function getCookie(cookie) {
+    if (!cookie)
+      cookie = document && document.cookie
+    if (typeof cookie === 'object') {
+      const cookies2 = {}
+      cookie.forEach(({ name, value }) => {
+        cookies2[name] = value
+      })
+      return cookies2
+    }
+    const cookies = cookie.split(';').map(cookie2 => cookie2.split('=').map(c => c.trim())).reduce((acc, [key, value]) => ({ ...acc, [key]: value }), {})
+    return cookies
+  }
+  function formatDate(time, fmt = 'YYYY-MM-DD HH:mm:ss:SSS') {
+    if (typeof time === 'number' && time < 1e12)
+      time *= 1e3
+    const date = new Date(time)
+    if (Number.isNaN(date.getTime()))
+      return ''
+    const pad = num => num.toString().padStart(2, '0')
+    const year = date.getFullYear()
+    const month = pad(date.getMonth() + 1)
+    const day = pad(date.getDate())
+    const hours = pad(date.getHours())
+    const minutes = pad(date.getMinutes())
+    const seconds = pad(date.getSeconds())
+    const milliseconds = pad(date.getMilliseconds())
+    return fmt.replace('YYYY', year.toString()).replace('MM', month).replace('DD', day).replace('HH', hours).replace('mm', minutes).replace('ss', seconds).replace('SSS', milliseconds)
+  }
+  const style$1 = '.tmd-down {\n    margin-left: 12px;\n    order: 99;\n}\n\n.tmd-down:hover>div>div>div>div {\n    color: rgba(29, 161, 242, 1.0);\n}\n\n.tmd-down:hover>div>div>div>div>div {\n    background-color: rgba(29, 161, 242, 0.1);\n}\n\n.tmd-down:active>div>div>div>div>div {\n    background-color: rgba(29, 161, 242, 0.2);\n}\n\n.tmd-down:hover svg {\n    color: rgba(29, 161, 242, 1.0);\n}\n\n.tmd-down:hover div:first-child:not(:last-child) {\n    background-color: rgba(29, 161, 242, 0.1);\n}\n\n.tmd-down:active div:first-child:not(:last-child) {\n    background-color: rgba(29, 161, 242, 0.2);\n}\n\n.tmd-down.tmd-media {\n    position: absolute;\n    right: 0;\n}\n\n.tmd-down.tmd-media>div {\n    display: flex;\n    border-radius: 99px;\n    margin: 2px;\n}\n\n.tmd-down.tmd-media>div>div {\n    display: flex;\n    margin: 6px;\n    color: #fff;\n}\n\n.tmd-down.tmd-media:hover>div {\n    background-color: rgba(255, 255, 255, 0.6);\n}\n\n.tmd-down.tmd-media:hover>div>div {\n    color: rgba(29, 161, 242, 1.0);\n}\n\n.tmd-down.tmd-media:not(:hover)>div>div {\n    filter: drop-shadow(0 0 1px #000);\n}\n\n.tmd-down g {\n    display: none;\n}\n\n.tmd-down.download g.download,\n.tmd-down.completed g.completed,\n.tmd-down.loading g.loading,\n.tmd-down.failed g.failed {\n    display: unset;\n}\n\n.tmd-down.loading svg {\n    animation: spin 1s linear infinite;\n}\n\n@keyframes spin {\n    0% {\n        transform: rotate(0deg);\n    }\n\n    100% {\n        transform: rotate(360deg);\n    }\n}\n\n.tmd-btn {\n    display: inline-block;\n    background-color: #1DA1F2;\n    color: #FFFFFF;\n    padding: 0 20px;\n    border-radius: 99px;\n}\n\n.tmd-tag {\n    display: inline-block;\n    background-color: #FFFFFF;\n    color: #1DA1F2;\n    padding: 0 10px;\n    border-radius: 10px;\n    border: 1px solid #1DA1F2;\n    font-weight: bold;\n    margin: 5px;\n}\n\n.tmd-btn:hover {\n    background-color: rgba(29, 161, 242, 0.9);\n}\n\n.tmd-tag:hover {\n    background-color: rgba(29, 161, 242, 0.1);\n}\n\n.tmd-down.tmd-img {\n    position: absolute;\n    right: 0;\n    bottom: 0;\n    display: none !important;\n}\n\n.tmd-down.tmd-img>div {\n    display: flex;\n    border-radius: 99px;\n    margin: 2px;\n    background-color: rgba(255, 255, 255, 0.6);\n}\n\n.tmd-down.tmd-img>div>div {\n    display: flex;\n    margin: 6px;\n    color: #fff !important;\n}\n\n.tmd-down.tmd-img:not(:hover)>div>div {\n    filter: drop-shadow(0 0 1px #000);\n}\n\n.tmd-down.tmd-img:hover>div>div {\n    color: rgba(29, 161, 242, 1.0);\n}\n\n:hover>.tmd-down.tmd-img,\n.tmd-img.loading,\n.tmd-img.completed,\n.tmd-img.failed {\n    display: block !important;\n}\n\n.tweet-detail-action-item {\n    width: 20% !important;\n}'
+  async function fetchTweet(status_id) {
+    const base_url = `https://${location.hostname}/i/api/graphql/NmCeCgkVlsRGS1cAwqtgmw/TweetDetail`
+    const variables = { focalTweetId: status_id, with_rux_injections: false, includePromotedContent: true, withCommunity: true, withQuickPromoteEligibilityTweetFields: true, withBirdwatchNotes: true, withVoice: true, withV2Timeline: true }
+    const features = { rweb_lists_timeline_redesign_enabled: true, responsive_web_graphql_exclude_directive_enabled: true, verified_phone_label_enabled: false, creator_subscriptions_tweet_preview_api_enabled: true, responsive_web_graphql_timeline_navigation_enabled: true, responsive_web_graphql_skip_user_profile_image_extensions_enabled: false, tweetypie_unmention_optimization_enabled: true, responsive_web_edit_tweet_api_enabled: true, graphql_is_translatable_rweb_tweet_is_translatable_enabled: true, view_counts_everywhere_api_enabled: true, longform_notetweets_consumption_enabled: true, responsive_web_twitter_article_tweet_consumption_enabled: false, tweet_awards_web_tipping_enabled: false, freedom_of_speech_not_reach_fetch_enabled: true, standardized_nudges_misinfo: true, tweet_with_visibility_results_prefer_gql_limited_actions_policy_enabled: true, longform_notetweets_rich_text_read_enabled: true, longform_notetweets_inline_media_enabled: true, responsive_web_media_download_video_enabled: false, responsive_web_enhance_cards_enabled: false }
+    const url = encodeURI(`${base_url}?variables=${JSON.stringify(variables)}&features=${JSON.stringify(features)}`)
+    const cookies = getCookie()
+    const headers = {
+      'authorization': 'Bearer AAAAAAAAAAAAAAAAAAAAANRILgAAAAAAnNwIzUejRCOuH5E6I8xnZz4puTs%3D1Zv7ttfk8LF81IUq16cHjhLTvJu4FA33AGWWjCpTnA',
+      'x-twitter-active-user': 'yes',
+      'x-csrf-token': cookies.ct0,
+    }
+    if (cookies.ct0.length === 32)
+      headers['x-guest-token'] = cookies.gt
+    const tweet_detail = await fetch(url, { headers }).then(result => result.json())
+    const tweet_entrie = tweet_detail.data.threaded_conversation_with_injections_v2.instructions[0].entries.find(n => n.entryId === `tweet-${status_id}`)
+    const tweet_result = tweet_entrie.content.itemContent.tweet_results.result
+    return tweet_result.tweet || tweet_result
+  }
+  const historyKey = 'download_history'
+  const idHistory = store.get(historyKey, [])
+  function useHistory(value) {
+    if (value) {
+      idHistory.push(value)
+      store.set(historyKey, idHistory)
+    }
+    return idHistory
+  }
+  const downBtn = `<svg viewBox="0 0 24 24" style="width: 18px; height: 18px;"><g class="download"><path d="M3,14 v5 q0,2 2,2 h14 q2,0 2,-2 v-5 M7,10 l4,4 q1,1 2,0 l4,-4 M12,3 v11" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" /></g>
+<g class="completed"><path d="M3,14 v5 q0,2 2,2 h14 q2,0 2,-2 v-5 M7,10 l3,4 q1,1 2,0 l8,-11" fill="none" stroke="#1DA1F2" stroke-width="2" stroke-linecap="round" /></g>
+<g class="loading"><circle cx="12" cy="12" r="10" fill="none" stroke="#1DA1F2" stroke-width="4" opacity="0.4" /><path d="M12,2 a10,10 0 0 1 10,10" fill="none" stroke="#1DA1F2" stroke-width="4" stroke-linecap="round" /></g>
+<g class="failed"><circle cx="12" cy="12" r="11" fill="#f33" stroke="currentColor" stroke-width="2" opacity="0.8" /><path d="M14,5 a1,1 0 0 0 -4,0 l0.5,9.5 a1.5,1.5 0 0 0 3,0 z M12,17 a2,2 0 0 0 0,4 a2,2 0 0 0 0,-4" fill="#fff" stroke="none" /></g></svg>
+`
+  function detect(node) {
+    if (!node)
+      return
+    const isArticle = node.tagName === 'ARTICLE' || node.tagName === 'DIV'
+    const article = isArticle ? $('article', node) || node.closest('article') : null
+    if (article)
+      addButtonToImgs(article)
+    const isListItems = node.tagName === 'LI' && node.getAttribute('role') === 'listitem' && [node] || node.tagName === 'DIV'
+    const listitems = isListItems ? $$('li[role="listitem"]', node) : null
+    listitems == null ? void 0 : listitems.forEach(item => addButtonToMediaList(item))
+  }
+  function createDownBtn() {
+    const btn_down = document.createElement('div')
+    btn_down.innerHTML = `<div><div>${downBtn}</div></div>`
+    return btn_down
+  }
+  function addButtonToImgs(article) {
+    if (article.dataset.detected)
+      return
+    article.dataset.detected = 'true'
+    const media_selector = [
+      'a[href*="/photo/1"]',
+      'div[role="progressbar"]',
+      'div[data-testid="playButton"]',
+      'a[href="/settings/content_you_see"]',
+      // hidden content
+      'div.media-image-container',
+      // for tweetdeck
+      'div.media-preview-container',
+      // for tweetdeck
+      'div[aria-labelledby]>div:first-child>div[role="button"][tabindex="0"]',
+      // for audio (experimental)
+    ]
+    const media = $(media_selector.join(','), article)
+    if (!media)
+      return
+    const status_item = $('a[href*="/status/"]', article)
+    const status_id = getStatusId(status_item)
+    if (!status_id)
+      return
+    const btn_group = $('div[role="group"]:last-of-type, ul.tweet-actions, ul.tweet-detail-actions', article)
+    const btn_share = $$(':scope>div>div, li.tweet-action-item>a, li.tweet-detail-action-item>a', btn_group).pop().parentNode
+    const btn_down = btn_share.cloneNode(true)
+    $('svg', btn_down).innerHTML = downBtn
+    const is_exist = idHistory.includes(status_id)
+    const title = is_exist ? 'completed' : 'download'
+    set_status(btn_down, 'tmd-down')
+    set_status(btn_down, title, title)
+    btn_group == null ? void 0 : btn_group.insertBefore(btn_down, btn_share.nextSibling)
+    btn_down.onclick = () => click(btn_down, status_id, is_exist)
+    const imgs = $$('a[href*="/photo/"]', article)
+    if (imgs.length < 1)
+      return
+    imgs.forEach((img) => {
+      let _a, _b
+      const index = Number((_a = img.href.split('/status/').pop()) == null ? void 0 : _a.split('/').pop()) || 0
+      const is_exist2 = idHistory.includes(status_id)
+      const btn_down2 = createDownBtn()
+      btn_down2.classList.add('tmd-down', 'tmd-img')
+      btn_down2.onclick = (e) => {
+        e.preventDefault()
+        click(btn_down2, status_id, is_exist2, index)
+      };
+      (_b = img.parentNode) == null ? void 0 : _b.appendChild(btn_down2)
+      set_status(btn_down2, 'download')
+    })
+  }
+  function getStatusId(item) {
+    let _a
+    const regex = /\/status\/(\d+)/
+    const status_id = (_a = item == null ? void 0 : item.href.match(regex)) == null ? void 0 : _a[1]
+    return status_id || ''
+  }
+  function addButtonToMediaList(item) {
+    if (item.dataset.detected)
+      return
+    item.dataset.detected = 'true'
+    const status_item = $('a[href*="/status/"]', item)
+    const status_id = getStatusId(status_item)
+    const is_exist = idHistory.includes(status_id)
+    const btn_down = createDownBtn()
+    btn_down.classList.add('tmd-down', 'tmd-media')
+    btn_down.onclick = () => click(btn_down, status_id, is_exist)
+    set_status(
+      btn_down,
+      is_exist ? 'completed' : 'download',
+      is_exist ? 'completed' : 'download',
+    )
+    item.appendChild(btn_down)
+  }
+  async function click(btn, status_id, is_exist, index) {
+    if (btn.classList.contains('loading'))
+      return
+    set_status(btn, 'loading')
+    const json = await fetchTweet(status_id)
+    const tweet = json.legacy
+    const user = json.core.user_results.result.legacy
+    const info = {}
+    const outFmt = `{user-id}-{date-time}-{status-id}`
+    info['status-id'] = status_id
+    info['user-name'] = user.name
+    info['user-id'] = user.screen_name
+    info['date-time'] = formatDate(tweet.created_at, 'YYYYMMDD_HHmmss')
+    let medias = tweet.extended_entities && tweet.extended_entities.media
+    if (index)
+      medias = [medias[index - 1]]
+    if (medias.length < 1) {
+      set_status(btn, 'failed', 'MEDIA_NOT_FOUND')
+      return
+    }
+    let tasks = medias.length
+    const tasks_result = []
+    medias.forEach((media, i) => {
+      let _a
+      info.url = `${media.media_url_https.replace('jpg', 'png')}:large`
+      info.file = ((_a = info.url.split('/').pop()) == null ? void 0 : _a.split(/[:?]/).shift()) || 'media'
+      info['file-name'] = info.file.split('.').shift() || 'media'
+      info['file-ext'] = info.file.split('.').pop() || 'jpg'
+      info['file-type'] = media.type.replace('animated_', '') || 'photo'
+      const shouldAppendIndex = (medias.length > 1 || index) && outFmt.match('{file-name}')
+      const indexSuffix = shouldAppendIndex ? `-${index ? index - 1 : i}` : ''
+      const formattedOut = `${outFmt}${indexSuffix}.{file-ext}`
+      info.out = formattedOut.replace(/\{([^{}:]+)(:[^{}]+)?\}/g, (_match, name) => info[name])
+      downloader.add({
+        url: info.url,
+        name: info.out,
+        onload: async () => {
+          tasks -= 1
+          tasks_result.push(medias.length > 1 || index ? `${index || i + 1}: ` : '')
+          set_status(btn, void 0, tasks_result.sort().join('\n'))
+          if (tasks > 0)
+            return
+          set_status(btn, 'completed', 'completed')
+          if (!is_exist) {
+            idHistory.push(status_id)
+            useHistory(status_id)
+          }
+        },
+        onerror: (result) => {
+          tasks = -1
+          tasks_result.push((medias.length > 1 ? `${i + 1}: ` : '') + result.details.current)
+          set_status(btn, 'failed', tasks_result.sort().join('\n'))
+        },
+      })
+    })
+  }
+  function set_status(btn, className, title) {
+    if (className) {
+      btn.classList.remove('download', 'completed', 'loading', 'failed')
+      btn.classList.add(className)
+    }
+    if (title)
+      btn.title = title
+  }
+  const imgDownload = {
+    tagName: 'DIV',
+    style: style$1,
+    action: detect,
+  }
+  function removeRetweets(el) {
+    let _a, _b, _c
+    const svgWapper = '.css-175oi2r.r-18kxxzh.r-ogg1b9.r-1mrc8m9.r-obd0qt.r-1777fci'
+    const whiteList = store.get('whiteList', [])
+    const svg = $(svgWapper, el)
+    if (!svg)
+      return
+    const username = ((_b = (_a = svg.nextElementSibling) == null ? void 0 : _a.textContent) == null ? void 0 : _b.split(' ')[0]) || ''
+    if (whiteList == null ? void 0 : whiteList.includes(username))
+      return;
+    (_c = svg.closest('article')) == null ? void 0 : _c.remove()
+  }
+  const rmRetweets = {
+    tagName: 'DIV',
+    action: removeRetweets,
+  }
+  const modules = [
+    imgDownload,
+    rmRetweets,
+  ]
+  function observeDoms() {
+    const styles = modules.map(({ style: style2 }) => style2).filter(Boolean).join('\n').replace(/\\n|\n| {2}/g, '')
+    document.head.insertAdjacentHTML('beforeend', `<style id="twitter-utils">${styles}</style>`)
+    const observer = new MutationObserver(ms => ms.forEach((mutation) => {
+      mutation.addedNodes.forEach((node) => {
+        if (mutation.type !== 'childList' || node.nodeType !== Node.ELEMENT_NODE) {
+          return
+        }
+        const el = node
+        modules.forEach(({ tagName, action }) => {
+          if (el.tagName === tagName.toUpperCase()) {
+            action(el)
+          }
+        })
+      })
+    }))
+    observer.observe(document.body, {
+      childList: true,
+      subtree: true,
+      attributes: false,
+    })
+  }
   function extractTimelineTweet(itemContent) {
     const tweetUnion = itemContent.tweet_results.result
     if (!tweetUnion) {
@@ -329,50 +653,6 @@
   }
   function parseText(text) {
     return new TextParser(text).parse()
-  }
-  const $ = (selector, root = document) => root == null ? void 0 : root.querySelector(selector)
-  const $$ = (selector, root = document) => Array.from((root == null ? void 0 : root.querySelectorAll(selector)) || [])
-  function waitForElement(selector, textContent = true) {
-    return new Promise((resolve) => {
-      function got(el2) {
-        if (textContent && el2.textContent)
-          resolve(el2)
-        return resolve(el2)
-      }
-      const el = $(selector)
-      if (el) {
-        got(el)
-        return
-      }
-      const observer = new MutationObserver(() => {
-        const el2 = $(selector)
-        if (el2) {
-          observer.disconnect()
-          got(el2)
-        }
-      })
-      observer.observe(document.body, {
-        childList: true,
-        subtree: true,
-        attributes: false,
-      })
-    })
-  }
-  function formatDate(time, fmt = 'YYYY-MM-DD HH:mm:ss:SSS') {
-    if (typeof time === 'number' && time < 1e12)
-      time *= 1e3
-    const date = new Date(time)
-    if (Number.isNaN(date.getTime()))
-      return ''
-    const pad = num => num.toString().padStart(2, '0')
-    const year = date.getFullYear()
-    const month = pad(date.getMonth() + 1)
-    const day = pad(date.getDate())
-    const hours = pad(date.getHours())
-    const minutes = pad(date.getMinutes())
-    const seconds = pad(date.getSeconds())
-    const milliseconds = pad(date.getMilliseconds())
-    return fmt.replace('YYYY', year.toString()).replace('MM', month).replace('DD', day).replace('HH', hours).replace('mm', minutes).replace('ss', seconds).replace('SSS', milliseconds)
   }
   function processTweet() {
     let _a, _b
@@ -506,7 +786,7 @@
     return num.toString().replace(/\B(?=(\d{4})+(?!\d))/g, ',')
   }
   function fixFollowers(followers) {
-    if (!followers || followers < 1e3)
+    if (!followers || followers < 1e4)
       return
     const selector = 'a span.css-1jxf684.r-bcqeeo.r-1ttztb7.r-qvutc0.r-poiln3.r-n6v787.r-1f529hi.r-b88u0q'
     const el = $$(selector)
@@ -583,4 +863,5 @@ div, span {
   extensionManager.add(UserTweetsModule)
   extensionManager.add(TweetDetailModule)
   extensionManager.start()
-})(preactSignalsCore)
+  observeDoms()
+})()

@@ -1,4 +1,3 @@
-import dayjs from 'dayjs'
 import logger from './logger'
 
 /**
@@ -24,22 +23,6 @@ export function capitalizeFirstLetter(str: string) {
 
 export function xssFilter(str: string) {
   return str.replace(/"/g, '&quot;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
-}
-
-export function parseTwitterDateTime(str: string) {
-  // "Thu Sep 28 11:07:25 +0000 2023"
-  // const regex = /^\w+ (\w+) (\d+) ([\d:]+) \+0000 (\d+)$/;
-  const trimmed = str.replace(/^\w+ (.*)$/, '$1')
-  return dayjs(trimmed, 'MMM DD HH:mm:ss ZZ YYYY', 'en')
-}
-
-export function formatDateTime(date: string | number | dayjs.Dayjs, format?: string) {
-  if (typeof date === 'number' || typeof date === 'string') {
-    date = dayjs(date)
-  }
-
-  // Display in local time zone.
-  return date.format(format)
 }
 
 export function formatVideoDuration(durationInMs?: number): string {

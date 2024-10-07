@@ -11,8 +11,12 @@ const modules = [
 }[]
 
 export function observeDoms() {
-  const styles = modules.map(({ style }) => style).filter(Boolean).join('\n')
-  document.head.insertAdjacentHTML('beforeend', `<style>${styles}</style>`)
+  const styles = modules.map(({ style }) => style)
+    .filter(Boolean)
+    .join('\n')
+    .replace(/\\n|\n| {2}/g, '')
+
+  document.head.insertAdjacentHTML('beforeend', `<style id="twitter-utils">${styles}</style>`)
 
   const observer = new MutationObserver(ms => ms.forEach((mutation) => {
     mutation.addedNodes.forEach((node) => {
