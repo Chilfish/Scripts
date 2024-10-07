@@ -1,6 +1,11 @@
 .tmd-down {
     margin-left: 12px;
     order: 99;
+    cursor: pointer;
+}
+.tmd-bar-btn {
+    padding-top: 8px;
+    font-size: 1rem;
 }
 
 .tmd-down:hover>div>div>div>div {
@@ -30,6 +35,12 @@
 .tmd-down.tmd-media {
     position: absolute;
     right: 0;
+    display: none;
+}
+
+a[data-detected]:hover .tmd-down.tmd-media,
+article[data-detected]:hover .tmd-down.tmd-media {
+    display: flex;
 }
 
 .tmd-down.tmd-media>div {

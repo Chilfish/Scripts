@@ -83,7 +83,7 @@ const logger = {
   errorWithBanner: (msg: string, err?: Error, ...args: LogExtraArgs) => {
     console.error(appname, msg, err?.message ?? 'none', ...args)
   },
-  debug: console.debug,
+  debug: console.info,
 }
 
 export default logger

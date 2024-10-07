@@ -43,14 +43,14 @@ export function saveAs(
   URL.revokeObjectURL(url)
 }
 
-export function waitForElement(
+export function waitForElement<T = HTMLElement>(
   selector: string,
   options: {
     root?: Element | Document
     timeout?: number
     checkTextContent?: boolean
   } = {},
-): Promise<Element | null> {
+): Promise<T | null> {
   const {
     root = document.body,
     timeout = 1000 * 60,
@@ -61,7 +61,7 @@ export function waitForElement(
     // Check if element already exists
     const existingElement = $(selector, root)
     if (existingElement && (!checkTextContent || existingElement.textContent)) {
-      resolve(existingElement)
+      resolve(existingElement as T)
       return
     }
 
@@ -69,7 +69,7 @@ export function waitForElement(
       const element = $(selector, root)
       if (element && (!checkTextContent || element.textContent)) {
         observer.disconnect()
-        resolve(element)
+        resolve(element as T)
       }
     })
 
