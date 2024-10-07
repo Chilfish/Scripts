@@ -1,4 +1,5 @@
 import { ofetch } from 'ofetch'
+import { isNotInImport } from './cli'
 import { getCookieString } from './cookie'
 import { newBrowser } from './puppeteer'
 
@@ -42,14 +43,12 @@ export function checkNetwork(domain = 'x.com') {
   return new Promise<string>((res) => {
     fetch(`https://${domain}`)
       .then(_ => res('ok'))
-      .catch(err => res(
-        `${err.cause}`,
-      ))
+      .catch(err => res(`${err.cause}`))
   })
 }
 
-if (process.argv.includes('--TEST')) {
+if (isNotInImport(import.meta.filename)) {
   checkNetwork('x.com').then(console.log)
-  getBiliAnonToken().then(console.log)
   getWeiboAnonToken().then(console.log)
+  getBiliAnonToken().then(console.log)
 }

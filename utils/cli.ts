@@ -22,10 +22,15 @@ export async function runCommand(command: string) {
 }
 
 /**
- * Check the filename is same to `tsx path/file.ts`
+ * Check if the script is not imported
+ *
+ * @example
+ * ```ts
+ * isInCli(import.meta.filename)
+ * ```
  */
-export function isInCli(filename: string) {
+export function isNotInImport(importMetaFilename: string) {
   const [_tsx, argFile] = process.argv
 
-  return path.resolve(filename) === path.resolve(argFile)
+  return path.resolve(importMetaFilename) === path.resolve(argFile)
 }
