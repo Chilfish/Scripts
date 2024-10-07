@@ -1,8 +1,14 @@
 import { $, store } from '~/monkey/utils'
 
+// TODO: set as path like 'config.rmtweets.enable'
+const isEnable = store.get<boolean>('enableRmTweets', false)
+const whiteList = store.get<string[]>('whiteList', [])
+
 function removeRetweets(el: HTMLElement) {
+  if (!isEnable)
+    return
+
   const svgWapper = '.css-175oi2r.r-18kxxzh.r-ogg1b9.r-1mrc8m9.r-obd0qt.r-1777fci'
-  const whiteList = store.get<string[]>('whiteList', [])
 
   const svg = $(svgWapper, el)
   if (!svg)

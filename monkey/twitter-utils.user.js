@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         推特小工具
 // @namespace    chilfish/monkey
-// @version      2024.10.07
+// @version      2024.10.08
 // @author       monkey
 // @description  推特小工具
 // @icon         https://abs.twimg.com/favicons/twitter.ico
@@ -503,10 +503,13 @@
     style: style$1,
     action: detect,
   }
+  const isEnable = store.get('enableRmTweets', false)
+  const whiteList = store.get('whiteList', [])
   function removeRetweets(el) {
     let _a, _b, _c
+    if (!isEnable)
+      return
     const svgWapper = '.css-175oi2r.r-18kxxzh.r-ogg1b9.r-1mrc8m9.r-obd0qt.r-1777fci'
-    const whiteList = store.get('whiteList', [])
     const svg = $(svgWapper, el)
     if (!svg)
       return
