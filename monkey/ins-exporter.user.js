@@ -119,7 +119,7 @@
     saveBlobUrl(url, filename)
     URL.revokeObjectURL(url)
   }
-  function formatDate(time, fmt = 'YYYY-MM-DD HH:mm:ss:SSS') {
+  function formatDate(time, fmt = 'YYYY-MM-DD HH:mm:ss') {
     if (typeof time === 'number' && time < 1e12)
       time *= 1e3
     const date = new Date(time)

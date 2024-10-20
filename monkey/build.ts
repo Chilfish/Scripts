@@ -26,8 +26,8 @@ for (const file of metaFiles) {
   await rename(`${cwd}/${file}`, `${cwd}/meta/${file}`)
 }
 
-console.log('lint the code')
+// console.log('lint the code')
 
-await runCommand(`cd ${cwd} && pnpm eslint **/*.js --fix`)
+// await runCommand(`cd ${cwd} && pnpm eslint **/*.js --fix`)
 
 console.log('build complete')

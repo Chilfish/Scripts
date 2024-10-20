@@ -1,4 +1,4 @@
-import { $, store } from '~/monkey/utils'
+import { $, $$, store } from '~/monkey/utils'
 
 // TODO: set as path like 'config.rmtweets.enable'
 const isEnable = store.get<boolean>('enableRmTweets', false)
@@ -14,11 +14,16 @@ function removeRetweets(el: HTMLElement) {
   if (!svg)
     return
 
-  const username = svg.nextElementSibling?.textContent?.split(' ')[0] || ''
+  const article = svg?.closest('article')
+  if (!article)
+    return
+
+  const username = $$('div[data-testid="User-Name"] span', article)[3]?.textContent?.replace('@', '') || ''
+
   if (whiteList?.includes(username))
     return
 
-  svg.closest('article')?.remove()
+  article.remove()
 }
 
 export default {

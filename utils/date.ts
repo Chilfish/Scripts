@@ -5,7 +5,7 @@
  */
 export function formatDate(
   time: string | number | Date,
-  fmt = 'YYYY-MM-DD HH:mm:ss:SSS',
+  fmt = 'YYYY-MM-DD HH:mm:ss',
 ) {
   if (typeof time === 'number' && time < 1e12)
     time *= 1000

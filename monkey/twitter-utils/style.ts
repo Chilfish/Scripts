@@ -1,8 +1,5 @@
 import { GM_addStyle } from '$'
-
-function css(strings: TemplateStringsArray) {
-  return String.raw(strings)
-}
+import { css } from '../utils'
 
 const style = css`
 div, span {

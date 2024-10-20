@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         推特小工具
 // @namespace    chilfish/monkey
-// @version      2024.10.08
+// @version      2024.10.20
 // @author       monkey
 // @description  推特小工具
 // @icon         https://abs.twimg.com/favicons/twitter.ico
@@ -183,6 +183,9 @@
   }
   const $ = (selector, root = document) => root == null ? void 0 : root.querySelector(selector)
   const $$ = (selector, root = document) => Array.from((root == null ? void 0 : root.querySelectorAll(selector)) || [])
+  function css(raw) {
+    return String.raw(raw)
+  }
   function waitForElement(selector, options = {}) {
     const {
       root = document.body,
@@ -291,7 +294,7 @@
     }
     return { add: addTask }
   })()
-  function formatDate(time, fmt = 'YYYY-MM-DD HH:mm:ss:SSS') {
+  function formatDate(time, fmt = 'YYYY-MM-DD HH:mm:ss') {
     if (typeof time === 'number' && time < 1e12)
       time *= 1e3
     const date = new Date(time)
@@ -444,17 +447,20 @@
   const isEnable = store.get('enableRmTweets', false)
   const whiteList = store.get('whiteList', [])
   function removeRetweets(el) {
-    let _a, _b, _c
+    let _a, _b
     if (!isEnable)
       return
     const svgWapper = '.css-175oi2r.r-18kxxzh.r-ogg1b9.r-1mrc8m9.r-obd0qt.r-1777fci'
     const svg = $(svgWapper, el)
     if (!svg)
       return
-    const username = ((_b = (_a = svg.nextElementSibling) == null ? void 0 : _a.textContent) == null ? void 0 : _b.split(' ')[0]) || ''
+    const article = svg == null ? void 0 : svg.closest('article')
+    if (!article)
+      return
+    const username = ((_b = (_a = $$('div[data-testid="User-Name"] span', article)[3]) == null ? void 0 : _a.textContent) == null ? void 0 : _b.replace('@', '')) || ''
     if (whiteList == null ? void 0 : whiteList.includes(username))
-      return;
-    (_c = svg.closest('article')) == null ? void 0 : _c.remove()
+      return
+    article.remove()
   }
   const rmRetweets = {
     tagName: 'DIV',
@@ -782,9 +788,6 @@
     intercept() {
       return UserTweetsInterceptor
     }
-  }
-  function css(strings) {
-    return String.raw(strings)
   }
   const style = css`
 div, span {

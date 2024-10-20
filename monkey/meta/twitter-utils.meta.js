@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         推特小工具
 // @namespace    chilfish/monkey
-// @version      2024.10.08
+// @version      2024.10.20
 // @author       monkey
 // @description  推特小工具
 // @icon         https://abs.twimg.com/favicons/twitter.ico
