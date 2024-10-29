@@ -3,6 +3,7 @@ import { ofetch } from 'ofetch'
 import { getWeiboAnonToken } from '~/utils'
 import {
   downloadBlob,
+  downloadFiles,
   runCommand,
 } from '~/utils/index.node'
 
@@ -78,12 +79,10 @@ async function main(url: string) {
   }
 
   const imageList = Object.values(data.pic_infos).map((pic: any) => pic.largest.url)
-  for (const imageUrl of imageList) {
-    await downloadBlob({
-      url: imageUrl,
-      fetchOptions: { headers: { cookie: token } },
-    })
-  }
+
+  await downloadFiles(imageList, {
+    fetchOptions: { headers: { cookie: token } },
+  })
 
   consola.success('Downloaded all images', imageList.length)
 }

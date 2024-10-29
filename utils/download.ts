@@ -7,6 +7,7 @@ import { consola } from 'consola'
 import { fetch, ProxyAgent, RequestInit } from 'undici'
 import { proxyUrl } from './constant'
 import { dir } from './file'
+import { PQueue, PQueueOptions } from './promise'
 
 export const proxy = new ProxyAgent(proxyUrl)
 export function proxyFetch(url: string, options?: RequestInit) {
@@ -18,37 +19,51 @@ export function proxyFetch(url: string, options?: RequestInit) {
 
 const streamPipeline = promisify(pipeline)
 
-export interface DownloadOptions {
+export interface DownloadFileInfo {
   url: string
+  name?: string
+}
+
+export interface DownloadOptions {
   raw?: boolean
   dest?: string
-  name?: string
   mime?: string
+  proxy?: boolean
   followRedirect?: boolean
   fetchOptions?: RequestInit
 }
-export async function downloadBlob(options: DownloadOptions): Promise<boolean> {
+
+const defaultOptions = {
+  dest: 'D:/Downloads',
+  followRedirect: true,
+}
+
+export async function downloadBlob(
+  options: (DownloadOptions & DownloadFileInfo) | string,
+): Promise<boolean> {
+  const { url, ...optionsRest } = typeof options === 'string' ? { url: options } : options
+
   const {
-    url,
     mime,
-    dest = 'D:/Downloads',
-    followRedirect = true,
+    dest,
+    followRedirect,
     fetchOptions,
-  } = options
-  let { name } = options
+    proxy,
+  } = { ...defaultOptions, ...optionsRest }
 
   if (!url)
     throw new Error('URL is required')
 
-  name = name?.trim() || new URL(url).pathname.split('/').pop() || 'unknown_file'
+  const name = optionsRest.name?.trim() || new URL(url).pathname.split('/').pop() || 'unknown_file'
   let filename = dir(`${dest}/${name}`)
 
   if (existsSync(filename)) {
     return true
   }
+  const fetcher = proxy ? proxyFetch : fetch
 
   try {
-    const res = await proxyFetch(url, fetchOptions)
+    const res = await fetcher(url, fetchOptions)
     const mimeType = res.headers.get('content-type')
 
     if (!res.ok || !res.body) {
@@ -61,7 +76,7 @@ export async function downloadBlob(options: DownloadOptions): Promise<boolean> {
     }
 
     // set file name to the original file's name
-    if (followRedirect && !options.name) {
+    if (followRedirect && !name) {
       const redirectedFilename = res.url.split('/').pop()
       if (redirectedFilename) {
         filename = path.resolve(dest, redirectedFilename)
@@ -81,4 +96,32 @@ export async function downloadBlob(options: DownloadOptions): Promise<boolean> {
     consola.error(`Failed to download ${url}:`, error)
     return false
   }
+}
+
+export async function downloadFiles(
+  files: DownloadFileInfo[] | string[],
+  options?: DownloadOptions & Partial<PQueueOptions>,
+) {
+  options = {
+    concurrency: 10,
+    ...defaultOptions,
+    ...options,
+  }
+
+  let downloaded = 0
+  const queue = new PQueue(options)
+  const fileArr = files.map(file => typeof file === 'string' ? { url: file } : file)
+
+  queue.addAll(fileArr.map(file => async () => {
+    const res = await downloadBlob({
+      ...options,
+      ...file,
+    })
+    if (res) {
+      downloaded++
+    }
+  }))
+  await queue.onIdle()
+
+  return downloaded
 }

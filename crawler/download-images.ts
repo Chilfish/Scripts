@@ -2,7 +2,7 @@ import { defineCommand, runMain } from 'citty'
 import { consola } from 'consola'
 import { Page } from 'puppeteer'
 import { devices } from '~/utils'
-import { downloadBlob, newBrowser, prompt } from '~/utils/index.node'
+import { downloadFiles, newBrowser, prompt } from '~/utils/index.node'
 
 runMain(defineCommand({
   meta: {
@@ -35,9 +35,8 @@ runMain(defineCommand({
       url = await prompt('Enter URL: ')
 
     if (fetch) {
-      const urls = url.split(', ')
-      for (const url of urls)
-        await downloadBlob({ url })
+      const urls = url.split(', ').filter(Boolean)
+      await downloadFiles(urls)
       return
     }
 
@@ -109,13 +108,7 @@ async function downImage(
     )
   consola.info(`共有 ${imgs.length} 条`)
 
-  let cnt = 0
-
-  for (const url of imgs) {
-    const res = await downloadBlob({ url })
-    if (res)
-      cnt++
-  }
+  const cnt = await downloadFiles(imgs)
 
   consola.success(`已下载 ${cnt}`)
 }

@@ -1,9 +1,10 @@
-import PQueue from 'p-queue'
-import { fetch, ProxyAgent } from 'undici'
-import { buildUrl, proxyUrl, randomUserAgent } from '~/utils'
-import { dir, downloadBlob, readCookie } from '~/utils/index.node'
-
-const proxy = new ProxyAgent(proxyUrl)
+import { buildUrl, PQueue, randomUserAgent } from '~/utils'
+import {
+  dir,
+  downloadBlob,
+  proxyFetch,
+  readCookie,
+} from '~/utils/index.node'
 
 const cookie = readCookie('pixiv')
 const uid = 70847616
@@ -33,13 +34,12 @@ async function _fetch<T = any>(path: string, query: object = {}) {
     },
   })
 
-  return await fetch(url, {
+  return await proxyFetch(url, {
     headers: {
       cookie,
       'Referer': `https://www.pixiv.net/users/${uid}`,
       'User-Agent': randomUserAgent(),
     },
-    dispatcher: proxy,
   })
     .then(res => res.json() as Promise<T>)
     .catch((err) => {
@@ -83,7 +83,7 @@ async function main(page: number) {
     })
   }
 
-  await queue.onEmpty()
+  await queue.onIdle()
 
   console.log(`Downloading: ${urls.length}, total: ${worksCount}/${total}`)
 
@@ -101,7 +101,7 @@ async function main(page: number) {
     }))
   }
 
-  await queue.onEmpty()
+  await queue.onIdle()
 
   const hasNext = worksCount < total
   if (hasNext) {

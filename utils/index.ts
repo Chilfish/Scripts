@@ -4,6 +4,7 @@ export * from './date'
 export * from './fetch'
 export * from './math'
 export * from './progress'
+export * from './promise'
 export * from './url'
 
 export function isJsonStr(str: string) {
