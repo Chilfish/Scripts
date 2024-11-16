@@ -14,7 +14,6 @@ export default antfu({
     'unused-imports/no-unused-vars': 'warn',
     'no-undef': 'warn',
     'unicorn/consistent-function-scoping': 'warn',
-    'ts/no-unused-expressions': 'warn',
     'no-var': 'warn',
     'antfu/no-top-level-await': 'off',
     'vars-on-top': 'off',

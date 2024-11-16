@@ -31,11 +31,13 @@ export interface DownloadOptions {
   proxy?: boolean
   followRedirect?: boolean
   fetchOptions?: RequestInit
+  unique?: boolean
 }
 
 const defaultOptions = {
   dest: 'D:/Downloads',
   followRedirect: true,
+  unique: true,
 }
 
 export async function downloadBlob(
@@ -49,6 +51,7 @@ export async function downloadBlob(
     followRedirect,
     fetchOptions,
     proxy,
+    unique,
   } = { ...defaultOptions, ...optionsRest }
 
   if (!url)
@@ -57,7 +60,7 @@ export async function downloadBlob(
   const name = optionsRest.name?.trim() || new URL(url).pathname.split('/').pop() || 'unknown_file'
   let filename = dir(`${dest}/${name}`)
 
-  if (existsSync(filename)) {
+  if (existsSync(filename) && !unique) {
     return true
   }
   const fetcher = proxy ? proxyFetch : fetch
@@ -81,6 +84,13 @@ export async function downloadBlob(
       if (redirectedFilename) {
         filename = path.resolve(dest, redirectedFilename)
       }
+    }
+
+    if (unique) {
+      const ext = path.extname(filename)
+      const base = path.basename(filename, ext)
+
+      filename = path.resolve(dest, `${base}-${Date.now()}${ext}`)
     }
 
     await streamPipeline(res.body, createWriteStream(filename))
