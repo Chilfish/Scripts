@@ -7,6 +7,7 @@ import { consola } from 'consola'
 import { fetch, ProxyAgent, RequestInit } from 'undici'
 import { proxyUrl } from './constant'
 import { dir } from './file'
+import { murmurHashV3, toBase62 } from './math'
 import { PQueue, PQueueOptions } from './promise'
 
 export const proxy = new ProxyAgent(proxyUrl)
@@ -31,13 +32,12 @@ export interface DownloadOptions {
   proxy?: boolean
   followRedirect?: boolean
   fetchOptions?: RequestInit
-  unique?: boolean
+  hash?: boolean
 }
 
 const defaultOptions = {
   dest: 'D:/Downloads',
   followRedirect: true,
-  unique: true,
 }
 
 export async function downloadBlob(
@@ -51,7 +51,7 @@ export async function downloadBlob(
     followRedirect,
     fetchOptions,
     proxy,
-    unique,
+    hash,
   } = { ...defaultOptions, ...optionsRest }
 
   if (!url)
@@ -60,7 +60,7 @@ export async function downloadBlob(
   const name = optionsRest.name?.trim() || new URL(url).pathname.split('/').pop() || 'unknown_file'
   let filename = dir(`${dest}/${name}`)
 
-  if (existsSync(filename) && !unique) {
+  if (existsSync(filename)) {
     return true
   }
   const fetcher = proxy ? proxyFetch : fetch
@@ -74,23 +74,22 @@ export async function downloadBlob(
     }
 
     if (mime && mimeType && !mimeType.includes(mime)) {
-      consola.warn(`MIME type mismatch: expected ${mime}, got ${mimeType}`)
-      throw new Error('MIME type mismatch')
+      throw new Error(`MIME type mismatch: expected ${mime}, got ${mimeType}`)
     }
 
     // set file name to the original file's name
-    if (followRedirect && !name) {
-      const redirectedFilename = res.url.split('/').pop()
+    if (followRedirect && !optionsRest.name) {
+      const redirectedFilename = new URL(res.url).pathname.split('/').pop()
       if (redirectedFilename) {
         filename = path.resolve(dest, redirectedFilename)
       }
     }
 
-    if (unique) {
-      const ext = path.extname(filename)
-      const base = path.basename(filename, ext)
-
-      filename = path.resolve(dest, `${base}-${Date.now()}${ext}`)
+    const ext = path.extname(filename)
+    const base = path.basename(filename, ext)
+    if (hash) {
+      const hash = toBase62(murmurHashV3(res.url))
+      filename = path.resolve(dest, `${base}-${hash}${ext}`)
     }
 
     await streamPipeline(res.body, createWriteStream(filename))
