@@ -1,5 +1,6 @@
 import type { UrlActions } from './types'
 import { GM_addStyle } from '$'
+import { $, $$ } from '../utils'
 import { baseCss, css } from './utils'
 
 css`
@@ -41,3 +42,8 @@ for (const path in modules) {
 }
 
 GM_addStyle(baseCss())
+
+Object.assign(window, {
+  _$: $,
+  _$$: $$,
+})

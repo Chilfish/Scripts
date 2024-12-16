@@ -5,7 +5,7 @@ import { UrlActions } from '../types'
 export default {
   pattern: /space\.bilibili\.com/,
   action: () => window.addEventListener('load', async () => {
-    await waitForElement('.n-fs', true)
+    await waitForElement('.n-fs')
 
     $('#n-fs')!.textContent = numFmt($('.n-fs')!.title.replaceAll(',', ''))
   }),

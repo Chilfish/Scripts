@@ -1,8 +1,14 @@
 import { GM_deleteValue, GM_download, GM_getValue, GM_setValue } from '$'
 
-export const $ = <T = HTMLElement>(selector: string, root: any = document) => root?.querySelector(selector) as T | null
+type Selector = keyof HTMLElementTagNameMap | ({} & string)
 
-export const $$ = <T = HTMLElement>(selector: string, root: any = document) => Array.from(root?.querySelectorAll(selector) || []) as T[]
+export function $<T = HTMLElement>(selector: Selector, root?: ParentNode) {
+  return (root || document).querySelector(selector) as T | null
+}
+
+export function $$<T = HTMLElement>(selector: Selector, root?: ParentNode) {
+  return Array.from((root || document).querySelectorAll(selector)) as T[]
+}
 
 // 配合 https://github.com/pushqrdx/vscode-inline-html 插件来高亮语法
 export function css(raw: TemplateStringsArray) {
@@ -44,7 +50,7 @@ export function saveAs(
 }
 
 export function waitForElement<T = HTMLElement>(
-  selector: string,
+  selector: Selector,
   options: {
     root?: Element | Document
     timeout?: number

@@ -1,7 +1,7 @@
 import fs from 'node:fs'
 import { mkdir } from 'node:fs/promises'
-import PQueue from 'p-queue'
 import { downloadBlob, readJson, writeJson } from '~/utils/index.node'
+import { PQueue } from '~/utils/promise'
 import {
   fetchExplorer,
   getAreas,

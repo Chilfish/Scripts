@@ -16,7 +16,12 @@
   'use strict'
 
   const _GM_addStyle = /* @__PURE__ */ (() => typeof GM_addStyle != 'undefined' ? GM_addStyle : void 0)()
-  const $ = (selector, root = document) => root == null ? void 0 : root.querySelector(selector)
+  function $(selector, root) {
+    return (root || document).querySelector(selector)
+  }
+  function $$(selector, root) {
+    return Array.from((root || document).querySelectorAll(selector))
+  }
   function waitForElement(selector, options = {}) {
     const {
       root = document.body,
@@ -56,7 +61,7 @@
   const bilibili = {
     pattern: /space\.bilibili\.com/,
     action: () => window.addEventListener('load', async () => {
-      await waitForElement('.n-fs', true)
+      await waitForElement('.n-fs')
       $('#n-fs').textContent = numFmt($('.n-fs').title.replaceAll(',', ''))
     }),
   }
@@ -185,4 +190,8 @@ body {
     }
   }
   _GM_addStyle(baseCss())
+  Object.assign(window, {
+    _$: $,
+    _$$: $$,
+  })
 })()

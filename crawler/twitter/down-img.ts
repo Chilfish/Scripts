@@ -7,12 +7,12 @@
 
 import path from 'node:path'
 import { consola } from 'consola'
-import PQueue from 'p-queue'
 import {
   downloadBlob,
   readJson,
   updateProgress,
 } from '~/utils/index.node'
+import { PQueue } from '~/utils/promise'
 
 const name = process.argv[2]
 if (!name) {

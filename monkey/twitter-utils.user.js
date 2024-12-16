@@ -181,8 +181,12 @@
   function pubTime(id) {
     return new Date(Number(snowId2millis(id)))
   }
-  const $ = (selector, root = document) => root == null ? void 0 : root.querySelector(selector)
-  const $$ = (selector, root = document) => Array.from((root == null ? void 0 : root.querySelectorAll(selector)) || [])
+  function $(selector, root) {
+    return (root || document).querySelector(selector)
+  }
+  function $$(selector, root) {
+    return Array.from((root || document).querySelectorAll(selector))
+  }
   function css(raw) {
     return String.raw(raw)
   }

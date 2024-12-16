@@ -26,10 +26,7 @@ export function viteConfig(
   const downloadURL = `${repo}/${filename}.user.js`
   const updateURL = `${repo}/meta/${filename}.meta.js`
 
-  // runtime & compile time are different...
-  const { dirname } = import.meta
-  const moduleDir = path.resolve(import.meta.dirname, path.basename(dirname))
-
+  const moduleDir = path.resolve(import.meta.dirname, filename)
   console.log('moduleDir', moduleDir)
 
   return defineConfig({

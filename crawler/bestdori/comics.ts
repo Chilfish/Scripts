@@ -1,5 +1,5 @@
-import PQueue from 'p-queue'
 import { downloadBlob } from '~/utils/download'
+import { PQueue } from '~/utils/promise'
 import { _fetch } from '.'
 
 interface Comic {

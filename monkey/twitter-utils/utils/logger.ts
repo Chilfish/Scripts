@@ -1,5 +1,3 @@
-// import { signal } from '@preact/signals-core'
-
 export interface LogLine {
   type: 'info' | 'warn' | 'error'
   line: string

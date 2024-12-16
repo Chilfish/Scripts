@@ -91,8 +91,12 @@
   const _GM_registerMenuCommand = /* @__PURE__ */ (() => typeof GM_registerMenuCommand != 'undefined' ? GM_registerMenuCommand : void 0)()
   const _GM_setValue = /* @__PURE__ */ (() => typeof GM_setValue != 'undefined' ? GM_setValue : void 0)()
   const _unsafeWindow = /* @__PURE__ */ (() => typeof unsafeWindow != 'undefined' ? unsafeWindow : void 0)()
-  const $ = (selector, root = document) => root == null ? void 0 : root.querySelector(selector)
-  const $$ = (selector, root = document) => Array.from((root == null ? void 0 : root.querySelectorAll(selector)) || [])
+  function $(selector, root) {
+    return (root || document).querySelector(selector)
+  }
+  function $$(selector, root) {
+    return Array.from((root || document).querySelectorAll(selector))
+  }
   function saveBlobUrl(url, filename) {
     console.log(`Downloaded: ${filename} (${url})`)
     const a = document.createElement('a')
