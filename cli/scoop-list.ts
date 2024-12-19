@@ -1,6 +1,6 @@
 import { execSync } from 'node:child_process'
 import { writeFileSync } from 'node:fs'
-import { dir } from '~/utils/file'
+import { dir } from '~/utils/nodejs'
 
 const listOutput = execSync('scoop list').toString()
 

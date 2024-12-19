@@ -5,10 +5,10 @@ import { pipeline } from 'node:stream'
 import { promisify } from 'node:util'
 import { consola } from 'consola'
 import { fetch, ProxyAgent, RequestInit } from 'undici'
-import { proxyUrl } from './constant'
+import { proxyUrl } from '../constant'
+import { murmurHashV3, toBase62 } from '../math'
+import { PQueue, PQueueOptions } from '../promise'
 import { dir } from './file'
-import { murmurHashV3, toBase62 } from './math'
-import { PQueue, PQueueOptions } from './promise'
 
 export const proxy = new ProxyAgent(proxyUrl)
 export function proxyFetch(url: string, options?: RequestInit) {

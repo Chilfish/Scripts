@@ -2,7 +2,7 @@ import { homedir } from 'node:os'
 import path from 'node:path'
 import puppeteer, { Browser } from 'puppeteer'
 import { isMacOS, isWindows } from 'std-env'
-import { proxyUrl } from './constant'
+import { proxyUrl } from '../constant'
 
 export const chromePath = (() => {
   if (isWindows)

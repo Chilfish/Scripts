@@ -1,8 +1,7 @@
 import glob from 'fast-glob'
 import { pubTime } from '~/monkey/twitter-utils/utils/common'
 import { formatDate, getCookie } from '~/utils'
-import { readCookie } from '~/utils/config'
-import { writeJson } from '~/utils/file'
+import { readCookie, writeJson } from '~/utils/nodejs'
 
 const cookie = readCookie('twitter')
 

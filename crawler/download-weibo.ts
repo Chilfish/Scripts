@@ -1,11 +1,11 @@
 import { consola } from 'consola'
 import { ofetch } from 'ofetch'
-import { getWeiboAnonToken } from '~/utils'
+import { getWeiboAnonToken } from '~/utils/fetch'
 import {
   downloadBlob,
   downloadFiles,
   runCommand,
-} from '~/utils/index.node'
+} from '~/utils/nodejs'
 
 interface PicInfo {
   largest: {

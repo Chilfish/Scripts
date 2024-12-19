@@ -2,8 +2,8 @@ import { Buffer } from 'node:buffer'
 import { execSync } from 'node:child_process'
 import { createHash } from 'node:crypto'
 import { readFile, writeFile } from 'node:fs/promises'
-import { dir } from '~/utils/file'
-import { genToken, murmurHashV3, toBase62 } from '~/utils/math'
+import { genToken, murmurHashV3, toBase62 } from '~/utils'
+import { dir } from '~/utils/nodejs'
 
 // or use `openssl dgst -sha256 -binary $file1 | openssl base64` instead
 let str = process.argv.at(2)

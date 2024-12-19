@@ -1,6 +1,6 @@
 import { defineCommand, runMain } from 'citty'
 import { consola } from 'consola'
-import { fetchIntercept, newBrowser, prompt } from '~/utils/index.node'
+import { fetchIntercept, newBrowser, prompt } from '~/utils/nodejs'
 
 runMain(defineCommand({
   meta: {
@@ -9,7 +9,7 @@ runMain(defineCommand({
   },
   args: {
     name: {
-      type: 'string',
+      type: 'positional',
       description: 'Twitter name (used in URL and @name)',
     },
   },

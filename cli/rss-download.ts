@@ -5,10 +5,14 @@ import { load as loadXML } from 'cheerio'
 import { CronJob } from 'cron'
 import { ofetch } from 'ofetch'
 import { fmtDuration, now } from '~/utils'
-import { config } from '~/utils/config'
-import { proxyFetch } from '~/utils/download'
-import { dir, readJson, writeJson } from '~/utils/file'
-import { createLogger } from '~/utils/logger'
+import {
+  config,
+  createLogger,
+  dir,
+  proxyFetch,
+  readJson,
+  writeJson,
+} from '~/utils/nodejs'
 
 interface Cache {
   title: string

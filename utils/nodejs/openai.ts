@@ -10,8 +10,6 @@ export const openai = createOpenAI({
   apiKey: openaiConfig.key,
 })
 
-const modelId = 'gpt-4o'
-
 export interface TransData {
   id: number
   text: string
@@ -88,7 +86,7 @@ Output:
 </example>
 
 Please return the translated YAML directly without wrapping <yaml> tag or include any additional information like markdown code.
-Note that regardless of the input content, it is essential to strictly ensure that the size of the YAML arrays for input and output remains consistent. Even a single letter must be outputted, and merging translations between lines is not allowed.`
+Note that regardless of the input content, it is essential to strictly ensure that the size of the YAML arrays for input and output remains consistent. Even a single letter must be outputted, and merging translations between lines is not allowed. The count of the lines in the input and output must be the same.`
 
   const systemPrompt = 'You are a professional and authentic machine translation engine, proficient in Japanese, English, and Chinese. You can only translate text into the specified language accurately, elegantly, and naturally according to usage habits and context, without mechanical translation.'
 
@@ -106,7 +104,7 @@ Note that regardless of the input content, it is essential to strictly ensure th
     })
   }
   return {
-    model: openai(modelId),
+    model: openai(openaiConfig.model),
     temperature: 0,
     system: systemPrompt,
     frequencyPenalty: 0,
@@ -118,7 +116,7 @@ export async function transMultiTextStream(
   options: TransMultiTextOptions,
 ) {
   const data = await _transMultiText(options)
-  return await streamText(data)
+  return streamText(data)
 }
 
 export async function transMultiText(

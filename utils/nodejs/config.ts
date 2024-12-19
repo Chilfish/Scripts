@@ -1,5 +1,5 @@
 import { loadConfig } from 'c12'
-import { dir } from '~/utils/file'
+import { dir } from './file'
 
 interface Config {
   cookie: {
@@ -11,6 +11,7 @@ interface Config {
   openai: {
     key: string
     url: string
+    model: string
   }
   prompts: {
     [key: string]: string
@@ -24,6 +25,7 @@ interface Config {
     maxDuration: number
     urls: string[]
   }
+  twitterKey: string
 }
 
 export const { config } = await loadConfig<Config>({

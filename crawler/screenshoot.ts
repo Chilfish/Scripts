@@ -3,7 +3,7 @@ import { defineCommand, runMain } from 'citty'
 import { consola } from 'consola'
 import { Page } from 'puppeteer'
 import { cookieToRecord, devices } from '~/utils'
-import { newBrowser, prompt } from '~/utils/index.node'
+import { newBrowser, prompt } from '~/utils/nodejs'
 
 const app = defineCommand({
   meta: {

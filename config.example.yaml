@@ -1,6 +1,7 @@
 openai:
   key:
   url:
+  model: gpt-4o
 cookie:
   twitter: auth_token=
   pixiv:
@@ -14,3 +15,4 @@ rss:
   maxDuration: 1200 # seconds, 20 minutes
   urls:
     - https://example.com/rss.xml
+twitterKey: # docs: https://github.com/Rishikant181/Rettiwt-API

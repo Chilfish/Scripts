@@ -1,6 +1,6 @@
 import path from 'node:path'
-import { downloadBlob } from '~/utils/index.node'
-import { PQueue } from '~/utils/promise'
+import { PQueue } from '~/utils'
+import { downloadBlob } from '~/utils/nodejs'
 import { fetchExplorer, getFileDir } from '.'
 
 const dest = 'D:/Downloads/bestdori/voice'

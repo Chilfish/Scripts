@@ -1,8 +1,8 @@
 import { defineCommand, runMain } from 'citty'
 import { consola } from 'consola'
 import { Page } from 'puppeteer'
-import { devices } from '~/utils'
-import { downloadFiles, newBrowser, prompt } from '~/utils/index.node'
+import { devices } from '~/utils/constant'
+import { downloadFiles, newBrowser, prompt } from '~/utils/nodejs'
 
 runMain(defineCommand({
   meta: {

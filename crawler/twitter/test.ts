@@ -1,5 +1,5 @@
 import { writeFile } from 'node:fs/promises'
-import { fetchIntercept, newBrowser } from '~/utils/index.node'
+import { fetchIntercept, newBrowser } from '~/utils/nodejs'
 
 const name = process.argv[2] || 'elonmusk'
 const url = `https://x.com/${name}`

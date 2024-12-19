@@ -1,6 +1,6 @@
 import { execSync } from 'node:child_process'
 import { stat } from 'node:fs/promises'
-import { dir, readJson } from '~/utils/file'
+import { dir, readJson } from '~/utils/nodejs'
 
 const files = dir('D:/Backups/bili/go-lang.json')
 const folder = dir('D:/Videos/golang')

@@ -4,7 +4,7 @@ import {
   downloadBlob,
   proxyFetch,
   readCookie,
-} from '~/utils/index.node'
+} from '~/utils/nodejs'
 
 const cookie = readCookie('pixiv')
 const uid = 70847616

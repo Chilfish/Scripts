@@ -1,6 +1,6 @@
 import fs from 'node:fs'
 import { mkdir } from 'node:fs/promises'
-import { downloadBlob, readJson, writeJson } from '~/utils/index.node'
+import { downloadBlob, readJson, writeJson } from '~/utils/nodejs'
 import { PQueue } from '~/utils/promise'
 import {
   fetchExplorer,

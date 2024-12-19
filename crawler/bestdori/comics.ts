@@ -1,5 +1,5 @@
-import { downloadBlob } from '~/utils/download'
-import { PQueue } from '~/utils/promise'
+import { PQueue } from '~/utils'
+import { downloadBlob } from '~/utils/nodejs'
 import { _fetch } from '.'
 
 interface Comic {

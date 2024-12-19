@@ -4,7 +4,7 @@
 
 import { diff } from 'ohash'
 import { formatDate, now } from '~/utils'
-import { dir, readJson, writeJson } from '~/utils/file'
+import { dir, readJson, writeJson } from '~/utils/nodejs'
 import { explorerUrl, getFileDir } from '.'
 
 const savePath = dir('data/bestdori/dir.json')

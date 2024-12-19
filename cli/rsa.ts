@@ -10,7 +10,7 @@ import { readFile, writeFile } from 'node:fs/promises'
 import path from 'node:path'
 import { defineCommand, runMain } from 'citty'
 import { consola } from 'consola'
-import { prompt } from '~/utils/cli'
+import { prompt } from '~/utils/nodejs'
 
 runMain(defineCommand({
   meta: {

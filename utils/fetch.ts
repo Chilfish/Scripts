@@ -1,10 +1,9 @@
 import { ofetch } from 'ofetch'
-import { isNotInImport } from './cli'
 import { getCookieString } from './cookie'
-import { newBrowser } from './puppeteer'
 
 // from: https://github.com/DIYgod/RSSHub/blob/d21c4dd/lib/routes/bilibili/cache.ts#L16-L31
 export async function getBiliAnonToken() {
+  const { newBrowser } = await import('./nodejs/puppeteer')
   const browser = await newBrowser()
   const page = await browser.newPage()
   await page.goto('https://space.bilibili.com/1/dynamic')
@@ -45,10 +44,4 @@ export function checkNetwork(domain = 'x.com') {
       .then(_ => res('ok'))
       .catch(err => res(`${err.cause}`))
   })
-}
-
-if (isNotInImport(import.meta.filename)) {
-  checkNetwork('x.com').then(console.log)
-  getWeiboAnonToken().then(console.log)
-  getBiliAnonToken().then(console.log)
 }

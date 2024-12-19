@@ -11,7 +11,7 @@ import {
   downloadBlob,
   readJson,
   updateProgress,
-} from '~/utils/index.node'
+} from '~/utils/nodejs'
 import { PQueue } from '~/utils/promise'
 
 const name = process.argv[2]

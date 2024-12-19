@@ -3,10 +3,14 @@ import { readFile, writeFile } from 'node:fs/promises'
 import path from 'node:path'
 import { loadConfig } from 'c12'
 import { defineCommand, runMain } from 'citty'
-import { config } from '~/utils/config'
-import { dir } from '~/utils/file'
-import { chunkArray } from '~/utils/math'
-import { toTransYaml, TransData, transMultiTextStream } from '~/utils/openai'
+import { chunkArray } from '~/utils'
+import {
+  config,
+  dir,
+  toTransYaml,
+  TransData,
+  transMultiTextStream,
+} from '~/utils/nodejs'
 
 runMain(defineCommand({
   meta: {
@@ -40,6 +44,7 @@ runMain(defineCommand({
     },
   },
   run: async ({ args }) => {
+    console.log('Running srt command with args:', args)
     await main(args)
   },
 }))
@@ -137,8 +142,6 @@ async function main({
     prefix = 'text'
 
   const transed = path.join(path.dirname(file), `${prefix}-${path.basename(file)}`)
-
-  console.log(`Translating ${file} to ${transed}`)
 
   const content = await readFile(file, 'utf-8')
   let result = ''
