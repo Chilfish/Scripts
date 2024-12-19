@@ -12,6 +12,7 @@ const { hash } = argvParser([{
   key: 'hash',
   type: 'boolean',
   description: 'append hash to filename',
+  defaultValue: false,
 }] as const)
 
 const data = await readFile(fileList, 'utf-8')

@@ -12,7 +12,7 @@ import os from 'node:os'
 import path from 'node:path'
 import { fileURLToPath } from 'node:url'
 
-export const root = path.resolve(fileURLToPath(import.meta.url), '../../')
+export const root = path.resolve(fileURLToPath(import.meta.url), '../../../')
 
 interface DirOptions {
   path: string

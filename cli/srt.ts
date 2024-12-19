@@ -2,52 +2,15 @@ import { createWriteStream } from 'node:fs'
 import { readFile, writeFile } from 'node:fs/promises'
 import path from 'node:path'
 import { loadConfig } from 'c12'
-import { defineCommand, runMain } from 'citty'
 import { chunkArray } from '~/utils'
 import {
+  argvParser,
   config,
   dir,
   toTransYaml,
   TransData,
   transMultiTextStream,
 } from '~/utils/nodejs'
-
-runMain(defineCommand({
-  meta: {
-    name: 'srt',
-    description: '翻译/提取 srt 字幕文件',
-  },
-  args: {
-    file: {
-      type: 'positional',
-      description: '要翻译/提取的 srt 文件路径',
-    },
-    textOnly: {
-      type: 'boolean',
-      description: '仅提取字幕文本内容',
-      default: false,
-    },
-    transOnly: {
-      type: 'boolean',
-      description: '将原字幕替换为翻译字幕',
-      default: true,
-    },
-    cache: {
-      type: 'boolean',
-      description: '使用缓存翻译结果，而不请求 api',
-      default: false,
-    },
-    prompt: {
-      type: 'string',
-      description: '额外的 prompts，存储在 config.yaml 中',
-      default: '',
-    },
-  },
-  run: async ({ args }) => {
-    console.log('Running srt command with args:', args)
-    await main(args)
-  },
-}))
 
 // Matches: 00:00:17,810 --> 00:00:20,330
 const timeMatch = /\d+:\d+:\d+,\d+\s-->\s\d+:\d+:\d+,\d+/
@@ -174,4 +137,43 @@ async function main({
   }
 
   await writeFile(transed, result, 'utf-8')
+  console.log(`Saved to ${transed}`)
 }
+
+const args = argvParser([
+  {
+    key: 'file',
+    shortKey: 'i',
+    description: '要翻译/提取的 srt 文件路径',
+    required: true,
+    beforeSet: value => path.resolve(value),
+  },
+  {
+    key: 'textOnly',
+    shortKey: 't',
+    description: '仅提取字幕文本内容',
+    defaultValue: false,
+    type: 'boolean',
+  },
+  {
+    key: 'transOnly',
+    description: '将原字幕替换为翻译字幕',
+    defaultValue: true,
+    type: 'boolean',
+  },
+  {
+    key: 'cache',
+    description: '使用缓存翻译结果，而不请求 api',
+    defaultValue: false,
+    type: 'boolean',
+  },
+  {
+    key: 'prompt',
+    shortKey: 'p',
+    description: '额外的 prompts，存储在 config.yaml 中',
+  },
+] as const)
+
+console.log('Running srt command with args:', args)
+
+await main(args)

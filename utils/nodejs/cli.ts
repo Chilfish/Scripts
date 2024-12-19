@@ -41,24 +41,23 @@ export interface ArgvOption<T = any> {
   shortKey?: string
   defaultValue?: T
   type?: 'string' | 'number' | 'boolean'
+  required?: boolean
   beforeSet?: (value: T) => T
 }
 
-type GetType<T> =
-  T extends { type: infer U }
-    ? U extends 'number'
-      ? number
-      : U extends 'string'
-        ? string
-        : U extends 'boolean'
-          ? boolean
-          : unknown
-    : string | undefined
+type GetOptionType<T extends ArgvOption> =
+  T extends { type: 'number' } ? number :
+    T extends { type: 'boolean' } ? boolean :
+      T extends { type: 'string' } ? string :
+        string
 
-type Result<T extends ArgvOption[]> = {
-  [P in T[number]['key']]: GetType<
-    Extract<T[number], { key: P }>
-  >
+type GetOptionValue<T extends ArgvOption> =
+  T extends { required: true } ? GetOptionType<T> :
+    T extends { defaultValue: any } ? GetOptionType<T> :
+  GetOptionType<T> | undefined
+
+export type OptionsResult<T extends ArgvOption[]> = {
+  [P in T[number] as P['key']]: GetOptionValue<P>
 }
 
 /**
@@ -67,10 +66,17 @@ type Result<T extends ArgvOption[]> = {
 export function argvParser<T extends ArgvOption[]>(options: T) {
   const argv: Record<string, any> = {}
 
+  if (process.argv.length <= 2 && options.some(option => option.required)) {
+    const required = options.filter(option => option.required)
+    console.error('Missing required arguments:', required.map(o => o.key).join(', '))
+
+    console.warn('Usage:')
+    _printHelp(options)
+    process.exit(1)
+  }
+
   for (let i = 2; i < process.argv.length; i++) {
     const arg = process.argv[i]
-    if (!arg.startsWith('-'))
-      continue
 
     const sliceLen = arg.startsWith('--') ? 2 : 1
     const key = arg.slice(sliceLen)
@@ -82,7 +88,23 @@ export function argvParser<T extends ArgvOption[]>(options: T) {
 
     const value = process.argv[i + 1]
     const option = options.find(option => option.key === key || option.shortKey === key)
-    if (option) {
+    if (!option) {
+      continue
+    }
+
+    if (option.required && (
+      value?.startsWith('-') || value === undefined
+    )) {
+      console.error(`Missing value for option: ${option.key}`)
+      console.warn('Usage:')
+      _printHelp(options)
+      process.exit(1)
+    }
+
+    if (option.type === 'boolean' && value === undefined) {
+      argv[option.key] = true
+    }
+    else {
       argv[option.key] = try2Number(value, option.type)
     }
   }
@@ -98,14 +120,15 @@ export function argvParser<T extends ArgvOption[]>(options: T) {
 
   argv.help = () => _printHelp(options)
 
-  return argv as Result<T> & { help: () => void }
+  return argv as OptionsResult<T> & { help: () => void }
 }
 
 function _printHelp(options: ArgvOption[]) {
   console.log('Options:')
   for (const option of options) {
     const shortKey = option.shortKey ? `-${option.shortKey}, ` : ''
-    console.log(`  --${option.key}, ${shortKey}${option.description}`)
+    const required = option.required ? '(required), ' : ''
+    console.log(`  --${option.key}, ${shortKey}${required}${option.description}`)
   }
 }
 
