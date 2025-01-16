@@ -2,6 +2,7 @@ import os from 'node:os'
 import path from 'node:path'
 import { fileURLToPath } from 'node:url'
 import { defineConfig, UserConfig } from 'vite'
+import mkcert from 'vite-plugin-mkcert'
 import monkey, { MonkeyOption } from 'vite-plugin-monkey'
 import { version } from '../package.json'
 
@@ -61,6 +62,7 @@ export function viteConfig(
           metaFileName: true,
         },
       }),
+      mkcert(),
     ],
     server: {
       ...viteConfig?.server,

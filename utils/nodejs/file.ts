@@ -120,13 +120,17 @@ export async function moveFoler(
 export async function cachedData<T>(
   dest: string,
   getter: () => Promise<T>,
+  force = false,
 ) {
   try {
-    return await readJson<T>(dest)
+    if (!force)
+      return await readJson<T>(dest)
   }
   catch {
-    const data = await getter()
-    await writeJson(dest, data)
-    return data
+    // ignore
   }
+
+  const data = await getter()
+  await writeJson(dest, data)
+  return data
 }

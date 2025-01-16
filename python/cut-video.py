@@ -98,12 +98,12 @@ def main():
     parser.add_argument("--pick", action="store_true", help="提取并单独保存time_intervals.txt中的片段")
     args = parser.parse_args()
 
-    desktop_path = os.path.join(os.path.expanduser("~"), "Desktop")
-    time_intervals_file = os.path.join(desktop_path, "time_intervals.txt")
+    videos_directory = os.path.join("D:/Videos")
+    time_intervals_file = os.path.join(videos_directory, "time_intervals.txt")
 
     input_video_path = args.input_video
     video_name = os.path.basename(input_video_path)
-    output_video_path = os.path.join(desktop_path, f"cut-{video_name}.mp4")
+    output_video_path = os.path.join(videos_directory, f"cut-{video_name}.mp4")
 
     if not os.path.exists(input_video_path):
         print("输入的视频文件不存在！")
