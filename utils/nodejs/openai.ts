@@ -1,13 +1,18 @@
+import { createDeepSeek } from '@ai-sdk/deepseek'
 import { createOpenAI } from '@ai-sdk/openai'
 import { CoreMessage, generateText, streamText } from 'ai'
 import { parseYAML } from 'confbox'
-import { openaiConfig } from './config'
+import { config, openaiConfig } from './config'
 
 // console.log({ openaiConfig })
 
 export const openai = createOpenAI({
   baseURL: openaiConfig.url,
   apiKey: openaiConfig.key,
+})
+
+export const deepseek = createDeepSeek({
+  apiKey: config.deepseekKey,
 })
 
 export interface TransData {
@@ -17,6 +22,7 @@ export interface TransData {
 
 export interface TransMultiTextOptions {
   text: string
+  ai?: 'openai' | 'deepseek' | (string & {})
   startAt?: number
   additionalPrompt?: string
   cb?: (yamlText: string) => Promise<void>
@@ -42,6 +48,7 @@ export function toTransYaml(
 async function _transMultiText(
   {
     text,
+    ai = 'openai',
     startAt = 0,
     additionalPrompt,
     cb,
@@ -103,8 +110,13 @@ Note that regardless of the input content, it is essential to strictly ensure th
       content: additionalPrompt,
     })
   }
+
+  const model = ai === 'openai'
+    ? openai(openaiConfig.model)
+    : deepseek('deepseek-chat')
+
   return {
-    model: openai(openaiConfig.model),
+    model,
     temperature: 0,
     system: systemPrompt,
     frequencyPenalty: 0,

@@ -34,6 +34,7 @@
     "winston": "^3.17.0"
   },
   "devDependencies": {
+    "@ai-sdk/deepseek": "^0.0.5",
     "@antfu/eslint-config": "^3.14.0",
     "@types/node": "^22.10.7",
     "confbox": "^0.1.8",

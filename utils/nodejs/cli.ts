@@ -120,7 +120,7 @@ export function argvParser<T extends ArgvOption[]>(options: T) {
 
   argv.help = () => _printHelp(options)
 
-  return argv as OptionsResult<T> & { help: () => void }
+  return argv as OptionsResult<T> & { help?: () => void }
 }
 
 function _printHelp(options: ArgvOption[]) {

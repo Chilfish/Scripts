@@ -57,6 +57,9 @@ importers:
         specifier: ^3.17.0
         version: 3.17.0
     devDependencies:
+      '@ai-sdk/deepseek':
+        specifier: ^0.0.5
+        version: 0.0.5(zod@3.24.1)
       '@antfu/eslint-config':
         specifier: ^3.14.0
         version: 3.14.0(@typescript-eslint/utils@8.20.0(eslint@9.18.0(jiti@2.3.1))(typescript@5.7.3))(@vue/compiler-sfc@3.4.33)(eslint-plugin-format@1.0.1(eslint@9.18.0(jiti@2.3.1)))(eslint@9.18.0(jiti@2.3.1))(typescript@5.7.3)
@@ -110,6 +113,18 @@ importers:
         version: 5.0.5(vite@6.0.7(@types/node@22.10.7)(jiti@2.3.1)(tsx@4.19.2)(yaml@2.6.1))
 
 packages:
+
+  '@ai-sdk/deepseek@0.0.5':
+    resolution: {integrity: sha512-+nJUIc0VFaeV5hO1qEGihm+MzIyCa5GV4U0O9i+UW3sAXwwNJGYeSfdwkgImbAxbmpa3Wpjz0a3SdCWjUhB94Q==}
+    engines: {node: '>=18'}
+    peerDependencies:
+      zod: ^3.0.0
+
+  '@ai-sdk/openai-compatible@0.0.17':
+    resolution: {integrity: sha512-FuaV9gGysF//n6OfadeaCE/tKHG8ruISeWD1zLPsmlEAPpg+eOENICEzkdDgN1JtFwou85zeMF49oyWTWGV8SQ==}
+    engines: {node: '>=18'}
+    peerDependencies:
+      zod: ^3.0.0
 
   '@ai-sdk/openai@1.0.19':
     resolution: {integrity: sha512-7qmLgppWpGUhSgrH0a6CtgD9hZeRh2hARppl1B7fNhVbekYftSMucsdCiVlKbQzSKPxox0vkNMmwjKa/7xf8bQ==}
@@ -3285,6 +3300,19 @@ packages:
     resolution: {integrity: sha512-bXE4cR/kVZhKZX/RjPEflHaKVhUVl85noU3v6b8apfQEc1x4A+zBxjZ4lN8LqGd6WZ3dl98pY4o717VFmoPp+A==}
 
 snapshots:
+
+  '@ai-sdk/deepseek@0.0.5(zod@3.24.1)':
+    dependencies:
+      '@ai-sdk/openai-compatible': 0.0.17(zod@3.24.1)
+      '@ai-sdk/provider': 1.0.4
+      '@ai-sdk/provider-utils': 2.0.7(zod@3.24.1)
+      zod: 3.24.1
+
+  '@ai-sdk/openai-compatible@0.0.17(zod@3.24.1)':
+    dependencies:
+      '@ai-sdk/provider': 1.0.4
+      '@ai-sdk/provider-utils': 2.0.7(zod@3.24.1)
+      zod: 3.24.1
 
   '@ai-sdk/openai@1.0.19(zod@3.24.1)':
     dependencies:

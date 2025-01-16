@@ -2,6 +2,7 @@ openai:
   key:
   url:
   model: gpt-4o
+deepseekKey:
 cookie:
   twitter: auth_token=
   pixiv:
