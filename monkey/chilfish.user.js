@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Chilfish's script
 // @namespace    chilfish/monkey
-// @version      2024.10.07
+// @version      2025.02.05
 // @author       monkey
 // @description  Chilfish's script
 // @icon         https://unavatar.io/chilfish
@@ -92,7 +92,10 @@
 
       a[data-testid="jobs-tab-item"],
       a[aria-label="Premium"],
-      a[aria-label="Grok"] {
+      a[aria-label="Grok"],
+      a[aria-label="Lists"],
+      div[aria-label="Analytics"],
+      button[aria-label="Grok 操作"] {
         display: none !important;
       }
   `

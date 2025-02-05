@@ -19,15 +19,19 @@ Invoke-Expression (& { (zoxide init powershell | Out-String) })
 
 fnm env --use-on-cd | Out-String | Invoke-Expression
 
+Remove-Item Alias:ni -Force -ErrorAction Ignore
+
 New-Alias git hub
 New-Alias Set-LocationWithFnm z
 New-Alias which Get-Command
 New-Alias open start-Process
+New-Alias pnpm "D:/Scoop/shims/pnpm"
+New-Alias bash "D:/Scoop/shims/bash.exe"
 
 New-Alias code code-insiders
+New-Alias vscode "D:\Dev\Microsoft VS Code\bin\code.cmd"
 New-Alias curl D:/Scoop/shims/curl.exe
 
-Remove-Item Alias:ni -Force -ErrorAction Ignore
 
 $hosts = "C:\Windows\System32\drivers\etc\hosts"
 $me = "C:/Users/Chilfish"
@@ -39,6 +43,10 @@ $proxy = "http://127.0.0.1:7890"
 
 $Env:IS_NODE="TRUE"
 $Env:PROXY=$proxy
+
+$Env:PATH += ";D:\Dev\Sublime Merge"
+$Env:EDITOR = "D:\Scoop\shims\nvim.exe"
+
 
 # https://github.com/xampprocky/tokei
 function code-count {
@@ -53,6 +61,21 @@ function ytd {
   yt-dlp --cookies "$me/cookies.txt" -o "$videos/%(title)s.mp4" $args
 }
 
+# https://github.com/nilaoda/N_m3u8DL-RE
+function m3u8 {
+  $_args = @(
+    "--save-dir=$videos",
+    "--download-retry-count", "5",
+    "--thread-count", "16",
+    "--mux-after-done", "format=mp4"
+    "--check-segments-count",
+    "--live-pipe-mux"
+    "--select-video", 'res="1080*":for=best',
+    "--select-audio", "for=best"
+  )
+  & "$download/App/N_m3u8DL-RE.exe" $_args $args
+}
+
 # https://github.com/Chilfish/Weibo-archiver/blob/main/scripts/server.mjs
 function wb {
   $cwd = "D:/Backups/Weibo"
@@ -60,16 +83,7 @@ function wb {
 }
 
 # bbdown: https://github.com/nilaoda/BBDown
-function danmu {
-  bbdown --danmaku-only --work-dir="$videos/弹幕/" $args
-  Remove-Item "$videos/弹幕/*.xml"
-}
-function subtitle {
-  bbdown --sub-only --skip-ai=false --work-dir=$videos $args
-}
-
 $bbdownArgs = @(
-  "-aria2", # 使用 Aria2 下载
   "-mt", # 多线程下载
   "-M", "<ownerName> - <videoTitle>/<pageNumber> - <pageTitle>", # 多分P文件名格式
   "-F", "<ownerName> - <videoTitle>", # 单分P文件名格式
@@ -81,6 +95,17 @@ function downbb {
 }
 function downbb-low {
   downbb -e "hevc" -q "1080P 高清" $args
+}
+function bangumi {
+  downbb -q "1080P 高码率" $args
+}
+
+function danmu {
+  bbdown --danmaku-only --work-dir="$videos/弹幕/" $args
+  Remove-Item "$videos/弹幕/*.xml"
+}
+function subtitle {
+  bbdown --sub-only --skip-ai=false --work-dir=$videos $args
 }
 
 # https://github.com/eza-community/eza
@@ -161,10 +186,30 @@ function gitblame {
 
 function runBg {
   param(
-    [string]$command
+    [string]$command,
+    [string]$name = "powershell"
   )
-  Start-Process powershell -ArgumentList "-NoProfile -NoLogo -Command $command" -WindowStyle Hidden
+
+  $logDir = "D:/logs"
+  $stdOutLog = Join-Path $logDir "$name.log"
+  $stdErrLog = Join-Path $logDir "$name.error.log"
+
+  $processOptions = @{
+    FilePath = "powershell"
+    WindowStyle = "Hidden"
+    RedirectStandardOutput = $stdOutLog
+    RedirectStandardError = $stdErrLog
+    ArgumentList = @(
+      "-NoProfile",
+      "-NoLogo",
+      "-Command",
+      $command
+    )
+  }
+
+  Start-Process @processOptions
 }
+
 
 function start-rss {
   Write-Host "running on http://localhost:1200"
@@ -180,19 +225,30 @@ function start-wb-checkin {
   runBg "node $cwd"
 }
 
+function checkPort {
+  param(
+    [int]$Port
+  ) 
+  $connection = Get-NetTCPConnection -LocalPort $Port -State Listen
+  $pids = $null
+  if ($connection) {
+      $pids = $connection.OwningProcess
+      Write-Host "Found process with PID: $pids on port $Port"
+  } else {
+      Write-Host "No process found listening on port $Port"
+  }
+  return $pids
+}
+
 # sudo: https://github.com/gerardog/gsudo
 function KillByPort {
   param(
     [int]$Port
   )
 
-  $connection = Get-NetTCPConnection -LocalPort $Port -State Listen
-  if ($connection) {
-      $pids = $connection.OwningProcess
-      Write-Host "Found process with PID: $pids on port $Port"
-      sudo Stop-Process -Id $pids -Force
-  } else {
-      Write-Host "No process found listening on port $Port"
+  $pids = checkPort($Port)
+  if ($pids) {
+    gsudo Stop-Process -Id $pids -Force
   }
 }
 
@@ -239,3 +295,12 @@ function randomString($length = 16) {
   return -join ((1..$length) | ForEach-Object { $chars[(Get-Random -Minimum 0 -Maximum $chars.Length)] })
 }
 
+function y {
+    $tmp = [System.IO.Path]::GetTempFileName()
+    yazi $args --cwd-file="$tmp"
+    $cwd = Get-Content -Path $tmp
+    if (-not [String]::IsNullOrEmpty($cwd) -and $cwd -ne $PWD.Path) {
+        Set-Location -LiteralPath $cwd
+    }
+    Remove-Item -Path $tmp
+}

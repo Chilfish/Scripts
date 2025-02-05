@@ -40,7 +40,9 @@ export interface ArgvOption<T = any> {
   description: string
   shortKey?: string
   defaultValue?: T
-  type?: 'string' | 'number' | 'boolean'
+  type?: 'string' | 'number' | 'boolean' | 'enum'
+  // Add enum values array for enum type
+  enumValues?: string[]
   required?: boolean
   beforeSet?: (value: T) => T
 }
@@ -49,12 +51,14 @@ type GetOptionType<T extends ArgvOption> =
   T extends { type: 'number' } ? number :
     T extends { type: 'boolean' } ? boolean :
       T extends { type: 'string' } ? string :
-        string
+        T extends { type: 'enum' } ?
+          T extends { enumValues: readonly string[] } ?
+            T['enumValues'][number] : string : string
 
 type GetOptionValue<T extends ArgvOption> =
   T extends { required: true } ? GetOptionType<T> :
     T extends { defaultValue: any } ? GetOptionType<T> :
-  GetOptionType<T> | undefined
+      GetOptionValue<T> | undefined
 
 export type OptionsResult<T extends ArgvOption[]> = {
   [P in T[number] as P['key']]: GetOptionValue<P>
@@ -104,8 +108,19 @@ export function argvParser<T extends ArgvOption[]>(options: T) {
     if (option.type === 'boolean' && value === undefined) {
       argv[option.key] = true
     }
-    else {
+    else if (option.type !== 'enum') {
       argv[option.key] = try2Number(value, option.type)
+    }
+    else {
+      if (option.enumValues?.includes(value as string)) {
+        argv[option.key] = value
+      }
+      else {
+        console.error(`Invalid value for option: ${option.key}`)
+        console.warn('Usage:')
+        _printHelp(options)
+        process.exit(1)
+      }
     }
   }
 

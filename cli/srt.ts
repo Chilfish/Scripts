@@ -43,12 +43,15 @@ const args = argvParser([
     key: 'prompt',
     shortKey: 'p',
     description: '额外的 prompts，存储在 config.yaml 中',
+    defaultValue: '',
   },
   {
     key: 'model',
     shortKey: 'm',
     description: '使用的模型(openai/deepseek)',
     defaultValue: 'openai',
+    type: 'enum',
+    enumValues: ['openai', 'deepseek'],
   },
 ] as const)
 

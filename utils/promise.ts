@@ -2,20 +2,35 @@ import { PromiseFn } from '~/types'
 
 class Queue<T = any> {
   private _queue: T[]
+  private _head: number
+
   constructor() {
     this._queue = []
+    this._head = 0
   }
 
   enqueue(item: T) {
     this._queue.push(item)
   }
 
-  dequeue() {
-    return this._queue.shift()
+  dequeue(): T | undefined {
+    if (this._head >= this._queue.length)
+      return undefined
+
+    const item = this._queue[this._head]
+    this._head++
+
+    // 定期清理已出队元素，避免内存泄漏
+    if (this._head > 100 && this._head > this._queue.length / 2) {
+      this._queue = this._queue.slice(this._head)
+      this._head = 0
+    }
+
+    return item
   }
 
   get length() {
-    return this._queue.length
+    return this._queue.length - this._head
   }
 }
 
@@ -25,45 +40,29 @@ export interface PQueueOptions {
    * @default Infinity
    */
   concurrency: number
-  /**
-   * The minimum time in milliseconds between each promise
-   * being executed.
-   * @default 0
-   */
-  delay: number
 }
 
 const defaultOptions = {
   concurrency: Infinity,
-  delay: 0,
 } satisfies PQueueOptions
 
-/**
- * A promises-based queue.
- */
 export class PQueue {
-  private _queue: Queue<PromiseFn>
-  private _pending: number
+  private _queue: Queue<() => Promise<void>>
+  private _pending = 0
   private _options: PQueueOptions
+  private _idleResolvers: (() => void)[] = []
 
   constructor(options: Partial<PQueueOptions> = {}) {
     this._queue = new Queue()
-    this._pending = 0
     this._options = { ...defaultOptions, ...options }
   }
 
-  /**
-   * Adds a promise to the queue.
-   * @param {PromiseFn} fn The promise to add.
-   */
-  add(fn: PromiseFn) {
-    return new Promise<ReturnType<typeof fn>>((resolve, reject) => {
+  add<T>(fn: PromiseFn<T>): Promise<T> {
+    return new Promise<Awaited<ReturnType<typeof fn>>>((resolve, reject) => {
       const run = async () => {
         this._pending++
-        try {
-          if (this._options.delay)
-            await new Promise(resolve => setTimeout(resolve, this._options.delay))
 
+        try {
           resolve(await fn())
         }
         catch (e) {
@@ -72,6 +71,7 @@ export class PQueue {
         finally {
           this._pending--
           this._next()
+          this._checkIdle()
         }
       }
 
@@ -85,33 +85,46 @@ export class PQueue {
   }
 
   private _next() {
-    if (this._pending >= this._options.concurrency)
-      return
-
-    const run = this._queue.dequeue()
-    if (run)
-      run()
+    while (this._pending < this._options.concurrency) {
+      const task = this._queue.dequeue()
+      if (!task)
+        break
+      task()
+    }
   }
 
-  /**
-   * Waits for the queue to be empty.
-   */
   async onIdle() {
+    if (this._isEmpty)
+      return Promise.resolve()
+
     return new Promise<void>((resolve) => {
-      const check = () => {
-        if (this._queue.length === 0 && this._pending === 0)
-          resolve()
-        else
-          setTimeout(check, this._options.delay)
-      }
-      check()
+      this._idleResolvers.push(resolve)
     })
   }
 
-  /**
-   * Clears the queue.
-   */
   clear() {
     this._queue = new Queue()
+  }
+
+  get length() {
+    return this._queue.length
+  }
+
+  get pending() {
+    return this._pending
+  }
+
+  private _checkIdle() {
+    if (!this._isEmpty)
+      return
+
+    console.log('idle', this._idleResolvers.length)
+    for (const resolve of this._idleResolvers)
+      resolve()
+    this._idleResolvers = []
+  }
+
+  private get _isEmpty() {
+    return this.length === 0 && this.pending === 0
   }
 }

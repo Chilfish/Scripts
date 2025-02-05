@@ -174,9 +174,9 @@ export function murmurHashV3(
 
   while (i < bytes) {
     k1 = ((key[i] & 0xFF))
-    | ((key[++i] & 0xFF) << 8)
-    | ((key[++i] & 0xFF) << 16)
-    | ((key[++i] & 0xFF) << 24)
+      | ((key[++i] & 0xFF) << 8)
+      | ((key[++i] & 0xFF) << 16)
+      | ((key[++i] & 0xFF) << 24)
     ++i
 
     k1 = ((((k1 & 0xFFFF) * c1) + ((((k1 >>> 16) * c1) & 0xFFFF) << 16))) & 0xFFFFFFFF

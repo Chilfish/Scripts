@@ -17,7 +17,10 @@ export default {
 
       a[data-testid="jobs-tab-item"],
       a[aria-label="Premium"],
-      a[aria-label="Grok"] {
+      a[aria-label="Grok"],
+      a[aria-label="Lists"],
+      div[aria-label="Analytics"],
+      button[aria-label="Grok 操作"] {
         display: none !important;
       }
   `
