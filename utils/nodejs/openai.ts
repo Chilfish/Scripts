@@ -12,7 +12,8 @@ export const openai = createOpenAI({
 })
 
 export const deepseek = createDeepSeek({
-  apiKey: config.deepseekKey,
+  apiKey: config.deepseek.key,
+  baseURL: config.deepseek.url,
 })
 
 export interface TransData {
@@ -48,7 +49,7 @@ export function toTransYaml(
 async function _transMultiText(
   {
     text,
-    ai = 'openai',
+    ai = 'deepseek',
     startAt = 0,
     additionalPrompt,
     cb,
@@ -92,33 +93,37 @@ Output:
 </yaml>
 </example>
 
-Please return the translated YAML directly without wrapping <yaml> tag or include any additional information like markdown code.
-Note that regardless of the input content, it is essential to strictly ensure that the size of the YAML arrays for input and output remains consistent. Even a single letter must be outputted, and merging translations between lines is not allowed. The count of the lines in the input and output must be the same.`
+Please return the translated YAML directly without wrapping <yaml> tag or include any additional information like markdown code. The YAML content must be valid that can be parsed by the YAML parser.
 
-  const systemPrompt = 'You are a professional and authentic machine translation engine, proficient in Japanese, English, and Chinese. You can only translate text into the specified language accurately, elegantly, and naturally according to usage habits and context, without mechanical translation.'
+Note that regardless of the input content, it is essential to strictly ensure that the size of the YAML arrays for input and output remains consistent. Even a single letter must be outputted, and merging translations between lines is not allowed. The count of the lines in the input and output must be the same.
+
+${additionalPrompt}
+`
+
+  const systemPrompt = `You are a professional and authentic machine translation engine, proficient in Japanese, English, and Chinese. You can only translate text into the specified language accurately, elegantly, and naturally according to usage habits and context, without mechanical translation.
+
+  The current time is ${new Date().toLocaleString()}.
+  `
+
+  const isDeepSeek = ai === 'deepseek'
 
   const messages = [
     {
       role: 'user',
-      content: prompt,
+      content: isDeepSeek
+        ? `${systemPrompt}\n${prompt}`
+        : prompt,
     },
   ] satisfies CoreMessage[]
 
-  if (additionalPrompt) {
-    messages.push({
-      role: 'user',
-      content: additionalPrompt,
-    })
-  }
-
-  const model = ai === 'openai'
-    ? openai(openaiConfig.model)
-    : deepseek('deepseek-chat')
+  const model = isDeepSeek
+    ? deepseek(config.deepseek.model)
+    : openai(openaiConfig.model)
 
   return {
     model,
-    temperature: 0,
-    system: systemPrompt,
+    temperature: 0.6,
+    system: isDeepSeek ? systemPrompt : undefined,
     frequencyPenalty: 0,
     messages,
   }

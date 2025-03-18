@@ -49,7 +49,7 @@ const args = argvParser([
     key: 'model',
     shortKey: 'm',
     description: '使用的模型(openai/deepseek)',
-    defaultValue: 'openai',
+    defaultValue: 'deepseek',
     type: 'enum',
     enumValues: ['openai', 'deepseek'],
   },

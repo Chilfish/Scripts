@@ -1,7 +1,5 @@
 $OutputEncoding = [console]::InputEncoding = [console]::OutputEncoding = New-Object System.Text.UTF8Encoding
 
-Import-Module -Name Microsoft.WinGet.CommandNotFound
-
 Set-PSReadLineOption -PredictionSource History
 Set-PSReadlineKeyHandler -Key Tab -Function MenuComplete
 Set-PSReadLineKeyHandler -Chord Tab -Function MenuComplete
@@ -20,6 +18,7 @@ Invoke-Expression (& { (zoxide init powershell | Out-String) })
 fnm env --use-on-cd | Out-String | Invoke-Expression
 
 Remove-Item Alias:ni -Force -ErrorAction Ignore
+Remove-Item Alias:conda -Force -ErrorAction Ignore
 
 New-Alias git hub
 New-Alias Set-LocationWithFnm z
@@ -27,29 +26,28 @@ New-Alias which Get-Command
 New-Alias open start-Process
 New-Alias pnpm "D:/Scoop/shims/pnpm"
 New-Alias bash "D:/Scoop/shims/bash.exe"
+New-Alias conda "D:\Scoop\apps\anaconda3\current\App\Scripts\conda.exe"
 
-New-Alias code code-insiders
-New-Alias vscode "D:\Dev\Microsoft VS Code\bin\code.cmd"
+New-Alias code code-insiders.cmd
+New-Alias vscode "D:\Dev\VSCode\bin\code.cmd"
 New-Alias curl D:/Scoop/shims/curl.exe
-
+New-Alias java8 "C:\Program Files (x86)\Common Files\Oracle\Java\java8path\java.exe"
 
 $hosts = "C:\Windows\System32\drivers\etc\hosts"
 $me = "C:/Users/Chilfish"
-$videos = "D:/Videos"
-$download = "D:/Downloads"
-$scripts = "D:/Codes/Scripts"
-$subl = "D:\Dev\Sublime Text\sublime_text.exe"
+$videos = "F:/Videos"
+$download = "$me/Downloads"
+$scripts = "F:/Codes/Scripts"
 $proxy = "http://127.0.0.1:7890"
 
 $Env:IS_NODE="TRUE"
 $Env:PROXY=$proxy
 
-$Env:PATH += ";D:\Dev\Sublime Merge"
+$Env:PATH += ";D:\Dev\Sublime Merge;C:\Users\Chilfish\.local\bin;"
 $Env:EDITOR = "D:\Scoop\shims\nvim.exe"
 
-
 # https://github.com/xampprocky/tokei
-function code-count {
+function codeCount {
   tokei -s lines -e pnpm-lock.yaml $args . 
 }
 
@@ -57,8 +55,16 @@ function code-count {
 function yt {
   python $scripts/python/video-dlp.py $args
 }
+
+# https://github.com/yt-dlp/yt-dlp#readme
 function ytd {
-  yt-dlp --cookies "$me/cookies.txt" -o "$videos/%(title)s.mp4" $args
+  $_args = @(
+    "--cookies", "$me/cookies.txt",
+    "-o", "$videos/%(title)s.mp4"
+    "--remux-video", "mp4"
+  )
+
+  & yt-dlp $_args $args
 }
 
 # https://github.com/nilaoda/N_m3u8DL-RE
@@ -70,15 +76,15 @@ function m3u8 {
     "--mux-after-done", "format=mp4"
     "--check-segments-count",
     "--live-pipe-mux"
-    "--select-video", 'res="1080*":for=best',
+    "--select-video", 'for=best',
     "--select-audio", "for=best"
   )
-  & "$download/App/N_m3u8DL-RE.exe" $_args $args
+  & "D:/Apps/N_m3u8DL-RE.exe" $_args $args
 }
 
 # https://github.com/Chilfish/Weibo-archiver/blob/main/scripts/server.mjs
 function wb {
-  $cwd = "D:/Backups/Weibo"
+  $cwd = "F:/Backups/Weibo"
   node "$cwd/server.mjs" $cwd
 }
 
@@ -93,11 +99,11 @@ $bbdownArgs = @(
 function downbb {
   bbdown $bbdownArgs $args
 }
-function downbb-low {
+function downbbLow {
   downbb -e "hevc" -q "1080P 高清" $args
 }
 function bangumi {
-  downbb -q "1080P 高码率" $args
+  downbb -q "1080P 高码率, 1080P 高帧率" $args
 }
 
 function danmu {
@@ -115,8 +121,8 @@ function lss {
 
 # 查看文件夹大小
 function mem {
-  $res = (ls $args -recurse | measure-object length -Sum).Sum/1MB 
-  echo ("{0:N3} MB" -f $res)
+  $res = (Get-ChildItem $args -recurse | measure-object length -Sum).Sum/1MB 
+  Write-Output ("{0:N3} MB" -f $res)
 }
 
 function get-filename {
@@ -130,7 +136,6 @@ function get-relative {
   param (
     [string]$path
   )
-  $pwd = Get-Location
   $relative = [System.IO.Path]::GetRelativePath($pwd, $path).Replace("\", "/")
   return $relative
 }
@@ -159,13 +164,13 @@ function subMp4 {
     [string]$video,
     [string]$subtitle
   )
-  cd $videos
+  Set-Location $videos
   $basename = get-filename $video
   $subPath = get-filename $subtitle
 
   ffmpeg -i $video -vf "ass=$subPath.ass" $smallArgs "sub-$basename.mp4"
 }
-function small-mp4 {
+function smallMp4 {
   param(
     [string]$video
   )
@@ -180,7 +185,7 @@ function battery {
 }
 
 function gitblame {
-  echo "" >> .git-blame-ignore-revs
+  Write-Output "" >> .git-blame-ignore-revs
   git config --local blame.ignoreRevsFile .git-blame-ignore-revs
 }
 
@@ -213,11 +218,11 @@ function runBg {
 
 function start-rss {
   Write-Host "running on http://localhost:1200"
-  cd D:/Codes/fork/RSSHub
+  Set-Location D:/Codes/fork/RSSHub
   runBg "pnpm start"
 }
 function start-rss-twitter {
-  cd $scripts
+  Set-Location $scripts
   runBg "pnpm run:rss"
 }
 function start-wb-checkin {
@@ -304,3 +309,8 @@ function y {
     }
     Remove-Item -Path $tmp
 }
+
+#f45873b3-b655-43a6-b217-97c00aa0db58 PowerToys CommandNotFound module
+
+Import-Module -Name Microsoft.WinGet.CommandNotFound
+#f45873b3-b655-43a6-b217-97c00aa0db58

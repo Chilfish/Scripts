@@ -1,40 +1,132 @@
-import { utimes } from 'node:fs/promises'
-import path from 'node:path'
-import glob from 'fast-glob'
+import ollama from 'ollama'
 
-const folder = process.argv[2]
+import { codes } from './codes'
 
-if (!folder) {
-  console.error('Folder is required')
-  process.exit(1)
+interface CodeEntry {
+  content: string
+  embedding: number[]
 }
 
-const mediaFiles = await glob(`${path.join(folder).replaceAll('\\', '/')}/*`)
-// rewrite created time
+class EmbeddingManager {
+  private batchSize = 50
+  private model = 'unclemusclez/jina-embeddings-v2-base-code'
 
-for (const file of mediaFiles) {
-  // 20200426_195259-xxx.jpg
-  const createdAt = file.split('/').pop()?.split('-')[0]
-
-  if (!createdAt || !createdAt.match(/^\d+/))
-    continue
-
-  const date = new Date(
-    Number.parseInt(createdAt.substring(0, 4)), // year
-    Number.parseInt(createdAt.substring(4, 6)) - 1, // month (0-based)
-    Number.parseInt(createdAt.substring(6, 8)), // day
-    Number.parseInt(createdAt.substring(9, 11)), // hours
-    Number.parseInt(createdAt.substring(11, 13)), // minutes
-    Number.parseInt(createdAt.substring(13, 15)), // seconds
-  )
-
-  if (Number.isNaN(date.getTime())) {
-    console.error(`Invalid date ${createdAt}, ${file}`)
-    continue
+  private async processBatch(batch: string[]) {
+    try {
+      const response = await ollama.embed({
+        model: this.model,
+        input: batch,
+      })
+      return response.embeddings
+    }
+    catch (error: any) {
+      console.error('Embedding batch error:', error)
+      throw new Error(`Failed to process batch: ${error.message}`)
+    }
   }
 
-  await utimes(file, date, date)
-    .catch(err => console.error(`Failed to rewrite created time ${err}`))
+  async getEmbeddings(codeBase: string[]): Promise<CodeEntry[]> {
+    const results: CodeEntry[] = []
+    const toProcess: string[] = codeBase
+
+    // Process in batches
+    for (let i = 0; i < toProcess.length; i += this.batchSize) {
+      const batch = toProcess.slice(i, i + this.batchSize)
+      const embeddings = await this.processBatch(batch)
+
+      for (let j = 0; j < batch.length; j++) {
+        const content = batch[j]
+        const entry: CodeEntry = {
+          content,
+          embedding: embeddings[j],
+        }
+
+        results.push(entry)
+      }
+    }
+
+    return results
+  }
 }
 
-console.log('Done', mediaFiles.length)
+class SimilarityChecker {
+  static cosineSimilarity(a: number[], b: number[]): number {
+    if (a.length !== b.length) {
+      throw new Error('Vectors must have the same dimensions')
+    }
+
+    let dot = 0
+    let magA = 0
+    let magB = 0
+    for (let i = 0; i < a.length; i++) {
+      dot += a[i] * b[i]
+      magA += a[i] ** 2
+      magB += b[i] ** 2
+    }
+    return dot / (Math.sqrt(magA) * Math.sqrt(magB))
+  }
+
+  static findMostSimilar(
+    queryEmbedding: number[],
+    entries: CodeEntry[],
+    threshold = 0.7,
+  ) {
+    let maxSimilarity = 0
+    let mostSimilar: CodeEntry | null = null
+
+    for (const entry of entries) {
+      const similarity = this.cosineSimilarity(queryEmbedding, entry.embedding)
+      if (similarity > maxSimilarity && similarity >= threshold) {
+        maxSimilarity = similarity
+        mostSimilar = entry
+      }
+    }
+
+    return {
+      similarity: maxSimilarity,
+      mostSimilarCode: mostSimilar?.content || '',
+    }
+  }
+}
+
+class CodeSimilarityDetector {
+  private embeddingManager = new EmbeddingManager()
+
+  async analyze(
+    testCode: string,
+    codeBase: string[],
+  ): Promise<{ similarity: number, mostSimilarCode: string }> {
+    try {
+      // Get codebase embeddings
+      const codeEntries = await this.embeddingManager.getEmbeddings(codeBase)
+
+      // Get test code embedding
+      const testEntries = await this.embeddingManager.getEmbeddings([testCode])
+      const testEmbedding = testEntries[0].embedding
+
+      // Find similarities
+      return SimilarityChecker.findMostSimilar(testEmbedding, codeEntries)
+    }
+    catch (error) {
+      console.error('Analysis failed:', error)
+      throw new Error(`Analysis failed: ${error}`)
+    }
+  }
+}
+
+// 使用示例
+async function main() {
+  const detector = new CodeSimilarityDetector()
+
+  const testIdx = Math.floor(Math.random() * codes.length)
+  const testCode = codes[testIdx]
+  const codeBase = codes.filter((_, idx) => idx !== testIdx)
+
+  const result = await detector.analyze(testCode, codeBase)
+
+  console.log(`Test code: ${testCode}`)
+  console.log(`Similarity: ${result.similarity.toFixed(4)}`)
+  console.log(`Most similar code:\n${result.mostSimilarCode}`)
+}
+
+main().catch(console.error)

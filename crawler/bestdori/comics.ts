@@ -19,13 +19,7 @@ if (!comicList) {
   process.exit(1)
 }
 
-const pickupCharacters = [26, 27, 28, 29, 30, 36, 37, 38, 39, 40]
-
 const comics = Object.entries(comicList).flatMap(([idx, comic]) => {
-  const isPickup = comic.characterId.some(id => pickupCharacters.includes(id))
-  if (!isPickup)
-    return []
-
   const isSingleFrame = !comic.assetBundleName.includes('comic_fourframe_')
   const title = comic.title[0]
 
@@ -45,7 +39,7 @@ const queue = new PQueue({ concurrency: 6 })
 
 comics.forEach(({ name, url }) => {
   queue.add(async () => {
-    await downloadBlob({ url, name, dest: 'D:/Downloads/bestdori/comics' })
+    await downloadBlob({ url, name, dest: 'F:/Downloads/bestdori/comics' })
   })
 })
 

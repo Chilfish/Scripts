@@ -98,7 +98,7 @@ def main():
     parser.add_argument("--pick", action="store_true", help="提取并单独保存time_intervals.txt中的片段")
     args = parser.parse_args()
 
-    videos_directory = os.path.join("D:/Videos")
+    videos_directory = os.path.join("F:/Videos")
     time_intervals_file = os.path.join(videos_directory, "time_intervals.txt")
 
     input_video_path = args.input_video

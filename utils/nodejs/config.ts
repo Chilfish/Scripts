@@ -13,7 +13,11 @@ interface Config {
     url: string
     model: string
   }
-  deepseekKey: string
+  deepseek: {
+    key: string
+    url: string
+    model: string
+  }
   prompts: {
     [key: string]: string
   }
