@@ -24,27 +24,28 @@ New-Alias git hub
 New-Alias Set-LocationWithFnm z
 New-Alias which Get-Command
 New-Alias open start-Process
+New-Alias code code-insiders.cmd
+New-Alias py uv
+New-Alias pyx uvx
+
 New-Alias pnpm "D:/Scoop/shims/pnpm"
 New-Alias bash "D:/Scoop/shims/bash.exe"
-New-Alias conda "D:\Scoop\apps\anaconda3\current\App\Scripts\conda.exe"
-
-New-Alias code code-insiders.cmd
-New-Alias vscode "D:\Dev\VSCode\bin\code.cmd"
+New-Alias vscode "D:/Dev/VSCode/bin/code.cmd"
 New-Alias curl D:/Scoop/shims/curl.exe
-New-Alias java8 "C:\Program Files (x86)\Common Files\Oracle\Java\java8path\java.exe"
+New-Alias java8 "C:/Program Files (x86)/Common Files/Oracle/Java/java8path/java.exe"
 
-$hosts = "C:\Windows\System32\drivers\etc\hosts"
+$hosts = "C:/Windows/System32/drivers/etc/hosts"
 $me = "C:/Users/Chilfish"
 $videos = "F:/Videos"
 $download = "$me/Downloads"
-$scripts = "F:/Codes/Scripts"
+$scripts = "H:/Scripts"
 $proxy = "http://127.0.0.1:7890"
 
 $Env:IS_NODE="TRUE"
 $Env:PROXY=$proxy
 
-$Env:PATH += ";D:\Dev\Sublime Merge;C:\Users\Chilfish\.local\bin;"
-$Env:EDITOR = "D:\Scoop\shims\nvim.exe"
+$Env:PATH += ";D:/Dev/Sublime Merge;C:/Users/Chilfish/.local/bin;"
+$Env:EDITOR = "D:/Scoop/shims/nvim.exe"
 
 # https://github.com/xampprocky/tokei
 function codeCount {
@@ -53,7 +54,7 @@ function codeCount {
 
 # https://github.com/Chilfish/Scripts/blob/main/python/video-dlp.py
 function yt {
-  python $scripts/python/video-dlp.py $args
+  uv run $scripts/python/video-dlp.py $args
 }
 
 # https://github.com/yt-dlp/yt-dlp#readme
@@ -308,6 +309,36 @@ function y {
         Set-Location -LiteralPath $cwd
     }
     Remove-Item -Path $tmp
+}
+
+function New-Symlink {
+    param (
+        [string]$TargetPath,
+        [string]$LinkPath
+    )
+
+    # 检查目标路径是否存在
+    if (!(Test-Path -Path $TargetPath)) {
+        Write-Error "目标路径 '$TargetPath' 不存在."
+        return $false
+    }
+
+    # 检查软链接是否已经存在
+    if (Test-Path -Path $LinkPath) {
+        Write-Error "软链接 '$LinkPath' 已经存在."
+        return $false
+    }
+
+    # 创建软链接
+    try {
+        New-Item -ItemType SymbolicLink -Path $LinkPath -Target $TargetPath
+        Write-Host "成功创建软链接: '$LinkPath' -> '$TargetPath'"
+        return $true
+    }
+    catch {
+        Write-Error "创建软链接失败: $($_.Exception.Message)"
+        return $false
+    }
 }
 
 #f45873b3-b655-43a6-b217-97c00aa0db58 PowerToys CommandNotFound module

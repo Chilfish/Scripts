@@ -2,8 +2,8 @@ import { execSync } from 'node:child_process'
 import { stat } from 'node:fs/promises'
 import { dir, readJson } from '~/utils/nodejs'
 
-const files = dir('D:/Backups/bili/go-lang.json')
-const folder = dir('D:/Videos/golang')
+const files = dir('F:/Backups/bili/data.json')
+const folder = dir('F:/Videos/bili')
 const maxDuration = 31 * 60 // 31 minutes
 
 interface Data {
@@ -37,8 +37,9 @@ for (const { url, title } of urls) {
       '-hs',
       '-e hevc',
       '-p 1',
+      `-q "1080P 高码率, 1080P 高帧率"`,
       `-F="<ownerName> - <videoTitle>"`,
-      `-M="<ownerName> - <videoTitle>"`,
+      `-M="<ownerName> - <videoTitle>/<pageNumber> - <pageTitle>"`,
       `--work-dir=${folder}`,
       url,
     ].join(' '),
