@@ -35,12 +35,38 @@ interface Config {
 
 export const { config } = await loadConfig<Config>({
   configFile: dir('config.yaml'),
+  defaultConfig: {
+    cookie: {
+      twitter: '',
+      pixiv: '',
+      bilibili: '',
+      weibo: '',
+    },
+    openai: {
+      key: '',
+      url: '',
+      model: '',
+    },
+    deepseek: {
+      key: '',
+      url: '',
+      model: '',
+    },
+    prompts: {},
+    rss: {
+      interval: 10,
+      folder: '',
+      maxDuration: 1000,
+      urls: [],
+    },
+    twitterKey: '',
+  },
 })
 
 export function readCookie(
   name: keyof Config['cookie'],
 ) {
-  return config.cookie[name] as string
+  return config.cookie[name] as string || ''
 }
 
-export const openaiConfig = config.openai
+export const openaiConfig = config.openai || {}

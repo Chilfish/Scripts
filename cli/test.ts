@@ -1,6 +1,6 @@
 import ollama from 'ollama'
 
-import { codes } from './codes'
+// import { codes } from './codes'
 
 interface CodeEntry {
   content: string
@@ -118,6 +118,7 @@ class CodeSimilarityDetector {
 async function main() {
   const detector = new CodeSimilarityDetector()
 
+  const codes = [] as string[]
   const testIdx = Math.floor(Math.random() * codes.length)
   const testCode = codes[testIdx]
   const codeBase = codes.filter((_, idx) => idx !== testIdx)

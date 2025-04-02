@@ -1,5 +1,4 @@
-import { PQueue } from '~/utils'
-import { downloadBlob } from '~/utils/nodejs'
+import { downloadFiles } from '~/utils/nodejs'
 import { _fetch } from '.'
 
 interface Comic {
@@ -19,7 +18,7 @@ if (!comicList) {
   process.exit(1)
 }
 
-const comics = Object.entries(comicList).flatMap(([idx, comic]) => {
+const comics = Object.entries(comicList).flatMap(([_idx, comic]) => {
   const isSingleFrame = !comic.assetBundleName.includes('comic_fourframe_')
   const title = comic.title[0]
 
@@ -35,14 +34,9 @@ const comics = Object.entries(comicList).flatMap(([idx, comic]) => {
 
 console.log(comics.length)
 
-const queue = new PQueue({ concurrency: 6 })
-
-comics.forEach(({ name, url }) => {
-  queue.add(async () => {
-    await downloadBlob({ url, name, dest: 'F:/Downloads/bestdori/comics' })
-  })
+await downloadFiles(comics, {
+  dest: 'F:/Downloads/bestdori/comics',
+  concurrency: 6,
 })
-
-await queue.onIdle()
 
 console.log('Downloaded all comics!')

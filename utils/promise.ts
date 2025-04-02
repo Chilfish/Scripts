@@ -118,7 +118,7 @@ export class PQueue {
     if (!this._isEmpty)
       return
 
-    console.log('idle', this._idleResolvers.length)
+    // console.log('idle', this._idleResolvers.length)
     for (const resolve of this._idleResolvers)
       resolve()
     this._idleResolvers = []

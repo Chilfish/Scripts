@@ -9,6 +9,7 @@ import { proxyUrl } from '../constant'
 import { murmurHashV3, toBase62 } from '../math'
 import { PQueue, PQueueOptions } from '../promise'
 import { dir } from './file'
+import { updateProgress } from './progress'
 
 export const proxy = new ProxyAgent(proxyUrl)
 export function proxyFetch(url: string, options?: RequestInit) {
@@ -60,7 +61,7 @@ export async function downloadBlob(
   const name = optionsRest.name?.trim() || new URL(url).pathname.split('/').pop() || 'unknown_file'
   let filename = dir(`${dest}/${name}`)
 
-  if (existsSync(filename)) {
+  if (existsSync(filename) && !hash) {
     return true
   }
   const fetcher = proxy ? proxyFetch : fetch
@@ -109,27 +110,39 @@ export async function downloadBlob(
 
 export async function downloadFiles(
   files: DownloadFileInfo[] | string[],
-  options?: DownloadOptions & Partial<PQueueOptions>,
+  options?: DownloadOptions & Partial<PQueueOptions> & {
+    progress?: boolean
+  },
 ) {
   options = {
     concurrency: 10,
+    progress: true,
     ...defaultOptions,
     ...options,
   }
+
+  console.log('downloadFiles', options)
 
   let downloaded = 0
   const queue = new PQueue(options)
   const fileArr = files.map(file => typeof file === 'string' ? { url: file } : file)
 
-  queue.addAll(fileArr.map(file => async () => {
-    const res = await downloadBlob({
-      ...options,
-      ...file,
+  for (const file of fileArr) {
+    queue.add(async () => {
+      const res = await downloadBlob({
+        ...options,
+        ...file,
+      })
+      if (res) {
+        downloaded++
+        updateProgress({
+          current: downloaded,
+          total: fileArr.length,
+        })
+      }
     })
-    if (res) {
-      downloaded++
-    }
-  }))
+  }
+
   await queue.onIdle()
 
   return downloaded

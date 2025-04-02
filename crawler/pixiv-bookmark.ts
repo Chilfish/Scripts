@@ -1,15 +1,33 @@
 import { buildUrl, PQueue, randomUserAgent } from '~/utils'
 import {
+  argvParser,
   dir,
-  downloadBlob,
+  downloadFiles,
   proxyFetch,
   readCookie,
 } from '~/utils/nodejs'
 
+const args = argvParser([{
+  key: 'uid',
+  description: '用户ID',
+  type: 'number',
+  required: true,
+}, {
+  key: 'dest',
+  description: '下载目录',
+  defaultValue: 'F:/Downloads/pixiv',
+}] as const)
+
 const cookie = readCookie('pixiv')
-const uid = 70847616
-const dest = dir('D:/Downloads/pixiv')
+const uid = args.uid
+const dest = dir(args.dest)
 const queue = new PQueue({ concurrency: 4 })
+const fetchHeaders = {
+  cookie,
+  'Referer': `https://www.pixiv.net/users/${uid}`,
+  'User-Agent': randomUserAgent(),
+}
+
 let worksCount = 0
 
 interface Work {
@@ -35,11 +53,7 @@ async function _fetch<T = any>(path: string, query: object = {}) {
   })
 
   return await proxyFetch(url, {
-    headers: {
-      cookie,
-      'Referer': `https://www.pixiv.net/users/${uid}`,
-      'User-Agent': randomUserAgent(),
-    },
+    headers: fetchHeaders,
   })
     .then(res => res.json() as Promise<T>)
     .catch((err) => {
@@ -48,14 +62,18 @@ async function _fetch<T = any>(path: string, query: object = {}) {
     })
 }
 
-async function getBookmarks(offset: number) {
+async function getBookmarks(offset: number): Promise<{ works: Work[], total: number }> {
   const data = await _fetch(`/user/${uid}/illusts/bookmarks`, {
     offset,
     limit: 48 * (offset || 1),
     rest: 'show',
     tag: '',
   })
-  return data.body
+  const res = data.body
+  if (data.error) {
+    throw new Error(`[bookmarks] ${data.message}`)
+  }
+  return res
 }
 
 async function getIllusts(work: Work) {
@@ -66,13 +84,18 @@ async function getIllusts(work: Work) {
 
     return {
       url: item.urls.original,
-      name: `${work.userId}-${work.id}${suffix}.jpg`,
+      name: `${work.userName}-${work.id}${suffix}.jpg`,
     }
   }) as Url[]
 }
 
 async function main(page: number) {
-  const { works, total } = await getBookmarks(page) as { works: Work[], total: number }
+  const { works, total } = await getBookmarks(page)
+  if (!works.length) {
+    console.log('No works found')
+    return
+  }
+
   const urls = [] as Url[]
   worksCount += works.length
 
@@ -87,21 +110,13 @@ async function main(page: number) {
 
   console.log(`Downloading: ${urls.length}, total: ${worksCount}/${total}`)
 
-  for (const { url, name } of urls) {
-    queue.add(() => downloadBlob({
-      url,
-      dest,
-      name,
-      fetchOptions: {
-        headers: {
-          cookie,
-          Referer: `https://www.pixiv.net/users/${uid}`,
-        },
-      },
-    }))
-  }
-
-  await queue.onIdle()
+  await downloadFiles(urls, {
+    dest,
+    concurrency: 4,
+    fetchOptions: {
+      headers: fetchHeaders,
+    },
+  })
 
   const hasNext = worksCount < total
   if (hasNext) {
