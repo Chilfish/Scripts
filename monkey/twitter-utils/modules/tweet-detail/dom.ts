@@ -1,7 +1,7 @@
 import { pubTime, tweetUrl } from '@/utils/common'
 import { parseText } from '@/utils/textParser'
-import { $, $$, waitForElement } from '~/monkey/utils'
 import { formatDate } from '~/utils/date'
+import { $, $$, waitForElement } from '~/utils/dom'
 
 function processTweet() {
   const oldElement = $('div[role="link"]')

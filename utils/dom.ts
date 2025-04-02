@@ -11,8 +11,10 @@ export function $$<T = HTMLElement>(selector: Selector, root?: ParentNode) {
 }
 
 // 配合 https://github.com/pushqrdx/vscode-inline-html 插件来高亮语法
-export function css(raw: TemplateStringsArray) {
-  return String.raw(raw)
+export function css(strings: TemplateStringsArray, ...values: any[]) {
+  if (!strings.length)
+    return ''
+  return String.raw(strings, ...values)
 }
 
 export function saveBlobUrl(url: string, filename: string) {

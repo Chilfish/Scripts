@@ -1,9 +1,8 @@
 import type { UrlActions } from './types'
 import { GM_addStyle } from '$'
-import { $, $$ } from '../utils'
-import { baseCss, css } from './utils'
+import { $, $$, css } from '~/utils/dom'
 
-css`
+const baseCss = css`
 html::-webkit-scrollbar {
   width: 8px;height: 8px;
 }
@@ -27,6 +26,7 @@ body {
   --vp-font-family-base: 'Inter';
 }
 `
+GM_addStyle(baseCss)
 
 const url = document.location.href
 
@@ -38,10 +38,9 @@ for (const path in modules) {
   const module = modules[path].default
   if (module.pattern.test(url)) {
     module.action()
+    GM_addStyle(module.css?.() ?? '')
   }
 }
-
-GM_addStyle(baseCss())
 
 Object.assign(window, {
   _$: $,

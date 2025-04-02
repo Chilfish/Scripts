@@ -1,6 +1,6 @@
 import { GM_registerMenuCommand } from '$'
-import { $, $$, saveAs } from '~/monkey/utils'
 import { formatDate } from '~/utils/date'
+import { $, $$, saveAs } from '~/utils/dom'
 import { delay } from '~/utils/math'
 
 function findImgBox() {
@@ -48,7 +48,7 @@ async function doanload(url: string, filename: string) {
 async function main() {
   const imgBox = findImgBox()
   const imgs = await findImgs(imgBox)
-  const time = $<HTMLTimeElement>('time', imgBox.nextElementSibling)?.dateTime || Date.now()
+  const time = $<HTMLTimeElement>('time', imgBox.nextElementSibling!)?.dateTime || Date.now()
   const id = location.pathname.split('/').at(-2)
 
   console.log({ imgs, time, id })

@@ -1,5 +1,5 @@
 import { GM_addStyle } from '$'
-import { css } from '../utils'
+import { css } from '~/utils/dom'
 
 const style = css`
 div, span {

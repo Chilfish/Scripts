@@ -1,6 +1,7 @@
 export * from './constant'
 export * from './cookie'
 export * from './date'
+export * from './dom'
 export * from './fetch'
 export * from './math'
 export * from './promise'

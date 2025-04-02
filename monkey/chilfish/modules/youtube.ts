@@ -1,13 +1,13 @@
+import { css } from '~/utils/dom'
 import { UrlActions } from '../types'
-import { css } from '../utils'
 
 export default {
   pattern: /youtube\.com/,
+  css: () => css`
+    .ytp-gradient-bottom {
+      display: none !important;
+    }
+  `,
   action: () => {
-    css`
-      .ytp-gradient-bottom {
-        display: none !important;
-      }
-    `
   },
 } satisfies UrlActions

@@ -1,6 +1,6 @@
 import { destr } from 'destr'
-import { saveAs } from '~/monkey/utils'
 import { formatDate } from '~/utils/date'
+import { saveAs } from '~/utils/dom'
 import { Interceptor, Tweet, User, UserFeed } from '../types'
 
 const urlMatch = 'graphql/query'

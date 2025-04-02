@@ -1,4 +1,4 @@
-import { $, store } from '~/monkey/utils'
+import { $, store } from '~/utils/dom'
 
 // TODO: set as path like 'config.rmtweets.enable'
 const isEnable = store.get<boolean>('enableRmTweets', false)

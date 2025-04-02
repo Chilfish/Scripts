@@ -1,4 +1,4 @@
-import { $$ } from '~/monkey/utils'
+import { $$ } from '~/utils/dom'
 import { numFmt } from '~/utils/math'
 
 export function fixFollowers(followers: number) {

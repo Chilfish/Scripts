@@ -5,7 +5,6 @@ import {
   isTimelineEntryTweet,
 } from '@/utils/api'
 import logger from '@/utils/logger'
-import { $$, waitForElement } from '~/monkey/utils'
 import {
   ItemContentUnion,
   TimelineAddEntriesInstruction,
@@ -14,6 +13,7 @@ import {
   TimelineTweet,
   Tweet,
 } from '~/types'
+import { $$, waitForElement } from '~/utils/dom'
 
 interface SearchTimelineResponse {
   data: {
