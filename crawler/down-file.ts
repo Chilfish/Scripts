@@ -14,7 +14,7 @@ const { hash } = argvParser([{
   key: 'hash',
   type: 'boolean',
   description: 'append hash to filename',
-  defaultValue: false,
+  default: false,
 }] as const)
 
 const data = await readFile(fileList, 'utf-8')
@@ -27,14 +27,9 @@ const data = await readFile(fileList, 'utf-8')
 
 console.log('Total files:', data.length, 'hash:', hash)
 
-const isSameFilename = new Set(
-  data.map(url => new URL(url).pathname.split('/').pop()!),
-)
-  .size < data.length - 1
-
 await downloadFiles(data, {
   dest,
-  hash: hash || isSameFilename,
+  hash,
   proxy: true,
   progress: true,
   concurrency: 1,

@@ -39,7 +39,7 @@ export interface ArgvOption<T = any> {
   key: string
   description: string
   shortKey?: string
-  defaultValue?: T
+  default?: T
   type?: 'string' | 'number' | 'boolean' | 'enum'
   // Add enum values array for enum type
   enumValues?: string[]
@@ -57,7 +57,7 @@ type GetOptionType<T extends ArgvOption> =
 
 type GetOptionValue<T extends ArgvOption> =
   T extends { required: true } ? GetOptionType<T> :
-    T extends { defaultValue: any } ? GetOptionType<T> :
+    T extends { default: any } ? GetOptionType<T> :
       GetOptionValue<T> | undefined
 
 export type OptionsResult<T extends ArgvOption[]> = {
@@ -126,16 +126,14 @@ export function argvParser<T extends ArgvOption[]>(options: T) {
 
   for (const option of options) {
     if (argv[option.key] === undefined)
-      argv[option.key] = option.defaultValue
+      argv[option.key] = option.default
 
     if (typeof option.beforeSet === 'function') {
       argv[option.key] = option.beforeSet(argv[option.key])
     }
   }
 
-  argv.help = () => _printHelp(options)
-
-  return argv as OptionsResult<T> & { help?: () => void }
+  return argv as OptionsResult<T>
 }
 
 function _printHelp(options: ArgvOption[]) {

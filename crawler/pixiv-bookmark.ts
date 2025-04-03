@@ -15,7 +15,7 @@ const args = argvParser([{
 }, {
   key: 'dest',
   description: '下载目录',
-  defaultValue: 'F:/Downloads/pixiv',
+  default: 'F:/Downloads/pixiv',
 }] as const)
 
 const cookie = readCookie('pixiv')

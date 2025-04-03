@@ -15,6 +15,9 @@ export interface ProgressOptions {
   current: number
   total: number
   offset?: number
+  speed?: string
+  eta?: string
+  done?: boolean
   /**
    * 格式化进度信息的函数
    */
@@ -30,6 +33,9 @@ export function updateProgress(
   const {
     current,
     total,
+    speed,
+    eta,
+    done,
     offset = 0,
     formatter = num => num.toString(),
   } = options
@@ -57,15 +63,17 @@ export function updateProgress(
   const status = current >= total ? '\x1B[32m✓\x1B[0m' : '\x1B[36m⋯\x1B[0m'
   const currentText = formatter(current)
   const totalText = formatter(total)
+  const speedText = speed ? ` ${speed}` : ''
+  const etaText = eta ? ` ${eta}` : ''
 
-  const progressText = `${progressBar} ${percentage}% ${status} [${currentText}/${totalText}]`
+  const progressText = `${progressBar} ${percentage}% ${status} [${currentText}/${totalText}]${speedText}${etaText}`
 
   process.stdout.write(`\r${progressText}`)
 
   // 恢复光标位置
   process.stdout.write('\x1B8')
 
-  if (current === total) {
+  if (current === total && done) {
     process.stdout.write('\n') // 完成后换行
     process.stdout.write('\n') // 额外添加一个换行，为下一个内容留出空间
   }

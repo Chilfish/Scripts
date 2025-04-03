@@ -32,7 +32,8 @@
     "puppeteer": "^24.5.0",
     "rettiwt-api": "^4.2.0",
     "undici": "^7.6.0",
-    "winston": "^3.17.0"
+    "winston": "^3.17.0",
+    "ytdlp-nodejs": "^2.0.5"
   },
   "devDependencies": {
     "@ai-sdk/deepseek": "^0.2.5",

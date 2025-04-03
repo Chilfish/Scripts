@@ -21,6 +21,7 @@
         "rettiwt-api": "^4.2.0",
         "undici": "^7.6.0",
         "winston": "^3.17.0",
+        "ytdlp-nodejs": "^2.0.5",
       },
       "devDependencies": {
         "@ai-sdk/deepseek": "^0.2.5",
@@ -1411,6 +1412,8 @@
     "yauzl": ["yauzl@2.10.0", "", { "dependencies": { "buffer-crc32": "~0.2.3", "fd-slicer": "~1.1.0" } }, "sha512-p4a9I6X6nu6IhoGmBqAcbJy1mlC4j27vEPZX9F4L4/vZT3Lyq1VkFHw/V/PUcB9Buo+DG3iHkT0x3Qya58zc3g=="],
 
     "yocto-queue": ["yocto-queue@0.1.0", "", {}, "sha512-rVksvsnNCdJ/ohGc6xgPwyN8eheCxsiLM8mxuE/t/mOVqJewPuO1miLpTHQiRgTKCLexL4MeAFVagts7HmNZ2Q=="],
+
+    "ytdlp-nodejs": ["ytdlp-nodejs@2.0.5", "", {}, "sha512-n3FGUpBl8ARMMCJ6qpfuKepvhZUP6lqGtChcdUVEw2nlVTwYXw7mfxrC7V+GxWBw/zT2ZlrIA0XO5rPFp8GRBQ=="],
 
     "zod": ["zod@3.24.2", "", {}, "sha512-lY7CDW43ECgW9u1TcT3IoXHflywfVqDYze4waEz812jR/bZ8FHDsl7pFQoSZTz5N+2NqRXs8GBwnAwo3ZNxqhQ=="],
 

@@ -19,7 +19,7 @@ const { name, force, help } = argvParser([
     key: 'force',
     shortKey: 'f',
     description: 'Force fetching the data again',
-    defaultValue: false,
+    default: false,
     type: 'boolean',
   },
 ] as const)
