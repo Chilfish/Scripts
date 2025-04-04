@@ -30,7 +30,7 @@ export async function runCommand(command: string) {
  * ```
  */
 export function isNotInImport(importMetaFilename: string) {
-  const [_tsx, argFile] = process.argv
+  const [, argFile] = process.argv
 
   return path.resolve(importMetaFilename) === path.resolve(argFile)
 }
@@ -67,10 +67,13 @@ export type OptionsResult<T extends ArgvOption[]> = {
 /**
  * A simple command line argument parser.
  */
-export function argvParser<T extends ArgvOption[]>(options: T) {
+export function argvParser<T extends ArgvOption[]>(
+  options: T,
+  args: string[] = process.argv.slice(2),
+) {
   const argv: Record<string, any> = {}
 
-  if (process.argv.length <= 2 && options.some(option => option.required)) {
+  if (args.length < 1 && options.some(option => option.required)) {
     const required = options.filter(option => option.required)
     console.error('Missing required arguments:', required.map(o => o.key).join(', '))
 
@@ -79,18 +82,22 @@ export function argvParser<T extends ArgvOption[]>(options: T) {
     process.exit(1)
   }
 
-  for (let i = 2; i < process.argv.length; i++) {
-    const arg = process.argv[i]
+  for (let i = 0; i < args.length;) {
+    const arg = args[i]
 
     const sliceLen = arg.startsWith('--') ? 2 : 1
     const key = arg.slice(sliceLen)
+    const value = args[i + 1]
+    let nextArgIdx = i + 2
+    if (value?.startsWith('-')) {
+      nextArgIdx = i + 1
+    }
+    i = nextArgIdx
 
     if (key === 'help' || key === 'h') {
       _printHelp(options)
       process.exit(0)
     }
-
-    const value = process.argv[i + 1]
     const option = options.find(option => option.key === key || option.shortKey === key)
     if (!option) {
       continue
@@ -105,7 +112,9 @@ export function argvParser<T extends ArgvOption[]>(options: T) {
       process.exit(1)
     }
 
-    if (option.type === 'boolean' && value === undefined) {
+    if (option.type === 'boolean' && (
+      value === undefined || value === 'true' || value.startsWith('-')
+    )) {
       argv[option.key] = true
     }
     else if (option.type !== 'enum') {
@@ -116,10 +125,7 @@ export function argvParser<T extends ArgvOption[]>(options: T) {
         argv[option.key] = value
       }
       else {
-        console.error(`Invalid value for option: ${option.key}`)
-        console.warn('Usage:')
-        _printHelp(options)
-        process.exit(1)
+        throw new Error(`Invalid value for option: ${option.key}, should be one of ${option.enumValues?.join(', ')}, got ${value}`)
       }
     }
   }

@@ -18,6 +18,7 @@ Invoke-Expression (& { (zoxide init powershell | Out-String) })
 fnm env --use-on-cd | Out-String | Invoke-Expression
 
 Remove-Item Alias:ni -Force -ErrorAction Ignore
+Remove-Item Alias:copy -Force -ErrorAction Ignore
 Remove-Item Alias:conda -Force -ErrorAction Ignore
 
 New-Alias git hub
@@ -37,7 +38,7 @@ New-Alias java8 "C:/Program Files (x86)/Common Files/Oracle/Java/java8path/java.
 $hosts = "C:/Windows/System32/drivers/etc/hosts"
 $me = "C:/Users/Chilfish"
 $videos = "F:/Videos"
-$download = "$me/Downloads"
+$download = "F:/Downloads"
 $scripts = "H:/Scripts"
 $proxy = "http://127.0.0.1:7890"
 
@@ -339,6 +340,14 @@ function New-Symlink {
         Write-Error "创建软链接失败: $($_.Exception.Message)"
         return $false
     }
+}
+
+function copy {
+  & bun run $scripts/cli/cp.ts $args
+}
+
+function downList {
+  & bun run $scripts\crawler\down-file.ts
 }
 
 #f45873b3-b655-43a6-b217-97c00aa0db58 PowerToys CommandNotFound module
