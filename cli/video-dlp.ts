@@ -56,6 +56,7 @@ const videoInfo = await cachedData(`data/ytd/${cacheId}.json`, () => ytDlp.getIn
 
 const isTwitter = /(x|twitter)\.com/.test(args.url)
 const isWeibo = /weibo\.com/.test(args.url)
+const isTikTok = /tiktok\.com/.test(args.url)
 
 const {
   uploader: author,
@@ -111,21 +112,8 @@ if (args.audio) {
   process.exit(0)
 }
 
-if (isWeibo) {
-  const formats = await ytDlp.execAsync(args.url, {
-    listFormats: true,
-  })
-
-  const formatId = getFormatId(formats)
-
-  await ytDlp.downloadAsync(args.url, {
-    ...commonOptions,
-    output: `${fileName}.mp4`,
-    format: formatId,
-  }).catch((error) => {
-    logger.error(`Failed to download video: ${error.message}`)
-    process.exit(1)
-  })
+if (isWeibo || isTikTok) {
+  await useFormats()
   process.exit(0)
 }
 
@@ -137,8 +125,9 @@ await ytDlp.downloadAsync(args.url, {
     type: 'mkv',
     quality: 'highest',
   },
-}).catch((error) => {
+}).catch(async (error) => {
   logger.error(`Failed to download video: ${error.message}`)
+  await useFormats()
   process.exit(1)
 })
 
@@ -157,4 +146,25 @@ function getFormatId(input: string) {
   const latestFormat = input.split('\n').filter(Boolean).at(-1) || ''
   const [id] = latestFormat.split(' ')
   return id || 'highest'
+}
+
+async function useFormats() {
+  const formats = await ytDlp.execAsync(args.url, {
+    listFormats: true,
+  })
+
+  const formatId = getFormatId(formats)
+
+  console.log({
+    formatId,
+  })
+
+  await ytDlp.downloadAsync(args.url, {
+    ...commonOptions,
+    output: `${fileName}.mp4`,
+    format: formatId,
+  }).catch((error) => {
+    logger.error(`Failed to download video: ${error.message}`)
+    process.exit(1)
+  })
 }

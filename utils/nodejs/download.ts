@@ -8,7 +8,7 @@ import { fetch, ProxyAgent, RequestInit } from 'undici'
 import { proxyUrl } from '../constant'
 import { murmurHashV3, toBase62 } from '../math'
 import { PQueue, PQueueOptions } from '../promise'
-import { dir } from './file'
+import { dir, sanitizeFilename } from './file'
 import { updateProgress } from './progress'
 
 export const proxy = new ProxyAgent(proxyUrl)
@@ -58,7 +58,11 @@ export async function downloadBlob(
   if (!url)
     throw new Error('URL is required')
 
-  const name = optionsRest.name?.trim() || new URL(url).pathname.split('/').pop() || 'unknown_file'
+  const name = sanitizeFilename(
+    optionsRest.name
+    || new URL(url).pathname.split('/').pop()
+    || 'unknown_file',
+  )
   let filename = dir(`${dest}/${name}`)
 
   if (existsSync(filename) && !hash) {
@@ -82,7 +86,7 @@ export async function downloadBlob(
     if (followRedirect && !optionsRest.name) {
       const redirectedFilename = new URL(res.url).pathname.split('/').pop()
       if (redirectedFilename) {
-        filename = path.resolve(dest, redirectedFilename)
+        filename = path.resolve(dest, sanitizeFilename(redirectedFilename))
       }
     }
 

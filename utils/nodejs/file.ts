@@ -134,3 +134,20 @@ export async function cachedData<T>(
   await writeJson(dest, data)
   return data
 }
+
+const unsafeFilenames = ['\\', '/', ':', '*', '?', '"', '<', '>', '|']
+
+export function sanitizeFilename(filename: string, replacement = '') {
+  let safeFilename = filename.trim()
+
+  unsafeFilenames.forEach((char) => {
+    safeFilename = safeFilename.replace(new RegExp(`\\${char}`, 'g'), replacement)
+  })
+
+  // Windows 路径限制大约为 260 个字符，文件名本身最好控制在 255 以内
+  const maxLength = 255
+  if (safeFilename.length > maxLength) {
+    safeFilename = safeFilename.substring(0, maxLength)
+  }
+  return safeFilename
+}

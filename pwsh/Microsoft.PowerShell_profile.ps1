@@ -1,5 +1,6 @@
 $OutputEncoding = [console]::InputEncoding = [console]::OutputEncoding = New-Object System.Text.UTF8Encoding
 
+Import-Module -Name Microsoft.WinGet.CommandNotFound
 Set-PSReadLineOption -PredictionSource History
 Set-PSReadlineKeyHandler -Key Tab -Function MenuComplete
 Set-PSReadLineKeyHandler -Chord Tab -Function MenuComplete
@@ -51,11 +52,6 @@ $Env:EDITOR = "D:/Scoop/shims/nvim.exe"
 # https://github.com/xampprocky/tokei
 function codeCount {
   tokei -s lines -e pnpm-lock.yaml $args . 
-}
-
-# https://github.com/Chilfish/Scripts/blob/main/python/video-dlp.py
-function yt {
-  uv run $scripts/python/video-dlp.py $args
 }
 
 # https://github.com/yt-dlp/yt-dlp#readme
@@ -160,18 +156,7 @@ function tomp4 {
   $basename = get-filename $video
   ffmpeg -i $video -c copy "$basename.mp4"
 }
-# 字幕压制，6倍速
-function subMp4 {
-  param (
-    [string]$video,
-    [string]$subtitle
-  )
-  Set-Location $videos
-  $basename = get-filename $video
-  $subPath = get-filename $subtitle
 
-  ffmpeg -i $video -vf "ass=$subPath.ass" $smallArgs "sub-$basename.mp4"
-}
 function smallMp4 {
   param(
     [string]$video
@@ -350,7 +335,12 @@ function downList {
   & bun run $scripts\crawler\down-file.ts
 }
 
-#f45873b3-b655-43a6-b217-97c00aa0db58 PowerToys CommandNotFound module
+function yt {
+  & bun run $scripts\cli\video-dlp.ts --url $args
+}
 
-Import-Module -Name Microsoft.WinGet.CommandNotFound
-#f45873b3-b655-43a6-b217-97c00aa0db58
+function subMp4 {
+  bun run $scripts/cli/sub-mp4.ts -i $args
+}
+
+
