@@ -1,4 +1,4 @@
-import { cachedData, config } from '~/utils/nodejs'
+import { cachedData, config } from '../utils/nodejs'
 
 const checkInApi = 'https://weibo.com/p/aj/general/button?api=http://i.huati.weibo.com/aj/super/checkin&id='
 const getListApi = 'https://weibo.com/ajax/profile/topicContent?tabid=231093_-_chaohua'
