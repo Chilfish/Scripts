@@ -91,7 +91,13 @@ export async function readJson<T = any>(file: string) {
   file = dir(file)
 
   const data = await readFile(file, 'utf-8')
-  return JSON.parse(data) as T
+  try {
+    return JSON.parse(data) as T
+  }
+  catch (e) {
+    console.error(`Error parsing JSON from ${file}:`, e)
+    throw e
+  }
 }
 
 export async function moveFoler(

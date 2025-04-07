@@ -1,22 +1,50 @@
 import { ofetch } from 'ofetch'
-import { getCookieString } from './cookie'
 
-// from: https://github.com/DIYgod/RSSHub/blob/d21c4dd/lib/routes/bilibili/cache.ts#L16-L31
+function dec2HexUpper(e: number) {
+  return Math.ceil(e).toString(16).toUpperCase()
+}
+function padStringWithZeros(string: string, length: number) {
+  let padding = ''
+  if (string.length < length) {
+    for (let n = 0; n < length - string.length; n++) {
+      padding += '0'
+    }
+  }
+  return padding + string
+}
+function randomHexStr(length: number) {
+  let string = ''
+  for (let r = 0; r < length; r++) {
+    string += dec2HexUpper(16 * Math.random())
+  }
+  return padStringWithZeros(string, length)
+}
+
+function lsid() {
+  const e = Date.now().toString(16).toUpperCase()
+  const lsid = `${randomHexStr(8)}_${e}`
+  return lsid
+}
+
+// copy from: https://github.com/DIYgod/RSSHub/blob/81a5807b/lib/routes/bilibili/cache.ts#L27-L46
 export async function getBiliAnonToken() {
   const { newBrowser } = await import('./nodejs/puppeteer')
   const browser = await newBrowser()
   const page = await browser.newPage()
-  await page.goto('https://space.bilibili.com/1/dynamic')
-
-  const cookieString = await new Promise<string>((res) => {
-    page.on('requestfinished', async (req) => {
-      if (req.url() === 'https://api.bilibili.com/x/internal/gaia-gateway/ExClimbWuzhi') {
+  const waitForRequest = new Promise<string>((resolve) => {
+    page.on('requestfinished', async (request) => {
+      if (request.url() === 'https://api.bilibili.com/x/internal/gaia-gateway/ExClimbWuzhi') {
         const cookies = await page.cookies()
-        res(getCookieString(cookies))
+        let cookieString = cookies.map(cookie => `${cookie.name}=${cookie.value}`).join('; ')
+
+        cookieString = cookieString.replace(/b_lsid=[0-9A-F]+_[0-9A-F]+/, `b_lsid=${lsid()}`)
+        resolve(cookieString)
       }
     })
   })
-
+  await page.goto('https://space.bilibili.com/1/dynamic')
+  const cookieString = await waitForRequest
+  // console.log(`Got bilibili cookie: ${cookieString}`)
   await browser.close()
   return cookieString
 }

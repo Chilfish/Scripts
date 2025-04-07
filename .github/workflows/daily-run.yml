@@ -1,6 +1,8 @@
+name: Daily-Run
+
 on:
   schedule:
-    - cron: '0 0 * * *'
+    - cron: '16 16 * * *' # UTC 时间 16:00，对应北京时间 00:00
   workflow_dispatch:
 
 jobs:
