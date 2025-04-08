@@ -141,7 +141,7 @@ export async function cachedData<T>(
   return data
 }
 
-const unsafeFilenames = ['\\', '/', ':', '*', '?', '"', '<', '>', '|']
+const unsafeFilenames = ['\\', '\n', '/', ':', '*', '?', '"', '<', '>', '|']
 
 export function sanitizeFilename(filename: string, replacement = '') {
   let safeFilename = filename.trim()

@@ -1,6 +1,6 @@
 import readline from 'node:readline'
 
-process.on('SIGINT', () => {
+process.addListener('SIGINT', () => {
   // 清除进度条
   readline.cursorTo(process.stdout, 0)
   readline.clearLine(process.stdout, 0)

@@ -11,6 +11,7 @@ import {
   cachedData,
   downloadBlob,
   logger,
+  sanitizeFilename,
   updateProgress,
   which,
 } from '../utils/nodejs'
@@ -69,6 +70,7 @@ let fileName = `${author} - ${title} - ${publishDate}`
 if (isTwitter) {
   fileName = `${author} - ${publishDate}`
 }
+fileName = sanitizeFilename(fileName)
 
 console.log({
   fileName,
