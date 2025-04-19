@@ -34,35 +34,33 @@
     if (typeof value !== 'string') {
       return value
     }
-    const _value = value.trim()
-    if (
-
-      value[0] === '"' && value.endsWith('"') && !value.includes('\\')
-    ) {
-      return _value.slice(1, -1)
+    if (value[0] === '"' && value[value.length - 1] === '"' && !value.includes('\\')) {
+      return value.slice(1, -1)
     }
+    const _value = value.trim()
     if (_value.length <= 9) {
-      const _lval = _value.toLowerCase()
-      if (_lval === 'true') {
-        return true
-      }
-      if (_lval === 'false') {
-        return false
-      }
-      if (_lval === 'undefined') {
-        return void 0
-      }
-      if (_lval === 'null') {
-        return null
-      }
-      if (_lval === 'nan') {
-        return Number.NaN
-      }
-      if (_lval === 'infinity') {
-        return Number.POSITIVE_INFINITY
-      }
-      if (_lval === '-infinity') {
-        return Number.NEGATIVE_INFINITY
+      switch (_value.toLowerCase()) {
+        case 'true': {
+          return true
+        }
+        case 'false': {
+          return false
+        }
+        case 'undefined': {
+          return void 0
+        }
+        case 'null': {
+          return null
+        }
+        case 'nan': {
+          return Number.NaN
+        }
+        case 'infinity': {
+          return Number.POSITIVE_INFINITY
+        }
+        case '-infinity': {
+          return Number.NEGATIVE_INFINITY
+        }
       }
     }
     if (!JsonSigRx.test(value)) {
@@ -86,6 +84,22 @@
       }
       return value
     }
+  }
+  function formatDate(time, fmt = 'YYYY-MM-DD HH:mm:ss') {
+    if (typeof time === 'number' && time < 1e12)
+      time *= 1e3
+    const date = new Date(time)
+    if (Number.isNaN(date.getTime()))
+      return ''
+    const pad = num => num.toString().padStart(2, '0')
+    const year = date.getFullYear()
+    const month = pad(date.getMonth() + 1)
+    const day = pad(date.getDate())
+    const hours = pad(date.getHours())
+    const minutes = pad(date.getMinutes())
+    const seconds = pad(date.getSeconds())
+    const milliseconds = pad(date.getMilliseconds())
+    return fmt.replace('YYYY', year.toString()).replace('MM', month).replace('DD', day).replace('HH', hours).replace('mm', minutes).replace('ss', seconds).replace('SSS', milliseconds)
   }
   const _GM_getValue = /* @__PURE__ */ (() => typeof GM_getValue != 'undefined' ? GM_getValue : void 0)()
   const _GM_registerMenuCommand = /* @__PURE__ */ (() => typeof GM_registerMenuCommand != 'undefined' ? GM_registerMenuCommand : void 0)()
@@ -122,22 +136,6 @@
     const url = URL.createObjectURL(blob)
     saveBlobUrl(url, filename)
     URL.revokeObjectURL(url)
-  }
-  function formatDate(time, fmt = 'YYYY-MM-DD HH:mm:ss') {
-    if (typeof time === 'number' && time < 1e12)
-      time *= 1e3
-    const date = new Date(time)
-    if (Number.isNaN(date.getTime()))
-      return ''
-    const pad = num => num.toString().padStart(2, '0')
-    const year = date.getFullYear()
-    const month = pad(date.getMonth() + 1)
-    const day = pad(date.getDate())
-    const hours = pad(date.getHours())
-    const minutes = pad(date.getMinutes())
-    const seconds = pad(date.getSeconds())
-    const milliseconds = pad(date.getMilliseconds())
-    return fmt.replace('YYYY', year.toString()).replace('MM', month).replace('DD', day).replace('HH', hours).replace('mm', minutes).replace('ss', seconds).replace('SSS', milliseconds)
   }
   const urlMatch = 'graphql/query'
   const tweetKey = 'xdt_api__v1__feed__user_timeline_graphql_connection'

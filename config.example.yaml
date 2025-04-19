@@ -6,6 +6,9 @@ deepseek:
   key:
   url: https://ark.cn-beijing.volces.com/api/v3
   model:
+gemini:
+  key:
+  model:
 cookie:
   twitter: auth_token=
   pixiv:

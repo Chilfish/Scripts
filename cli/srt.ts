@@ -21,6 +21,13 @@ const args = argvParser([
     beforeSet: value => path.resolve(value),
   },
   {
+    key: 'chunkSize',
+    shortKey: 's',
+    description: '翻译行数缓冲区大小，200 以下会减少一些缺段落的现象',
+    default: 100,
+    type: 'number',
+  },
+  {
     key: 'textOnly',
     shortKey: 't',
     description: '仅提取字幕文本内容',
@@ -48,10 +55,10 @@ const args = argvParser([
   {
     key: 'model',
     shortKey: 'm',
-    description: '使用的模型(openai/deepseek)',
+    description: '使用的模型(openai/deepseek/gemini)',
     default: 'deepseek',
     type: 'enum',
-    enumValues: ['openai', 'deepseek'],
+    enumValues: ['openai', 'deepseek', 'gemini'],
   },
 ] as const)
 
@@ -61,7 +68,7 @@ let prompt = args.prompt
 const timeMatch = /\d+:\d+:\d+,\d+\s-->\s\d+:\d+:\d+,\d+/
 
 // 翻译行数缓冲区大小，200 以下会减少一些缺段落的现象
-const chunkSize = 100
+const chunkSize = args.chunkSize
 
 const outputFile = dir('data/trans-output.yaml')
 const tmpFile = dir('data/trans-tmp.yaml')
@@ -84,7 +91,7 @@ async function translate(
     })
 
     for await (const text of textStream) {
-      outputStream.write(text)
+      outputStream.write(text.replace(/^```(yaml)?$/gm, ''))
     }
 
     outputStream.write('\n')
@@ -176,6 +183,5 @@ async function main() {
   console.log(`Saved to ${transed}`)
 }
 
-delete args.help
 console.log('Running srt command with args:', args)
 await main()

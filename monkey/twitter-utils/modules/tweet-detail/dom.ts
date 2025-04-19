@@ -33,7 +33,6 @@ function processTweet() {
     showmore.style.display = 'none'
 
   const time = $('a time')!
-  // @ts-expect-error it's fine
   time.style = `
     margin-top: 8px;
     color: #536471;
@@ -54,7 +53,6 @@ export async function editTweet() {
   newBtn.title = '编辑推文'
   newBtn.id = 'edit-tweet'
 
-  // @ts-expect-error it's fine
   newBtn.style = `
     border: none;
     background: none;
@@ -88,7 +86,6 @@ export function viewInArchiver(id: string, name: string) {
     a.textContent = text
     a.target = '_blank'
 
-    // @ts-expect-error it's fine
     a.style = `
       color: #1da1f2;
       margin-top: 6px;

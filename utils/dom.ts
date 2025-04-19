@@ -1,3 +1,4 @@
+import type { GmDownloadOptions } from '$'
 import { GM_deleteValue, GM_download, GM_getValue, GM_setValue } from '$'
 
 type Selector = keyof HTMLElementTagNameMap | ({} & string)
@@ -115,9 +116,7 @@ export const store = {
   },
 }
 
-interface Task {
-  url: string
-  name: string
+interface Task extends GmDownloadOptions {
   onload: () => void
   onerror: (result: any) => void
   retry?: number
@@ -175,6 +174,7 @@ export const downloader = (() => {
     return new Promise<void>(resolve => GM_download({
       url: task.url,
       name: task.name,
+      saveAs: task.saveAs,
       onload: () => {
         task.onload()
         resolve()

@@ -181,6 +181,22 @@
   function pubTime(id) {
     return new Date(Number(snowId2millis(id)))
   }
+  function formatDate(time, fmt = 'YYYY-MM-DD HH:mm:ss') {
+    if (typeof time === 'number' && time < 1e12)
+      time *= 1e3
+    const date = new Date(time)
+    if (Number.isNaN(date.getTime()))
+      return ''
+    const pad = num => num.toString().padStart(2, '0')
+    const year = date.getFullYear()
+    const month = pad(date.getMonth() + 1)
+    const day = pad(date.getDate())
+    const hours = pad(date.getHours())
+    const minutes = pad(date.getMinutes())
+    const seconds = pad(date.getSeconds())
+    const milliseconds = pad(date.getMilliseconds())
+    return fmt.replace('YYYY', year.toString()).replace('MM', month).replace('DD', day).replace('HH', hours).replace('mm', minutes).replace('ss', seconds).replace('SSS', milliseconds)
+  }
   function $(selector, root) {
     return (root || document).querySelector(selector)
   }
@@ -283,6 +299,7 @@
         resolve => _GM_download({
           url: task.url,
           name: task.name,
+          saveAs: true,
           onload: () => {
             task.onload()
             resolve()
@@ -300,22 +317,6 @@
     }
     return { add: addTask }
   })()
-  function formatDate(time, fmt = 'YYYY-MM-DD HH:mm:ss') {
-    if (typeof time === 'number' && time < 1e12)
-      time *= 1e3
-    const date = new Date(time)
-    if (Number.isNaN(date.getTime()))
-      return ''
-    const pad = num => num.toString().padStart(2, '0')
-    const year = date.getFullYear()
-    const month = pad(date.getMonth() + 1)
-    const day = pad(date.getDate())
-    const hours = pad(date.getHours())
-    const minutes = pad(date.getMinutes())
-    const seconds = pad(date.getSeconds())
-    const milliseconds = pad(date.getMilliseconds())
-    return fmt.replace('YYYY', year.toString()).replace('MM', month).replace('DD', day).replace('HH', hours).replace('mm', minutes).replace('ss', seconds).replace('SSS', milliseconds)
-  }
   const style$1 = '.tmd-down {\n  margin-left: 12px;\n  order: 99;\n  cursor: pointer;\n}\n\n.tmd-bar-btn {\n  padding-top: 8px;\n  font-size: 1rem;\n}\n\n.tmd-down:hover > div > div > div > div {\n  color: rgba(29, 161, 242, 1);\n}\n\n.tmd-down:hover > div > div > div > div > div {\n  background-color: rgba(29, 161, 242, 0.1);\n}\n\n.tmd-down:active > div > div > div > div > div {\n  background-color: rgba(29, 161, 242, 0.2);\n}\n\n.tmd-down:hover svg {\n  color: rgba(29, 161, 242, 1);\n}\n\n.tmd-down:hover div:first-child:not(:last-child) {\n  background-color: rgba(29, 161, 242, 0.1);\n}\n\n.tmd-down:active div:first-child:not(:last-child) {\n  background-color: rgba(29, 161, 242, 0.2);\n}\n\n.tmd-down.tmd-media {\n  position: absolute;\n  right: 0;\n  display: none;\n}\n\na[data-detected]:hover .tmd-down.tmd-media,\narticle[data-detected] img:hover .tmd-down.tmd-media {\n  display: flex;\n}\n\n.tmd-down.tmd-media > div {\n  display: flex;\n  border-radius: 99px;\n  margin: 2px;\n}\n\n.tmd-down.tmd-media > div > div {\n  display: flex;\n  margin: 6px;\n  color: #fff;\n}\n\n.tmd-down.tmd-media:hover > div {\n  background-color: rgba(255, 255, 255, 0.6);\n}\n\n.tmd-down.tmd-media:hover > div > div {\n  color: rgba(29, 161, 242, 1);\n}\n\n.tmd-down.tmd-media:not(:hover) > div > div {\n  filter: drop-shadow(0 0 1px #000);\n}\n\n.tmd-down g {\n  display: none;\n}\n\n.tmd-down.download g.download,\n.tmd-down.completed g.completed,\n.tmd-down.loading g.loading,\n.tmd-down.failed g.failed {\n  display: unset;\n}\n\n.tmd-down.loading svg {\n  animation: spin 1s linear infinite;\n}\n\n@keyframes spin {\n  0% {\n    transform: rotate(0deg);\n  }\n\n  100% {\n    transform: rotate(360deg);\n  }\n}\n\n.tmd-btn {\n  display: inline-block;\n  background-color: #1da1f2;\n  color: #ffffff;\n  padding: 0 20px;\n  border-radius: 99px;\n}\n\n.tmd-tag {\n  display: inline-block;\n  background-color: #ffffff;\n  color: #1da1f2;\n  padding: 0 10px;\n  border-radius: 10px;\n  border: 1px solid #1da1f2;\n  font-weight: bold;\n  margin: 5px;\n}\n\n.tmd-btn:hover {\n  background-color: rgba(29, 161, 242, 0.9);\n}\n\n.tmd-tag:hover {\n  background-color: rgba(29, 161, 242, 0.1);\n}\n\n.tmd-down.tmd-img {\n  position: absolute;\n  right: 0;\n  bottom: 0;\n  display: none !important;\n}\n\n.tmd-down.tmd-img > div {\n  display: flex;\n  border-radius: 99px;\n  margin: 2px;\n  background-color: rgba(255, 255, 255, 0.6);\n}\n\n.tmd-down.tmd-img > div > div {\n  display: flex;\n  margin: 6px;\n  color: #fff !important;\n}\n\n.tmd-down.tmd-img:not(:hover) > div > div {\n  filter: drop-shadow(0 0 1px #000);\n}\n\n.tmd-down.tmd-img:hover > div > div {\n  color: rgba(29, 161, 242, 1);\n}\n\n:hover > .tmd-down.tmd-img,\n.tmd-img.loading,\n.tmd-img.completed,\n.tmd-img.failed {\n  display: block !important;\n}\n\n.tweet-detail-action-item {\n  width: 20% !important;\n}\n'
   const downloadStatus = ['download', 'completed', 'loading', 'failed']
   function setStatus(btn, className) {
@@ -323,7 +324,9 @@
     btn.classList.add(className)
   }
   const historyKey = 'download_history'
+  const proxyKey = 'download_proxy'
   const idHistory = store.get(historyKey, [])
+  const proxyDownload = store.get(proxyKey, false)
   function addHistory(status_id) {
     if (idHistory.includes(status_id))
       return
@@ -430,9 +433,13 @@
       const name = `${userId}-${formatTime}-${statusId}${afterFix}.png`
       const url = new URL(imgUrl)
       url.search = '?format=png&name=large'
+      let downloadUrl = url.href
       console.log('download', imgUrl, name)
+      if (proxyDownload) {
+        downloadUrl = `https://proxy.chilfish.top/${name}?url=${downloadUrl}`
+      }
       downloader.add({
-        url: url.href,
+        url: downloadUrl,
         name,
         onload: async () => {
           setStatus(btn, 'completed')

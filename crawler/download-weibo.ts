@@ -1,9 +1,9 @@
 import { consola } from 'consola'
 import { ofetch } from 'ofetch'
-import { getWeiboAnonToken } from '~/utils/fetch'
 import {
   downloadBlob,
   downloadFiles,
+  readCookie,
   runCommand,
 } from '~/utils/nodejs'
 
@@ -44,7 +44,7 @@ async function main(url: string) {
 
   const postId = pidMatch[1]
   const api_url = `https://weibo.com/ajax/statuses/show?id=${postId}`
-  const token = await getWeiboAnonToken()
+  const token = readCookie('weibo')
 
   const data = await ofetch<PicData>(api_url, {
     headers: {

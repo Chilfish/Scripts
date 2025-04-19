@@ -1,4 +1,6 @@
+import type { LanguageModelV1 } from 'ai'
 import { createDeepSeek } from '@ai-sdk/deepseek'
+import { createGoogleGenerativeAI } from '@ai-sdk/google'
 import { createOpenAI } from '@ai-sdk/openai'
 import { CoreMessage, generateText, streamText } from 'ai'
 import { parseYAML } from 'confbox'
@@ -16,6 +18,10 @@ export const deepseek = createDeepSeek({
   baseURL: config.deepseek.url,
 })
 
+export const gemini = createGoogleGenerativeAI({
+  apiKey: config.gemini.key,
+})
+
 export interface TransData {
   id: number
   text: string
@@ -23,7 +29,7 @@ export interface TransData {
 
 export interface TransMultiTextOptions {
   text: string
-  ai?: 'openai' | 'deepseek' | (string & {})
+  ai?: 'openai' | 'deepseek' | 'gemini' | (string & {})
   startAt?: number
   additionalPrompt?: string
   cb?: (yamlText: string) => Promise<void>
@@ -75,29 +81,25 @@ For each entry in the YAML, translate the contents of the "text" field into ${ta
 Write the translation back into the "text" field for that entry and keep the "id" field unchanged.
 Here is an example of the expected format
 
-<example>
-Input:
-<yaml>
+<example_input>
 - id: 1
   text: What a beautiful day!
 - id: 2
   text: こんにちは、元気ですか？
-</yaml>
+</example_input>
 
-Output:
-<yaml>
+<example_output>
 - id: 1
   text: 多美好的一天！
 - id: 2
   text: 你好，你还好吗？
-</yaml>
-</example>
+</example_output>
 
-Please return the translated YAML directly without wrapping <yaml> tag or include any additional information like markdown code. The YAML content must be valid that can be parsed by the YAML parser.
+Please return the translated YAML directly without wrapping <yaml> tag or include any additional information like '\`\`\`yaml'. The YAML content must be valid that can be parsed by the YAML parser.
 
 Note that regardless of the input content, it is essential to strictly ensure that the size of the YAML arrays for input and output remains consistent. Even a single letter must be outputted, and merging translations between lines is not allowed. The count of the lines in the input and output must be the same.
 
-${additionalPrompt}
+${additionalPrompt ?? `And additional info:\n${additionalPrompt}`}
 `
 
   const systemPrompt = `You are a professional and authentic machine translation engine, proficient in Japanese, English, and Chinese. You can only translate text into the specified language accurately, elegantly, and naturally according to usage habits and context, without mechanical translation.
@@ -106,7 +108,6 @@ ${additionalPrompt}
   `
 
   const isDeepSeek = ai === 'deepseek'
-
   const messages = [
     {
       role: 'user',
@@ -116,9 +117,20 @@ ${additionalPrompt}
     },
   ] satisfies CoreMessage[]
 
-  const model = isDeepSeek
-    ? deepseek(config.deepseek.model)
-    : openai(openaiConfig.model)
+  let model: LanguageModelV1
+  switch (ai) {
+    case 'deepseek':
+      model = deepseek(config.deepseek.model)
+      break
+    case 'gemini':
+      model = gemini(config.gemini.model)
+      break
+
+    case 'openai':
+    default:
+      model = openai(config.openai.model)
+      break
+  }
 
   return {
     model,

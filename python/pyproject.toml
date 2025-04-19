@@ -4,4 +4,9 @@ version = "0.1.0"
 description = "Add your description here"
 readme = "README.md"
 requires-python = ">=3.12"
-dependencies = [ "yt-dlp>=2025.3.31", ]
+dependencies = [
+  "pillow>=11.2.1",
+  "pypdf>=5.4.0",
+  "pypng>=0.20220715.0",
+  "yt-dlp>=2025.3.31",
+]

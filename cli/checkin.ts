@@ -47,7 +47,11 @@ async function weiboSuper() {
       })
         .then(res => res.json())
         .then(data => data.data.alert_title || data.msg)
-        .catch(err => err.message || err)
+        .catch((err) => {
+          console.error(err)
+          process.exit(1)
+          return err
+        })
 
       console.log(`${name}: ${msg}`)
     }),

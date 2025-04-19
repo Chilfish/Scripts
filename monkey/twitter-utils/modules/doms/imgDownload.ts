@@ -5,6 +5,7 @@ import style from './style.css?raw'
 
 const downloadStatus = ['download', 'completed', 'loading', 'failed'] as const
 type DownloadStatus = typeof downloadStatus[number]
+
 /**
  * set the status of the button
  */
@@ -17,7 +18,10 @@ function setStatus(
 }
 
 const historyKey = 'download_history'
+const proxyKey = 'download_proxy'
 const idHistory = store.get<string[]>(historyKey, [])!
+const proxyDownload = store.get<boolean>(proxyKey, false)!
+
 function addHistory(status_id: string) {
   if (idHistory.includes(status_id))
     return
@@ -173,11 +177,18 @@ async function click(
     const url = new URL(imgUrl)
     url.search = '?format=png&name=large'
 
+    let downloadUrl = url.href
     console.log('download', imgUrl, name)
 
+    if (proxyDownload) {
+      // 其实是为了记录服务器的 modified-date
+      downloadUrl = `https://proxy.chilfish.top/${name}?url=${downloadUrl}`
+    }
+
     downloader.add({
-      url: url.href,
+      url: downloadUrl,
       name,
+      saveAs: proxyDownload,
       onload: async () => {
         setStatus(btn, 'completed')
         addHistory(statusId)

@@ -18,6 +18,10 @@ interface Config {
     url: string
     model: string
   }
+  gemini: {
+    key: string
+    model: string
+  }
   prompts: {
     [key: string]: string
   }
@@ -50,6 +54,10 @@ export const { config } = await loadConfig<Config>({
     deepseek: {
       key: '',
       url: '',
+      model: '',
+    },
+    gemini: {
+      key: '',
       model: '',
     },
     prompts: {},
