@@ -28,15 +28,7 @@ const config = {
 }
 
 let currentUrl = ''
-let isMenuVisible = false
-
-function about() {
-  window.open('https://github.com/JoeanAmier/XHS-Downloader', '_blank')
-}
-
-function abnormal(text: string) {
-  alert(`${text}请向作者反馈！\n项目开源地址：https://github.com/JoeanAmier/XHS-Downloader`)
-}
+let lastUrl = window.location.href
 
 function generateVideoUrl(note: any) {
   try {
@@ -109,13 +101,12 @@ async function download(urls: string[], note: any) {
     const items = extractImageWebpUrls(note, urls)
     if (items.length === 0) {
       console.error('解析图文作品数据失败', note)
-      abnormal('解析图文作品数据发生异常！')
     }
     else if (urls.length > 1) {
       showImageSelectionModal(items, name)
     }
     else {
-      await downloadImage(items, name)
+      await downloadFiles(items, name)
     }
   }
 }
@@ -133,13 +124,9 @@ async function exploreDeal(note: any) {
       console.info('下载链接', links)
       await download(links, note)
     }
-    else {
-      abnormal('处理下载链接发生异常！')
-    }
   }
   catch (error) {
     console.error('Error in exploreDeal function:', error)
-    abnormal('下载作品文件发生异常！')
   }
 }
 
@@ -160,9 +147,6 @@ async function extractDownloadLinks() {
     if (note.note) {
       await exploreDeal(note.note)
     }
-    else {
-      abnormal('读取作品数据发生异常！')
-    }
   }
 }
 
@@ -180,15 +164,14 @@ async function downloadFiles(items: any[], name: string) {
   const downloadPromises = items.map(async (item) => {
     let fileName
     if (item.index) {
-      fileName = `${name}_${item.index}.png` // 根据索引生成文件名
+      fileName = `${name}_${item.index}.png`
     }
     else {
       fileName = `${name}.png`
     }
-    await downloadFile(item.url, fileName) // 调用单个文件下载方法
+    return downloadFile(item.url, fileName)
   })
 
-  // 等待所有下载操作完成
   await Promise.all(downloadPromises)
 }
 
@@ -208,20 +191,6 @@ function extractName() {
   const match = currentUrl.match(/\/([^/]+)$/)
   const id = match ? match[1] : null
   return name === '' ? id : name
-}
-
-async function downloadImage(items: any, name: string) {
-  if (items.length > 1) {
-    for (const item of items) {
-      await downloadFile(item.url, `${name}_${item.index}.png`)
-    }
-  }
-  else if (items.length === 1) {
-    await downloadFile(items[0].url, `${name}.png`)
-  }
-  else {
-    await downloadFiles(items, name)
-  }
 }
 
 // 关闭弹窗函数
@@ -332,7 +301,7 @@ function showImageSelectionModal(imageUrls: any[], name: string) {
       return
     }
     closeImagesModal()
-    await downloadImage(selectedImages, name)
+    await downloadFiles(selectedImages, name)
   })
 
   // 关闭事件
@@ -344,21 +313,21 @@ function showImageSelectionModal(imageUrls: any[], name: string) {
 function createIcon() {
   const icon = document.createElement('div')
   icon.style = `
-            position: fixed;
-            bottom: ${config.position.bottom};
-            left: ${config.position.left};
-            width: 64px;
-            height: 64px;
-            background: white;
-            border-radius: ${config.icon.image.borderRadius || '8px'};
-            cursor: pointer;
-            z-index: 9999;
-            box-shadow: 0 3px 5px rgba(0,0,0,0.12), 0 3px 5px rgba(0,0,0,0.24);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            transition: all ${config.animation.duration}s ${config.animation.easing};
-        `
+    position: fixed;
+    bottom: ${config.position.bottom};
+    left: ${config.position.left};
+    width: 64px;
+    height: 64px;
+    background: white;
+    border-radius: ${config.icon.image.borderRadius || '8px'};
+    cursor: pointer;
+    z-index: 9999;
+    box-shadow: 0 3px 5px rgba(0,0,0,0.12), 0 3px 5px rgba(0,0,0,0.24);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all ${config.animation.duration}s ${config.animation.easing};
+`
 
   icon.style.backgroundImage = `url(${config.icon.image.url})`
   icon.style.backgroundSize = 'cover'
@@ -369,151 +338,45 @@ function createIcon() {
 // 创建菜单容器
 const menu = document.createElement('div')
 menu.style = `
-        position: fixed;
-        bottom: calc(${config.position.bottom} + 64px + 1rem);
-        left: ${config.position.left};
-        width: 255px;
-        max-width: calc(100vw - 4rem);
-        background: white;
-        border-radius: 16px;
-        box-shadow: 0 10px 20px rgba(0,0,0,0.19), 0 6px 6px rgba(0,0,0,0.23);
-        overflow: hidden;
-        display: none;
-        z-index: 9998;
-        transform-origin: bottom left;
-        opacity: 0;
-        transform: translateY(10px) scaleY(0.95);
-        will-change: transform, opacity;
-    `
+  position: fixed;
+  bottom: calc(${config.position.bottom} + 64px + 1rem);
+  left: ${config.position.left};
+  width: 255px;
+  max-width: calc(100vw - 4rem);
+  background: white;
+  border-radius: 16px;
+  box-shadow: 0 10px 20px rgba(0,0,0,0.19), 0 6px 6px rgba(0,0,0,0.23);
+  overflow: hidden;
+  display: none;
+  z-index: 9998;
+  transform-origin: bottom left;
+  opacity: 0;
+  transform: translateY(10px) scaleY(0.95);
+  will-change: transform, opacity;
+`
 
 // 创建菜单内容容器
 const menuContent = document.createElement('div')
 menuContent.style = `
-        max-height: 400px;
-        overflow-y: auto;
-        overscroll-behavior: contain;
-    `
+  max-height: 400px;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+`
 menu.appendChild(menuContent)
-
-function hideMenu() {
-  menu.classList.remove('menu-enter')
-  menu.style.opacity = '0'
-  menu.style.transform = 'translateY(10px) scaleY(0.95)'
-  menu.style.display = 'none'
-  isMenuVisible = false
-}
-
-// 动态生成菜单内容
-function updateMenuContent() {
-  menuContent.innerHTML = ''
-
-  // 根据URL生成不同菜单项
-  currentUrl = window.location.href
-  const menuItems = []
-
-  // if (
-  //   currentUrl === 'https://www.xiaohongshu.com/explore'
-  //   || currentUrl.includes('https://www.xiaohongshu.com/explore?')
-  // ) {
-  // }
-  // else
-  if (currentUrl.includes('https://www.xiaohongshu.com/explore/')) {
-    menuItems.push({
-      text: '下载作品文件',
-      icon: ' 📦 ',
-      action: extractDownloadLinks,
-      description: '下载当前作品的无水印文件',
-    })
-  }
-  // else if (currentUrl.includes('https://www.xiaohongshu.com/user/profile/')) {
-  // }
-  // else if (currentUrl.includes('https://www.xiaohongshu.com/search_result')) {
-  // }
-  // else if (currentUrl.includes('https://www.xiaohongshu.com/board/')) {
-  // }
-
-  // 常用功能
-  menuItems.push(
-    {
-      separator: true,
-    },
-    {
-      text: '访问项目开源仓库',
-      icon: ' 📒 ',
-      action: about,
-      description: '访问原项目 GitHub 开源仓库',
-    },
-  )
-
-  // 创建菜单项
-  menuItems.forEach((item) => {
-    if (item.separator) {
-      const divider = document.createElement('div')
-      divider.style = `
-                    height: 8px;
-                    background: #f5f5f5;
-                `
-      menuContent.appendChild(divider)
-      return
-    }
-
-    const btn = document.createElement('div')
-    btn.className = 'menu-item'
-    btn.innerHTML = `
-                <div class="icon-container">
-                    <span class="material-icons">${item.icon}</span>
-                </div>
-                <div class="content">
-                    <div class="title">${item.text}</div>
-                    <div class="subtitle">${item.description}</div>
-                </div>
-            `
-
-    btn.addEventListener('click', (e) => {
-      e.stopPropagation()
-      item.action?.()
-      hideMenu()
-    })
-
-    menuContent.appendChild(btn)
-  })
-}
-
-// URL监测相关
-let lastUrl = window.location.href
-
-// 显示菜单
-function showMenu() {
-  menu.style.display = 'block'
-  void menu.offsetHeight // 触发重绘
-  menu.classList.add('menu-enter')
-  menu.style.opacity = '1'
-  menu.style.transform = 'translateY(0) scaleY(1)'
-  updateMenuContent()
-  isMenuVisible = true
-}
 
 // 事件监听
 const icon = createIcon()
-let isShow = false
-icon.addEventListener('click', () => {
-  if (isShow) {
-    hideMenu()
-  }
-  else {
-    showMenu()
-  }
-  isShow = !isShow
-})
+icon.addEventListener('click', extractDownloadLinks)
 
 // URL变化监听
 function setupUrlListener() {
   const observeUrl = () => {
-    if (window.location.href !== lastUrl) {
+    const url = window.location.href
+    if (url !== lastUrl) {
       lastUrl = window.location.href
-      if (isMenuVisible) {
-        updateMenuContent()
-      }
+    }
+    else {
+      currentUrl = url
     }
     requestAnimationFrame(observeUrl)
   }

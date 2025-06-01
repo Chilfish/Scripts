@@ -6,7 +6,7 @@ export default viteConfig({
   filename: 'xhs-downloader',
   entry: 'main.ts',
   userscript: {
-    'version': '2.1.0',
+    'version': '2.1.1',
     'run-at': 'document-end',
     'description': '提取小红书作品/用户链接，下载小红书无水印图文/视频作品文件',
     'icon': iconBase64,

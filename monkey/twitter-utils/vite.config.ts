@@ -5,7 +5,7 @@ export default viteConfig({
   filename: 'twitter-utils',
   entry: 'main.ts',
   userscript: {
-    'version': '2025.04.02',
+    'version': '2025.06.01',
     'run-at': 'document-start',
     'description': '推特小工具',
     'icon': 'https://abs.twimg.com/favicons/twitter.ico',

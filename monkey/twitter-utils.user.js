@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         推特小工具
 // @namespace    chilfish/monkey
-// @version      2025.04.02
+// @version      2025.06.01
 // @author       monkey
 // @description  推特小工具
 // @icon         https://abs.twimg.com/favicons/twitter.ico
@@ -299,7 +299,7 @@
       return new Promise(
         (resolve) => {
           let downloadUrl = task.url
-          const name = task.name
+          const name = encodeURIComponent(task.name)
           if (isSaveAs) {
             downloadUrl = `https://proxy.chilfish.top/${name}?url=${downloadUrl}`
           }

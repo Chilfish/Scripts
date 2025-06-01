@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         小红书下载工具
 // @namespace    chilfish/monkey
-// @version      2.1.0
+// @version      2.1.1
 // @author       JoeanAmier, Chilfish
 // @description  提取小红书作品/用户链接，下载小红书无水印图文/视频作品文件
 // @license      GNU General Public License v3.0

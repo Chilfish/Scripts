@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         小红书下载工具
 // @namespace    chilfish/monkey
-// @version      2.1.0
+// @version      2.1.1
 // @author       JoeanAmier, Chilfish
 // @description  提取小红书作品/用户链接，下载小红书无水印图文/视频作品文件
 // @license      GNU General Public License v3.0
@@ -89,7 +89,7 @@
       return new Promise(
         (resolve) => {
           let downloadUrl = task.url
-          const name = task.name
+          const name = encodeURIComponent(task.name)
           if (isSaveAs) {
             downloadUrl = `https://proxy.chilfish.top/${name}?url=${downloadUrl}`
           }
@@ -142,14 +142,7 @@
     },
   }
   let currentUrl = ''
-  let isMenuVisible = false
-  function about() {
-    window.open('https://github.com/JoeanAmier/XHS-Downloader', '_blank')
-  }
-  function abnormal(text) {
-    alert(`${text}请向作者反馈！
-项目开源地址：https://github.com/JoeanAmier/XHS-Downloader`)
-  }
+  let lastUrl = window.location.href
   function generateVideoUrl(note) {
     try {
       return [`https://sns-video-bd.xhscdn.com/${note.video.consumer.originVideoKey}`]
@@ -217,13 +210,12 @@
       const items = extractImageWebpUrls(note, urls)
       if (items.length === 0) {
         console.error('解析图文作品数据失败', note)
-        abnormal('解析图文作品数据发生异常！')
       }
       else if (urls.length > 1) {
         showImageSelectionModal(items, name)
       }
       else {
-        await downloadImage(items, name)
+        await downloadFiles(items, name)
       }
     }
   }
@@ -240,13 +232,9 @@
         console.info('下载链接', links)
         await download(links, note)
       }
-      else {
-        abnormal('处理下载链接发生异常！')
-      }
     }
     catch (error) {
       console.error('Error in exploreDeal function:', error)
-      abnormal('下载作品文件发生异常！')
     }
   }
   function extractNoteInfo() {
@@ -265,9 +253,6 @@
       if (note.note) {
         await exploreDeal(note.note)
       }
-      else {
-        abnormal('读取作品数据发生异常！')
-      }
     }
   }
   async function downloadFile(link, name) {
@@ -285,7 +270,7 @@
       else {
         fileName = `${name}.png`
       }
-      await downloadFile(item.url, fileName)
+      return downloadFile(item.url, fileName)
     })
     await Promise.all(downloadPromises)
   }
@@ -302,19 +287,6 @@
     const match = currentUrl.match(/\/([^/]+)$/)
     const id = match ? match[1] : null
     return name === '' ? id : name
-  }
-  async function downloadImage(items, name) {
-    if (items.length > 1) {
-      for (const item of items) {
-        await downloadFile(item.url, `${name}_${item.index}.png`)
-      }
-    }
-    else if (items.length === 1) {
-      await downloadFile(items[0].url, `${name}.png`)
-    }
-    else {
-      await downloadFiles(items, name)
-    }
   }
   function closeImagesModal() {
     const overlay = document.getElementById('imageSelectionOverlay')
@@ -397,7 +369,7 @@
         return
       }
       closeImagesModal()
-      await downloadImage(selectedImages, name)
+      await downloadFiles(selectedImages, name)
     })
     closeBtn.addEventListener('click', closeImagesModal)
     overlay.addEventListener('click', e => e.target === overlay && closeImagesModal())
@@ -405,138 +377,60 @@
   function createIcon() {
     const icon2 = document.createElement('div')
     icon2.style = `
-            position: fixed;
-            bottom: ${config.position.bottom};
-            left: ${config.position.left};
-            width: 64px;
-            height: 64px;
-            background: white;
-            border-radius: ${config.icon.image.borderRadius};
-            cursor: pointer;
-            z-index: 9999;
-            box-shadow: 0 3px 5px rgba(0,0,0,0.12), 0 3px 5px rgba(0,0,0,0.24);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            transition: all ${config.animation.duration}s ${config.animation.easing};
-        `
+    position: fixed;
+    bottom: ${config.position.bottom};
+    left: ${config.position.left};
+    width: 64px;
+    height: 64px;
+    background: white;
+    border-radius: ${config.icon.image.borderRadius};
+    cursor: pointer;
+    z-index: 9999;
+    box-shadow: 0 3px 5px rgba(0,0,0,0.12), 0 3px 5px rgba(0,0,0,0.24);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all ${config.animation.duration}s ${config.animation.easing};
+`
     icon2.style.backgroundImage = `url(${config.icon.image.url})`
     icon2.style.backgroundSize = 'cover'
     return icon2
   }
   const menu = document.createElement('div')
   menu.style = `
-        position: fixed;
-        bottom: calc(${config.position.bottom} + 64px + 1rem);
-        left: ${config.position.left};
-        width: 255px;
-        max-width: calc(100vw - 4rem);
-        background: white;
-        border-radius: 16px;
-        box-shadow: 0 10px 20px rgba(0,0,0,0.19), 0 6px 6px rgba(0,0,0,0.23);
-        overflow: hidden;
-        display: none;
-        z-index: 9998;
-        transform-origin: bottom left;
-        opacity: 0;
-        transform: translateY(10px) scaleY(0.95);
-        will-change: transform, opacity;
-    `
+  position: fixed;
+  bottom: calc(${config.position.bottom} + 64px + 1rem);
+  left: ${config.position.left};
+  width: 255px;
+  max-width: calc(100vw - 4rem);
+  background: white;
+  border-radius: 16px;
+  box-shadow: 0 10px 20px rgba(0,0,0,0.19), 0 6px 6px rgba(0,0,0,0.23);
+  overflow: hidden;
+  display: none;
+  z-index: 9998;
+  transform-origin: bottom left;
+  opacity: 0;
+  transform: translateY(10px) scaleY(0.95);
+  will-change: transform, opacity;
+`
   const menuContent = document.createElement('div')
   menuContent.style = `
-        max-height: 400px;
-        overflow-y: auto;
-        overscroll-behavior: contain;
-    `
+  max-height: 400px;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+`
   menu.appendChild(menuContent)
-  function hideMenu() {
-    menu.classList.remove('menu-enter')
-    menu.style.opacity = '0'
-    menu.style.transform = 'translateY(10px) scaleY(0.95)'
-    menu.style.display = 'none'
-    isMenuVisible = false
-  }
-  function updateMenuContent() {
-    menuContent.innerHTML = ''
-    currentUrl = window.location.href
-    const menuItems = []
-    if (currentUrl.includes('https://www.xiaohongshu.com/explore/')) {
-      menuItems.push({
-        text: '下载作品文件',
-        icon: ' 📦 ',
-        action: extractDownloadLinks,
-        description: '下载当前作品的无水印文件',
-      })
-    }
-    menuItems.push(
-      {
-        separator: true,
-      },
-      {
-        text: '访问项目开源仓库',
-        icon: ' 📒 ',
-        action: about,
-        description: '访问原项目 GitHub 开源仓库',
-      },
-    )
-    menuItems.forEach((item) => {
-      if (item.separator) {
-        const divider = document.createElement('div')
-        divider.style = `
-                    height: 8px;
-                    background: #f5f5f5;
-                `
-        menuContent.appendChild(divider)
-        return
-      }
-      const btn = document.createElement('div')
-      btn.className = 'menu-item'
-      btn.innerHTML = `
-                <div class="icon-container">
-                    <span class="material-icons">${item.icon}</span>
-                </div>
-                <div class="content">
-                    <div class="title">${item.text}</div>
-                    <div class="subtitle">${item.description}</div>
-                </div>
-            `
-      btn.addEventListener('click', (e) => {
-        let _a
-        e.stopPropagation();
-        (_a = item.action) == null ? void 0 : _a.call(item)
-        hideMenu()
-      })
-      menuContent.appendChild(btn)
-    })
-  }
-  let lastUrl = window.location.href
-  function showMenu() {
-    menu.style.display = 'block'
-    void menu.offsetHeight
-    menu.classList.add('menu-enter')
-    menu.style.opacity = '1'
-    menu.style.transform = 'translateY(0) scaleY(1)'
-    updateMenuContent()
-    isMenuVisible = true
-  }
   const icon = createIcon()
-  let isShow = false
-  icon.addEventListener('click', () => {
-    if (isShow) {
-      hideMenu()
-    }
-    else {
-      showMenu()
-    }
-    isShow = !isShow
-  })
+  icon.addEventListener('click', extractDownloadLinks)
   function setupUrlListener() {
     const observeUrl = () => {
-      if (window.location.href !== lastUrl) {
+      const url = window.location.href
+      if (url !== lastUrl) {
         lastUrl = window.location.href
-        if (isMenuVisible) {
-          updateMenuContent()
-        }
+      }
+      else {
+        currentUrl = url
       }
       requestAnimationFrame(observeUrl)
     }

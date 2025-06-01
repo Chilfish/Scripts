@@ -199,7 +199,7 @@
       return new Promise(
         (resolve) => {
           let downloadUrl = task.url
-          const name = task.name
+          const name = encodeURIComponent(task.name)
           if (isSaveAs) {
             downloadUrl = `https://proxy.chilfish.top/${name}?url=${downloadUrl}`
           }

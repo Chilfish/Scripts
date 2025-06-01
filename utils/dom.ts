@@ -173,7 +173,7 @@ export const downloader = (() => {
   function executeTask(task: Task) {
     return new Promise<void>((resolve) => {
       let downloadUrl = task.url
-      const name = task.name
+      const name = encodeURIComponent(task.name)
       if (isSaveAs) {
         // 其实是为了记录服务器的 modified-date 和命名
         downloadUrl = `https://proxy.chilfish.top/${name}?url=${downloadUrl}`
