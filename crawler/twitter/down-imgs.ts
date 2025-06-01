@@ -65,4 +65,5 @@ if (!downloadDir) {
 
 await downloadFiles(medias, {
   dest: downloadDir,
+  proxy: true,
 })

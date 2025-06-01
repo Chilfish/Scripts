@@ -8,6 +8,8 @@
 // @downloadURL  https://github.com/Chilfish/Scripts/raw/main/monkey/ins-exporter.user.js
 // @updateURL    https://github.com/Chilfish/Scripts/raw/main/monkey/meta/ins-exporter.meta.js
 // @match        https://www.instagram.com/*
+// @grant        GM_deleteValue
+// @grant        GM_download
 // @grant        GM_getValue
 // @grant        GM_registerMenuCommand
 // @grant        GM_setValue
@@ -101,6 +103,8 @@
     const milliseconds = pad(date.getMilliseconds())
     return fmt.replace('YYYY', year.toString()).replace('MM', month).replace('DD', day).replace('HH', hours).replace('mm', minutes).replace('ss', seconds).replace('SSS', milliseconds)
   }
+  const _GM_deleteValue = /* @__PURE__ */ (() => typeof GM_deleteValue != 'undefined' ? GM_deleteValue : void 0)()
+  const _GM_download = /* @__PURE__ */ (() => typeof GM_download != 'undefined' ? GM_download : void 0)()
   const _GM_getValue = /* @__PURE__ */ (() => typeof GM_getValue != 'undefined' ? GM_getValue : void 0)()
   const _GM_registerMenuCommand = /* @__PURE__ */ (() => typeof GM_registerMenuCommand != 'undefined' ? GM_registerMenuCommand : void 0)()
   const _GM_setValue = /* @__PURE__ */ (() => typeof GM_setValue != 'undefined' ? GM_setValue : void 0)()
@@ -137,6 +141,91 @@
     saveBlobUrl(url, filename)
     URL.revokeObjectURL(url)
   }
+  const store = {
+    get(key, fallback) {
+      const data = _GM_getValue(key)
+      if (!data) {
+        this.set(key, fallback)
+        return fallback
+      }
+      return data
+    },
+    set(key, value) {
+      _GM_setValue(key, value)
+    },
+    remove(key) {
+      _GM_deleteValue(key)
+    },
+  };
+  (() => {
+    const tasks = []
+    const MAX_RETRY = 2
+    const MAX_THREADS = 2
+    let activeThreads = 0
+    let retryCount = 0
+    const isSaveAs = store.get('saveAs', false)
+    function addTask(task) {
+      tasks.push(task)
+      if (activeThreads < MAX_THREADS) {
+        activeThreads++
+        processNextTask()
+      }
+    }
+    async function processNextTask() {
+      const task = tasks.shift()
+      if (!task)
+        return
+      await executeTask(task)
+      if (tasks.length > 0 && activeThreads <= MAX_THREADS)
+        processNextTask()
+      else
+        activeThreads--
+    }
+    const handleRetry = (task, result) => {
+      let _a, _b
+      retryCount++
+      if (retryCount === 3)
+        activeThreads = 1
+      if (task.retry && task.retry >= MAX_RETRY || ((_a = result.details) == null ? void 0 : _a.current) === 'USER_CANCELED') {
+        (_b = task.onerror) == null ? void 0 : _b.call(task, result)
+      }
+      else {
+        if (activeThreads === 1)
+          task.retry = (task.retry || 0) + 1
+        addTask(task)
+      }
+    }
+    function executeTask(task) {
+      return new Promise(
+        (resolve) => {
+          let downloadUrl = task.url
+          const name = task.name
+          if (isSaveAs) {
+            downloadUrl = `https://proxy.chilfish.top/${name}?url=${downloadUrl}`
+          }
+          return _GM_download({
+            url: downloadUrl,
+            name,
+            saveAs: isSaveAs,
+            onload: () => {
+              let _a;
+              (_a = task.onload) == null ? void 0 : _a.call(task)
+              resolve()
+            },
+            onerror: (result) => {
+              handleRetry(task, result)
+              resolve()
+            },
+            ontimeout: () => {
+              handleRetry(task, { details: { current: 'TIMEOUT' } })
+              resolve()
+            },
+          })
+        },
+      )
+    }
+    return { add: addTask }
+  })()
   const urlMatch = 'graphql/query'
   const tweetKey = 'xdt_api__v1__feed__user_timeline_graphql_connection'
   let user

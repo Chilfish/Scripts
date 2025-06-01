@@ -17,6 +17,9 @@ await runCommand(`cd ${cwd}/chilfish && vite build`)
 console.log('build twitter-utils')
 await runCommand(`cd ${cwd}/twitter-utils && vite build`)
 
+console.log('build xhs-downloader')
+await runCommand(`cd ${cwd}/xhs-downloader && vite build`)
+
 console.log('move meta files')
 const metaFiles = await readdir(`${cwd}`, { withFileTypes: true })
   .then(files => files.filter(file => file.isFile() && file.name.endsWith('.meta.js')))

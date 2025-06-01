@@ -116,9 +116,8 @@ export const store = {
   },
 }
 
-interface Task extends GmDownloadOptions {
-  onload: () => void
-  onerror: (result: any) => void
+type Task = GmDownloadOptions & {
+  onerror?: (result: any) => void
   retry?: number
 }
 
@@ -131,6 +130,7 @@ export const downloader = (() => {
   const MAX_THREADS = 2
   let activeThreads = 0
   let retryCount = 0
+  const isSaveAs = store.get('saveAs', false)
 
   function addTask(task: Task) {
     tasks.push(task)
@@ -160,7 +160,7 @@ export const downloader = (() => {
       task.retry && task.retry >= MAX_RETRY
       || result.details?.current === 'USER_CANCELED'
     ) {
-      task.onerror(result)
+      task.onerror?.(result)
     }
     else {
       if (activeThreads === 1)
@@ -171,23 +171,31 @@ export const downloader = (() => {
   }
 
   function executeTask(task: Task) {
-    return new Promise<void>(resolve => GM_download({
-      url: task.url,
-      name: task.name,
-      saveAs: task.saveAs,
-      onload: () => {
-        task.onload()
-        resolve()
-      },
-      onerror: (result) => {
-        handleRetry(task, result)
-        resolve()
-      },
-      ontimeout: () => {
-        handleRetry(task, { details: { current: 'TIMEOUT' } })
-        resolve()
-      },
-    }),
+    return new Promise<void>((resolve) => {
+      let downloadUrl = task.url
+      const name = task.name
+      if (isSaveAs) {
+        // 其实是为了记录服务器的 modified-date 和命名
+        downloadUrl = `https://proxy.chilfish.top/${name}?url=${downloadUrl}`
+      }
+      return GM_download({
+        url: downloadUrl,
+        name,
+        saveAs: isSaveAs,
+        onload: () => {
+          task.onload?.()
+          resolve()
+        },
+        onerror: (result) => {
+          handleRetry(task, result)
+          resolve()
+        },
+        ontimeout: () => {
+          handleRetry(task, { details: { current: 'TIMEOUT' } })
+          resolve()
+        },
+      })
+    },
     )
   }
 

@@ -1,8 +1,8 @@
 import { writeFile } from 'node:fs/promises'
 import path from 'node:path'
 import { glob } from 'fast-glob'
-import data from '../data/medias.json'
-import { writeJson } from '../utils/nodejs'
+import data from '~/data/medias.json'
+import { writeJson } from '~/utils/nodejs'
 
 const dir = 'F:/Pictures/seiyu/nishio'
 

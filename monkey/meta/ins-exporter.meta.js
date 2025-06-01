@@ -8,6 +8,8 @@
 // @downloadURL  https://github.com/Chilfish/Scripts/raw/main/monkey/ins-exporter.user.js
 // @updateURL    https://github.com/Chilfish/Scripts/raw/main/monkey/meta/ins-exporter.meta.js
 // @match        https://www.instagram.com/*
+// @grant        GM_deleteValue
+// @grant        GM_download
 // @grant        GM_getValue
 // @grant        GM_registerMenuCommand
 // @grant        GM_setValue

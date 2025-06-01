@@ -9,6 +9,10 @@
 // @updateURL    https://github.com/Chilfish/Scripts/raw/main/monkey/meta/chilfish.meta.js
 // @match        *://*/*
 // @grant        GM_addStyle
+// @grant        GM_deleteValue
+// @grant        GM_download
+// @grant        GM_getValue
+// @grant        GM_setValue
 // @run-at       document-end
 // ==/UserScript==
 
@@ -17,6 +21,10 @@
 
   let _a
   const _GM_addStyle = /* @__PURE__ */ (() => typeof GM_addStyle != 'undefined' ? GM_addStyle : void 0)()
+  const _GM_deleteValue = /* @__PURE__ */ (() => typeof GM_deleteValue != 'undefined' ? GM_deleteValue : void 0)()
+  const _GM_download = /* @__PURE__ */ (() => typeof GM_download != 'undefined' ? GM_download : void 0)()
+  const _GM_getValue = /* @__PURE__ */ (() => typeof GM_getValue != 'undefined' ? GM_getValue : void 0)()
+  const _GM_setValue = /* @__PURE__ */ (() => typeof GM_setValue != 'undefined' ? GM_setValue : void 0)()
   function $(selector, root) {
     return (root || document).querySelector(selector)
   }
@@ -61,6 +69,91 @@
       }
     })
   }
+  const store = {
+    get(key, fallback) {
+      const data = _GM_getValue(key)
+      if (!data) {
+        this.set(key, fallback)
+        return fallback
+      }
+      return data
+    },
+    set(key, value) {
+      _GM_setValue(key, value)
+    },
+    remove(key) {
+      _GM_deleteValue(key)
+    },
+  };
+  (() => {
+    const tasks = []
+    const MAX_RETRY = 2
+    const MAX_THREADS = 2
+    let activeThreads = 0
+    let retryCount = 0
+    const isSaveAs = store.get('saveAs', false)
+    function addTask(task) {
+      tasks.push(task)
+      if (activeThreads < MAX_THREADS) {
+        activeThreads++
+        processNextTask()
+      }
+    }
+    async function processNextTask() {
+      const task = tasks.shift()
+      if (!task)
+        return
+      await executeTask(task)
+      if (tasks.length > 0 && activeThreads <= MAX_THREADS)
+        processNextTask()
+      else
+        activeThreads--
+    }
+    const handleRetry = (task, result) => {
+      let _a2, _b
+      retryCount++
+      if (retryCount === 3)
+        activeThreads = 1
+      if (task.retry && task.retry >= MAX_RETRY || ((_a2 = result.details) == null ? void 0 : _a2.current) === 'USER_CANCELED') {
+        (_b = task.onerror) == null ? void 0 : _b.call(task, result)
+      }
+      else {
+        if (activeThreads === 1)
+          task.retry = (task.retry || 0) + 1
+        addTask(task)
+      }
+    }
+    function executeTask(task) {
+      return new Promise(
+        (resolve) => {
+          let downloadUrl = task.url
+          const name = task.name
+          if (isSaveAs) {
+            downloadUrl = `https://proxy.chilfish.top/${name}?url=${downloadUrl}`
+          }
+          return _GM_download({
+            url: downloadUrl,
+            name,
+            saveAs: isSaveAs,
+            onload: () => {
+              let _a2;
+              (_a2 = task.onload) == null ? void 0 : _a2.call(task)
+              resolve()
+            },
+            onerror: (result) => {
+              handleRetry(task, result)
+              resolve()
+            },
+            ontimeout: () => {
+              handleRetry(task, { details: { current: 'TIMEOUT' } })
+              resolve()
+            },
+          })
+        },
+      )
+    }
+    return { add: addTask }
+  })()
   function numFmt(num) {
     return num.toString().replace(/\B(?=(\d{4})+(?!\d))/g, ',')
   }

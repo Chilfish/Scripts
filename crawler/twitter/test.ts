@@ -1,10 +1,9 @@
-import { FetcherService, Rettiwt } from 'rettiwt-api'
+import { CursoredData, EResourceType, FetcherService, Rettiwt, Tweet } from 'rettiwt-api'
 import {
   argvParser,
   config,
   writeJson,
 } from '~/utils/nodejs'
-import { fetchTweetByRange } from './fetchTweet'
 
 const { name, cursor } = argvParser([
   {
@@ -27,7 +26,10 @@ if (!name) {
 }
 
 const rettiwt = new Rettiwt({ apiKey: config.twitterKey })
-const tweetApi = new FetcherService({ apiKey: config.twitterKey })
+const tweetApi = new FetcherService({
+  apiKey: config.twitterKey,
+  logging: true,
+})
 
 const user = await rettiwt.user.details(name)
 if (!user) {
@@ -35,25 +37,33 @@ if (!user) {
   process.exit(1)
 }
 
-// const res = await tweetApi.request<any>(
-//   EResourceType.TWEET_SEARCH,
-//   {
-//     cursor,
-//     filter: {
-//       endDate: new Date('2025-02-01'),
-//       fromUsers: [user.userName]
-//     }
-//   },
-// )
-// const data = new CursoredData<Tweet>(res, 'Tweet' as any)
+console.log(user.fullName)
 
-const data = await fetchTweetByRange(tweetApi, {
-  filter: {
-    startDate: new Date('2024-02-01'),
-    fromUsers: [user.userName],
-    // top: false,
+const res = await tweetApi.request<any>(
+  EResourceType.USER_TIMELINE,
+  {
+    cursor,
+    id: user.id,
+    // filter: {
+    //   endDate: new Date('2025-02-01'),
+    //   fromUsers: [user.userName]
+    // }
   },
-  endAt: new Date(),
-})
+)
+const data = new CursoredData<Tweet>(res, 'Tweet' as any)
+
+// const data = await fetchTweetByRange(tweetApi, {
+//   filter: {
+//     startDate: new Date('2024-02-01'),
+//     fromUsers: [user.userName],
+//     top: false,
+//   },
+//   endAt: new Date(),
+// })
+
+// const data = await fetchTweet(tweetApi, {
+//   endAt: new Date('2025-04-10'),
+//   id: user.id
+// })
 
 await writeJson('data/twitter/tmp.json', data)

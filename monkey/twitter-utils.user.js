@@ -257,12 +257,13 @@
       _GM_deleteValue(key)
     },
   }
-  const downloader = /* @__PURE__ */ (() => {
+  const downloader = (() => {
     const tasks = []
     const MAX_RETRY = 2
     const MAX_THREADS = 2
     let activeThreads = 0
     let retryCount = 0
+    const isSaveAs = store.get('saveAs', false)
     function addTask(task) {
       tasks.push(task)
       if (activeThreads < MAX_THREADS) {
@@ -281,12 +282,12 @@
         activeThreads--
     }
     const handleRetry = (task, result) => {
-      let _a
+      let _a, _b
       retryCount++
       if (retryCount === 3)
         activeThreads = 1
       if (task.retry && task.retry >= MAX_RETRY || ((_a = result.details) == null ? void 0 : _a.current) === 'USER_CANCELED') {
-        task.onerror(result)
+        (_b = task.onerror) == null ? void 0 : _b.call(task, result)
       }
       else {
         if (activeThreads === 1)
@@ -296,23 +297,31 @@
     }
     function executeTask(task) {
       return new Promise(
-        resolve => _GM_download({
-          url: task.url,
-          name: task.name,
-          saveAs: true,
-          onload: () => {
-            task.onload()
-            resolve()
-          },
-          onerror: (result) => {
-            handleRetry(task, result)
-            resolve()
-          },
-          ontimeout: () => {
-            handleRetry(task, { details: { current: 'TIMEOUT' } })
-            resolve()
-          },
-        }),
+        (resolve) => {
+          let downloadUrl = task.url
+          const name = task.name
+          if (isSaveAs) {
+            downloadUrl = `https://proxy.chilfish.top/${name}?url=${downloadUrl}`
+          }
+          return _GM_download({
+            url: downloadUrl,
+            name,
+            saveAs: isSaveAs,
+            onload: () => {
+              let _a;
+              (_a = task.onload) == null ? void 0 : _a.call(task)
+              resolve()
+            },
+            onerror: (result) => {
+              handleRetry(task, result)
+              resolve()
+            },
+            ontimeout: () => {
+              handleRetry(task, { details: { current: 'TIMEOUT' } })
+              resolve()
+            },
+          })
+        },
       )
     }
     return { add: addTask }
@@ -441,6 +450,7 @@
       downloader.add({
         url: downloadUrl,
         name,
+        saveAs: proxyDownload,
         onload: async () => {
           setStatus(btn, 'completed')
           addHistory(statusId)

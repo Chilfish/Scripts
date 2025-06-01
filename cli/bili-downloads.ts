@@ -1,48 +1,33 @@
 import { execSync } from 'node:child_process'
-import { stat } from 'node:fs/promises'
-import { dir, readJson } from '~/utils/nodejs'
+import { readFile } from 'node:fs/promises'
+import { dir } from '~/utils/nodejs'
 
-const files = dir('F:/Backups/bili/data.json')
-const folder = dir('F:/Videos/bili')
-const maxDuration = 31 * 60 // 31 minutes
+const files = dir('C:/Users/Chilfish/Desktop/bili-list.txt')
+const folder = dir('F:/Videos/bili/golang')
 
-interface Data {
-  title: string
-  url: string
-  duration: string
-}
+const urls = await readFile(files, { encoding: 'utf-8' }).then(lines =>
+  lines.split('\n').filter(Boolean),
+)
 
-const urls = await readJson<Data[]>(files)
-  .then(data => data.filter(({ duration }) => {
-    // 12:34 -> 00:12:34
-    if (duration.length <= 5)
-      duration = `00:${duration}`
-
-    const [h, m, s] = duration.split(':').map(Number)
-    return h * 3600 + m * 60 + s <= maxDuration
-  })
-    .filter(({ url }) => url.includes('bilibili.com/video/BV')),
-  )
-
-for (const { url, title } of urls) {
-  console.log(`Downloading ${title}...`)
-  if (await stat(`${folder}/${title}.mp4`).catch(() => null))
-    continue
-
-  execSync(
-    [
-      'bbdown',
-      '-aria2',
-      '-mt',
-      '-hs',
-      '-e hevc',
-      '-p 1',
-      `-q "1080P 高码率, 1080P 高帧率"`,
-      `-F="<ownerName> - <videoTitle>"`,
-      `-M="<ownerName> - <videoTitle>/<pageNumber> - <pageTitle>"`,
-      `--work-dir=${folder}`,
-      url,
-    ].join(' '),
-    { stdio: 'inherit' },
-  )
+for (const url of urls) {
+  try {
+    execSync(
+      [
+        'bbdown',
+        '-mt',
+        '-hs',
+        '-e hevc',
+        '-p 1',
+        `-q "1080P 高码率, 1080P 高帧率"`,
+        `-F="<ownerName> - <videoTitle>"`,
+        `-M="<ownerName> - <videoTitle>/<pageNumber> - <pageTitle>"`,
+        `--work-dir=${folder}`,
+        url,
+      ].join(' '),
+      { stdio: 'inherit' },
+    )
+  }
+  catch (e) {
+    console.error(url, e)
+  }
 }

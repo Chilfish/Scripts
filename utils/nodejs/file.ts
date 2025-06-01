@@ -96,7 +96,7 @@ export async function readJson<T = any>(file: string) {
   }
   catch (e) {
     console.error(`Error parsing JSON from ${file}:`, e)
-    throw e
+    return data as T
   }
 }
 
