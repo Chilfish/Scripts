@@ -46,6 +46,7 @@ export function viteConfig(
         ...monkeyConfig,
         userscript: {
           name,
+          author: 'Chilfish',
           namespace: 'chilfish/monkey',
           downloadURL,
           updateURL,

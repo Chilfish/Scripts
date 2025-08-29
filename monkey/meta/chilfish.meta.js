@@ -2,7 +2,7 @@
 // @name         Chilfish's script
 // @namespace    chilfish/monkey
 // @version      2025.06.01
-// @author       monkey
+// @author       Chilfish
 // @description  Chilfish's script
 // @icon         https://unavatar.io/chilfish
 // @downloadURL  https://github.com/Chilfish/Scripts/raw/main/monkey/chilfish.user.js

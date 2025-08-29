@@ -47,18 +47,18 @@ export interface ArgvOption<T = any> {
   beforeSet?: (value: T) => T
 }
 
-type GetOptionType<T extends ArgvOption> =
-  T extends { type: 'number' } ? number :
-    T extends { type: 'boolean' } ? boolean :
-      T extends { type: 'string' } ? string :
-        T extends { type: 'enum' } ?
-          T extends { enumValues: readonly string[] } ?
-            T['enumValues'][number] : string : string
+type GetOptionType<T extends ArgvOption>
+  = T extends { type: 'number' } ? number
+    : T extends { type: 'boolean' } ? boolean
+      : T extends { type: 'string' } ? string
+        : T extends { type: 'enum' }
+          ? T extends { enumValues: readonly string[] }
+            ? T['enumValues'][number] : string : string
 
-type GetOptionValue<T extends ArgvOption> =
-  T extends { required: true } ? GetOptionType<T> :
-    T extends { default: any } ? GetOptionType<T> :
-      GetOptionValue<T> | undefined
+type GetOptionValue<T extends ArgvOption>
+  = T extends { required: true } ? GetOptionType<T>
+    : T extends { default: any } ? GetOptionType<T>
+      : GetOptionValue<T> | undefined
 
 export type OptionsResult<T extends ArgvOption[]> = {
   [P in T[number] as P['key']]: GetOptionValue<P>

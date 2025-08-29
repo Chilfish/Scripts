@@ -22,7 +22,7 @@ Remove-Item Alias:ni -Force -ErrorAction Ignore
 Remove-Item Alias:copy -Force -ErrorAction Ignore
 Remove-Item Alias:conda -Force -ErrorAction Ignore
 
-New-Alias git hub
+# New-Alias git hub
 New-Alias Set-LocationWithFnm z
 New-Alias which Get-Command
 New-Alias open start-Process
@@ -30,7 +30,7 @@ New-Alias code code-insiders.cmd
 New-Alias py uv
 New-Alias pyx uvx
 
-New-Alias pnpm "D:/Scoop/shims/pnpm"
+# New-Alias pnpm "D:/Scoop/shims/pnpm"
 New-Alias bash "D:/Scoop/shims/bash.exe"
 New-Alias vscode "D:/Dev/VSCode/bin/code.cmd"
 New-Alias curl D:/Scoop/shims/curl.exe
@@ -46,20 +46,21 @@ $proxy = "http://127.0.0.1:7890"
 $Env:IS_NODE="TRUE"
 $Env:PROXY=$proxy
 
+$Env:CLAUDE_CODE_GIT_BASH_PATH = "D:/Scoop/apps/git/current/bin/bash.exe"
 $Env:PATH += ";D:/Dev/Sublime Merge;C:/Users/Chilfish/.local/bin;"
 $Env:EDITOR = "D:/Scoop/shims/nvim.exe"
 
 # https://github.com/xampprocky/tokei
 function codeCount {
-  tokei -s lines -e pnpm-lock.yaml $args . 
+  tokei -s lines -e "**/components/ui/" -e pnpm-lock.yaml $args . 
 }
 
 # https://github.com/yt-dlp/yt-dlp#readme
 function ytd {
   $_args = @(
-    "--cookies", "$me/cookies.txt",
-    "-o", "$videos/%(title)s.mp4"
-    "--remux-video", "mp4"
+    # "--cookies", "$me/cookies.txt",
+    "--cookies-from-browser", "firefox",
+    "-o", "$videos/%(uploader)s - %(title)s - %(upload_date>%Y-%m-%d)s - %(id)s.mp4"
   )
 
   & yt-dlp $_args $args
@@ -134,7 +135,7 @@ function get-relative {
   param (
     [string]$path
   )
-  $relative = [System.IO.Path]::GetRelativePath($pwd, $path).Replace("\", "/")
+  $relative = [System.IO.Path]::GetRelativePath($pwd, $path).Replace("/", "/")
   return $relative
 }
 
@@ -163,6 +164,14 @@ function smallMp4 {
   )
   $basename = get-filename $video
   ffmpeg -i $video $smallArgs "small-$basename.mp4"
+}
+
+function get-subtitle {
+  param(
+    [string]$video
+  )
+  $basename = get-filename $video
+  ffmpeg -i $video -map 0:s:0 "$basename.ass"
 }
 
 # get battery report
@@ -273,14 +282,6 @@ function update-scoop {
 function ip {
   curl -x $proxy "https://ipinfo.io?token=$Env:ip_token"
 }
-function openx {
-  param([string]$str)
-  if ($str -match '(\d+)$') {
-    $id = $matches[1]
-    $url = "https://x.com/i/status/$id"
-    Start-Process $url
-  }
-}
 
 function randomString($length = 16) {
   $chars = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!@#$%^&*()_+-=[]{}|;:,.<>?`~"
@@ -297,50 +298,23 @@ function y {
     Remove-Item -Path $tmp
 }
 
-function New-Symlink {
-    param (
-        [string]$TargetPath,
-        [string]$LinkPath
-    )
-
-    # 检查目标路径是否存在
-    if (!(Test-Path -Path $TargetPath)) {
-        Write-Error "目标路径 '$TargetPath' 不存在."
-        return $false
-    }
-
-    # 检查软链接是否已经存在
-    if (Test-Path -Path $LinkPath) {
-        Write-Error "软链接 '$LinkPath' 已经存在."
-        return $false
-    }
-
-    # 创建软链接
-    try {
-        New-Item -ItemType SymbolicLink -Path $LinkPath -Target $TargetPath
-        Write-Host "成功创建软链接: '$LinkPath' -> '$TargetPath'"
-        return $true
-    }
-    catch {
-        Write-Error "创建软链接失败: $($_.Exception.Message)"
-        return $false
-    }
-}
-
 function copy {
   & bun run $scripts/cli/cp.ts $args
 }
 
 function downList {
-  & bun run $scripts\crawler\down-file.ts
+  & bun run $scripts/crawler/down-file.ts
 }
 
 function yt {
-  & bun run $scripts\cli\video-dlp.ts --url $args
+  & bun run $scripts/cli/video-dlp.ts --url $args
 }
 
 function subMp4 {
   bun run $scripts/cli/sub-mp4.ts -i $args
 }
 
-
+function init {
+  & runBg "caddy run -c H:/caddy/Caddyfile"
+  & runBg "bun run H:/hono-proxy/dist/index.js"
+}

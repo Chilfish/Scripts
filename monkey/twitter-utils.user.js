@@ -2,7 +2,7 @@
 // @name         推特小工具
 // @namespace    chilfish/monkey
 // @version      2025.06.01
-// @author       monkey
+// @author       Chilfish
 // @description  推特小工具
 // @icon         https://abs.twimg.com/favicons/twitter.ico
 // @downloadURL  https://github.com/Chilfish/Scripts/raw/main/monkey/twitter-utils.user.js
@@ -21,39 +21,31 @@
 (function () {
   'use strict'
 
-  const __defProp = Object.defineProperty
-  const __defNormalProp = (obj, key, value) => key in obj ? __defProp(obj, key, { enumerable: true, configurable: true, writable: true, value }) : obj[key] = value
-  const __publicField = (obj, key, value) => __defNormalProp(obj, typeof key !== 'symbol' ? `${key}` : key, value)
-  const _GM_addStyle = /* @__PURE__ */ (() => typeof GM_addStyle != 'undefined' ? GM_addStyle : void 0)()
-  const _GM_deleteValue = /* @__PURE__ */ (() => typeof GM_deleteValue != 'undefined' ? GM_deleteValue : void 0)()
-  const _GM_download = /* @__PURE__ */ (() => typeof GM_download != 'undefined' ? GM_download : void 0)()
-  const _GM_getValue = /* @__PURE__ */ (() => typeof GM_getValue != 'undefined' ? GM_getValue : void 0)()
-  const _GM_setValue = /* @__PURE__ */ (() => typeof GM_setValue != 'undefined' ? GM_setValue : void 0)()
-  const _unsafeWindow = /* @__PURE__ */ (() => typeof unsafeWindow != 'undefined' ? unsafeWindow : void 0)()
+  const _GM_addStyle = (() => typeof GM_addStyle != 'undefined' ? GM_addStyle : void 0)()
+  const _GM_deleteValue = (() => typeof GM_deleteValue != 'undefined' ? GM_deleteValue : void 0)()
+  const _GM_download = (() => typeof GM_download != 'undefined' ? GM_download : void 0)()
+  const _GM_getValue = (() => typeof GM_getValue != 'undefined' ? GM_getValue : void 0)()
+  const _GM_setValue = (() => typeof GM_setValue != 'undefined' ? GM_setValue : void 0)()
+  const _unsafeWindow = (() => typeof unsafeWindow != 'undefined' ? unsafeWindow : void 0)()
   const appname = '[twitter-utils]'
   const logger = {
     info: console.info,
     warn: console.warn,
     error: console.error,
     errorWithBanner: (msg, err, ...args) => {
-      console.error(appname, msg, (err == null ? void 0 : err.message) ?? 'none', ...args)
+      console.error(appname, msg, err?.message ?? 'none', ...args)
     },
     debug: console.info,
   }
   const globalObject = _unsafeWindow ?? window ?? globalThis
   const xhrOpen = globalObject.XMLHttpRequest.prototype.open
   class ExtensionManager {
+    extensions = new Map()
+    disabledExtensions = new Set()
     constructor() {
-      __publicField(this, 'extensions', /* @__PURE__ */ new Map())
-      __publicField(this, 'disabledExtensions', /* @__PURE__ */ new Set())
       this.installHttpHooks()
     }
 
-    /**
-     * Register and instantiate a new extension.
-     *
-     * @param Ctor Extension constructor.
-     */
     add(Ctor) {
       try {
         logger.debug(`Register new extension: ${Ctor.name}`)
@@ -65,9 +57,6 @@
       }
     }
 
-    /**
-     * Set up all enabled extensions.
-     */
     start() {
       for (const ext of this.extensions.values()) {
         if (this.disabledExtensions.has(ext.name)) {
@@ -109,10 +98,6 @@
       return [...this.extensions.values()]
     }
 
-    /**
-     * Here we hooks the browser's XHR method to intercept Twitter's Web API calls.
-     * This need to be done before any XHR request is made.
-     */
     installHttpHooks() {
       const manager = this
       globalObject.XMLHttpRequest.prototype.open = function (method, url) {
@@ -137,36 +122,27 @@
       }, 1e3)
     }
   }
-  var ExtensionType = /* @__PURE__ */ ((ExtensionType2) => {
+  var ExtensionType = ((ExtensionType2) => {
     ExtensionType2.TWEET = 'tweet'
     ExtensionType2.USER = 'user'
     ExtensionType2.NONE = 'none'
     return ExtensionType2
   })(ExtensionType || {})
   class Extension {
+    name = ''
+    enabled = true
+    type = 'none'
+    manager
     constructor(manager) {
-      __publicField(this, 'name', '')
-      __publicField(this, 'enabled', true)
-      __publicField(this, 'type', 'none')
-      __publicField(this, 'manager')
       this.manager = manager
     }
 
-    /**
-     * Optionally run side effects when enabled.
-     */
     setup() {
     }
 
-    /**
-     * Optionally clear side effects when disabled.
-     */
     dispose() {
     }
 
-    /**
-     * Intercept HTTP responses.
-     */
     intercept() {
       return null
     }
@@ -282,12 +258,11 @@
         activeThreads--
     }
     const handleRetry = (task, result) => {
-      let _a, _b
       retryCount++
       if (retryCount === 3)
         activeThreads = 1
-      if (task.retry && task.retry >= MAX_RETRY || ((_a = result.details) == null ? void 0 : _a.current) === 'USER_CANCELED') {
-        (_b = task.onerror) == null ? void 0 : _b.call(task, result)
+      if (task.retry && task.retry >= MAX_RETRY || result.details?.current === 'USER_CANCELED') {
+        task.onerror?.(result)
       }
       else {
         if (activeThreads === 1)
@@ -308,8 +283,7 @@
             name,
             saveAs: isSaveAs,
             onload: () => {
-              let _a;
-              (_a = task.onload) == null ? void 0 : _a.call(task)
+              task.onload?.()
               resolve()
             },
             onerror: (result) => {
@@ -333,9 +307,7 @@
     btn.classList.add(className)
   }
   const historyKey = 'download_history'
-  const proxyKey = 'download_proxy'
   const idHistory = store.get(historyKey, [])
-  const proxyDownload = store.get(proxyKey, false)
   function addHistory(status_id) {
     if (idHistory.includes(status_id))
       return
@@ -354,7 +326,7 @@
     setTimeout(() => listitems.forEach(addButtonToImgs), 1e3)
   }
   function getStatusInfo(item) {
-    if (!(item == null ? void 0 : item.href)) {
+    if (!item?.href) {
       return {
         statusId: '',
         username: '',
@@ -386,7 +358,6 @@
     const media_selector = [
       'a[href*="/photo/1"]',
       'a[href="/settings/content_you_see"]',
-      // hidden content
     ]
     const media = $(media_selector.join(','), article)
     if (!media)
@@ -402,11 +373,8 @@
       const btn_group = $('div[role="group"]:last-of-type, ul.tweet-actions, ul.tweet-detail-actions', article)
       const btn_down = createDownBtn(statusId)
       btn_down.classList.add('tmd-bar-btn')
-      btn_group == null ? void 0 : btn_group.appendChild(btn_down)
-      const urls = imgLinks.map((item) => {
-        let _a
-        return (_a = $('img', item)) == null ? void 0 : _a.src
-      }).filter(url => !!url)
+      btn_group?.appendChild(btn_down)
+      const urls = imgLinks.map(item => $('img', item)?.src).filter(url => !!url)
       btn_down.onclick = (e) => {
         e.preventDefault()
         e.stopPropagation()
@@ -442,15 +410,11 @@
       const name = `${userId}-${formatTime}-${statusId}${afterFix}.png`
       const url = new URL(imgUrl)
       url.search = '?format=png&name=large'
-      let downloadUrl = url.href
+      const downloadUrl = url.href
       console.log('download', imgUrl, name)
-      if (proxyDownload) {
-        downloadUrl = `https://proxy.chilfish.top/${name}?url=${downloadUrl}`
-      }
       downloader.add({
         url: downloadUrl,
         name,
-        saveAs: proxyDownload,
         onload: async () => {
           setStatus(btn, 'completed')
           addHistory(statusId)
@@ -470,7 +434,6 @@
   const isEnable = store.get('enableRmTweets', false)
   const whiteList = store.get('whiteList', [])
   function removeRetweets(el) {
-    let _a
     if (!isEnable)
       return
     const svgWapper = '.css-175oi2r.r-18kxxzh.r-ogg1b9.r-1mrc8m9.r-obd0qt.r-1777fci'
@@ -480,8 +443,8 @@
     const article = svg.closest('article')
     if (!article)
       return
-    const reTweetUser = (_a = $('span[data-testid="socialContext"]', article)) == null ? void 0 : _a.parentElement
-    const username = (reTweetUser == null ? void 0 : reTweetUser.href.split('/').pop()) || ''
+    const reTweetUser = $('span[data-testid="socialContext"]', article)?.parentElement
+    const username = reTweetUser?.href.split('/').pop() || ''
     if (whiteList.includes(username))
       return
     article.remove()
@@ -540,7 +503,6 @@
     return isTimelineEntryModule(entry) && entry.entryId.startsWith('profile-conversation-') && Array.isArray(entry.content.items)
   }
   function extractTweetUnion(tweet) {
-    let _a, _b
     try {
       if (tweet.__typename === 'Tweet') {
         return tweet
@@ -549,7 +511,7 @@
         return tweet.tweet
       }
       if (tweet.__typename === 'TweetTombstone') {
-        logger.warn(`TweetTombstone received (Reason: ${(_b = (_a = tweet.tombstone) == null ? void 0 : _a.text) == null ? void 0 : _b.text})`, tweet)
+        logger.warn(`TweetTombstone received (Reason: ${tweet.tombstone?.text?.text})`, tweet)
         return null
       }
       if (tweet.__typename === 'TweetUnavailable') {
@@ -580,8 +542,8 @@
     return linkify(`https://x.com/${name}`, `@${name}`)
   }
   class TextParser {
+    text
     constructor(text) {
-      __publicField(this, 'text')
       this.text = text
     }
 
@@ -617,11 +579,10 @@
     return new TextParser(text).parse()
   }
   function processTweet() {
-    let _a, _b
     const oldElement = $('div[role="link"]')
     if (oldElement) {
-      const newElement = oldElement.cloneNode(true);
-      (_a = oldElement.parentNode) == null ? void 0 : _a.replaceChild(newElement, oldElement)
+      const newElement = oldElement.cloneNode(true)
+      oldElement.parentNode?.replaceChild(newElement, oldElement)
     }
     const tweetTexts = $$('div[data-testid="tweetText"]').splice(0, 2).map((div, idx) => {
       div.contentEditable = 'true'
@@ -644,11 +605,10 @@
     margin-top: 8px;
     color: #536471;
     font-size: 0.9rem;
-  `;
-    (_b = tweetTexts[0].parentElement) == null ? void 0 : _b.appendChild(time.cloneNode(true))
+  `
+    tweetTexts[0].parentElement?.appendChild(time.cloneNode(true))
   }
   async function editTweet() {
-    let _a, _b
     const isInjected = document.getElementById('edit-tweet') !== null
     if (isInjected)
       return
@@ -663,8 +623,8 @@
     font-size: 1rem;
     margin-left: 6px;
     cursor: pointer;
-`;
-    (_b = (_a = btn.parentElement) == null ? void 0 : _a.parentElement) == null ? void 0 : _b.appendChild(newBtn)
+`
+    btn.parentElement?.parentElement?.appendChild(newBtn)
     newBtn.onclick = processTweet
   }
   function webArchiveUrl(id, name = 'i') {
@@ -693,11 +653,10 @@
       font-weight: 700;
     `
       a.href = archiveUrl
-      node == null ? void 0 : node.append(a)
+      node?.append(a)
     })
   }
   const TweetDetailInterceptor = (req, res, ext) => {
-    let _a, _b
     if (!/\/graphql\/.+\/TweetDetail/.test(req.url)) {
       return
     }
@@ -707,7 +666,7 @@
       const timelineAddEntriesInstruction = instructions.find(
         i => i.type === 'TimelineAddEntries',
       )
-      const timelineAddEntriesInstructionEntries = (timelineAddEntriesInstruction == null ? void 0 : timelineAddEntriesInstruction.entries) ?? []
+      const timelineAddEntriesInstructionEntries = timelineAddEntriesInstruction?.entries ?? []
       for (const entry of timelineAddEntriesInstructionEntries) {
         if (isTimelineEntryTweet(entry)) {
           const tweet = extractTimelineTweet(entry.content.itemContent)
@@ -717,7 +676,7 @@
           else {
             const tweetId = entry.entryId.split('-')[1]
             const replyItem = timelineAddEntriesInstructionEntries[1]
-            const name = ((_b = (_a = replyItem.content) == null ? void 0 : _a.itemContent.tweet_results.result.legacy.entities.user_mentions[0]) == null ? void 0 : _b.screen_name) || 'i'
+            const name = replyItem.content?.itemContent.tweet_results.result.legacy.entities.user_mentions[0]?.screen_name || 'i'
             viewInArchiver(tweetId, name)
           }
         }
@@ -734,12 +693,8 @@
     }
   }
   class TweetDetailModule extends Extension {
-    constructor() {
-      super(...arguments)
-      __publicField(this, 'name', 'TweetDetailModule')
-      __publicField(this, 'type', ExtensionType.TWEET)
-    }
-
+    name = 'TweetDetailModule'
+    type = ExtensionType.TWEET
     intercept() {
       return TweetDetailInterceptor
     }
@@ -777,7 +732,7 @@
       const timelineAddEntriesInstruction = instructions.find(
         i => i.type === 'TimelineAddEntries',
       )
-      const timelineAddEntriesInstructionEntries = (timelineAddEntriesInstruction == null ? void 0 : timelineAddEntriesInstruction.entries) ?? []
+      const timelineAddEntriesInstructionEntries = timelineAddEntriesInstruction?.entries ?? []
       let followersCount = 0
       for (const entry of timelineAddEntriesInstructionEntries) {
         if (isTimelineEntryTweet(entry)) {
@@ -786,7 +741,7 @@
             newData.push(tweet)
           }
           if (followersCount === 0) {
-            followersCount = (tweet == null ? void 0 : tweet.core.user_results.result.legacy.followers_count) ?? 0
+            followersCount = tweet?.core.user_results.result.legacy.followers_count ?? 0
             fixFollowers(followersCount)
           }
         }
@@ -803,12 +758,8 @@
     }
   }
   class UserTweetsModule extends Extension {
-    constructor() {
-      super(...arguments)
-      __publicField(this, 'name', 'UserTweetsModule')
-      __publicField(this, 'type', ExtensionType.TWEET)
-    }
-
+    name = 'UserTweetsModule'
+    type = ExtensionType.TWEET
     intercept() {
       return UserTweetsInterceptor
     }

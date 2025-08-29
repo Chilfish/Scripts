@@ -23,5 +23,6 @@ export default antfu({
     '*.py',
     '*.ps1',
     'pnpm-lock.yaml',
+    'python/**',
   ],
 })

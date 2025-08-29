@@ -11,7 +11,8 @@ node_modules
 dist
 dist-ssr
 *.local
-
+*.aac
+*.srt
 
 .idea
 .DS_Store

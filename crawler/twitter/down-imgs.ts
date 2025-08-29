@@ -7,7 +7,13 @@ const urls = new Set<string>()
 
 console.log(tweets.length)
 
+const startAt = new Date('2025-05-05')
+
 const medias = tweets
+  .filter((tweet: any) => {
+    const createdAt = new Date(tweet.created_at || tweet.createdAt || Date.now())
+    return createdAt >= startAt && tweet.media && tweet.media.length > 0
+  })
   .map((tweet: any) => {
     const medias = getMediaUrl(tweet)
     const retweets = getMediaUrl(tweet.retweeted_status)
@@ -25,7 +31,7 @@ function getMediaUrl(tweet: any) {
     return []
   }
 
-  return (tweet.media as any[]).map(({ url, type }, idx) => {
+  return (tweet.media as any[]).map(({ original: url, type }, idx) => {
     if (!url || urls.has(url)) {
       return null
     }
@@ -37,9 +43,10 @@ function getMediaUrl(tweet: any) {
       tweet.created_at || tweet.createdAt || Date.now(),
       'YYYYMMDD_HHmmss',
     )
+    const username = tweet.screen_name || tweet.username || 'unknown'
     const ext = type === 'video' ? 'mp4' : 'png'
 
-    const filename = `${id}-${craetedAt}${suffix}.${ext}`
+    const filename = `${username}-${id}-${craetedAt}${suffix}.${ext}`
 
     const largeUrl = new URL(url)
 

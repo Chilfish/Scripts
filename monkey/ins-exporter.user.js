@@ -2,7 +2,7 @@
 // @name         Instagram Exporter
 // @namespace    chilfish/monkey
 // @version      2025.04.02
-// @author       monkey
+// @author       Chilfish
 // @description  Export Instagram posts
 // @icon         https://www.instagram.com/static/images/ico/favicon-192.png/68d99ba29cc8.png
 // @downloadURL  https://github.com/Chilfish/Scripts/raw/main/monkey/ins-exporter.user.js
@@ -103,12 +103,12 @@
     const milliseconds = pad(date.getMilliseconds())
     return fmt.replace('YYYY', year.toString()).replace('MM', month).replace('DD', day).replace('HH', hours).replace('mm', minutes).replace('ss', seconds).replace('SSS', milliseconds)
   }
-  const _GM_deleteValue = /* @__PURE__ */ (() => typeof GM_deleteValue != 'undefined' ? GM_deleteValue : void 0)()
-  const _GM_download = /* @__PURE__ */ (() => typeof GM_download != 'undefined' ? GM_download : void 0)()
-  const _GM_getValue = /* @__PURE__ */ (() => typeof GM_getValue != 'undefined' ? GM_getValue : void 0)()
-  const _GM_registerMenuCommand = /* @__PURE__ */ (() => typeof GM_registerMenuCommand != 'undefined' ? GM_registerMenuCommand : void 0)()
-  const _GM_setValue = /* @__PURE__ */ (() => typeof GM_setValue != 'undefined' ? GM_setValue : void 0)()
-  const _unsafeWindow = /* @__PURE__ */ (() => typeof unsafeWindow != 'undefined' ? unsafeWindow : void 0)()
+  const _GM_deleteValue = (() => typeof GM_deleteValue != 'undefined' ? GM_deleteValue : void 0)()
+  const _GM_download = (() => typeof GM_download != 'undefined' ? GM_download : void 0)()
+  const _GM_getValue = (() => typeof GM_getValue != 'undefined' ? GM_getValue : void 0)()
+  const _GM_registerMenuCommand = (() => typeof GM_registerMenuCommand != 'undefined' ? GM_registerMenuCommand : void 0)()
+  const _GM_setValue = (() => typeof GM_setValue != 'undefined' ? GM_setValue : void 0)()
+  const _unsafeWindow = (() => typeof unsafeWindow != 'undefined' ? unsafeWindow : void 0)()
   function $(selector, root) {
     return (root || document).querySelector(selector)
   }
@@ -182,12 +182,11 @@
         activeThreads--
     }
     const handleRetry = (task, result) => {
-      let _a, _b
       retryCount++
       if (retryCount === 3)
         activeThreads = 1
-      if (task.retry && task.retry >= MAX_RETRY || ((_a = result.details) == null ? void 0 : _a.current) === 'USER_CANCELED') {
-        (_b = task.onerror) == null ? void 0 : _b.call(task, result)
+      if (task.retry && task.retry >= MAX_RETRY || result.details?.current === 'USER_CANCELED') {
+        task.onerror?.(result)
       }
       else {
         if (activeThreads === 1)
@@ -208,8 +207,7 @@
             name,
             saveAs: isSaveAs,
             onload: () => {
-              let _a;
-              (_a = task.onload) == null ? void 0 : _a.call(task)
+              task.onload?.()
               resolve()
             },
             onerror: (result) => {
@@ -243,7 +241,7 @@
         const { code, caption, owner, carousel_media, image_versions2 } = node
         if (!caption)
           return null
-        let images = carousel_media == null ? void 0 : carousel_media.map(({ image_versions2: image_versions22 }) => image_versions22.candidates[0].url)
+        let images = carousel_media?.map(({ image_versions2: image_versions22 }) => image_versions22.candidates[0].url)
         if (!images)
           images = [image_versions2.candidates[0].url]
         user = {
@@ -259,15 +257,15 @@
         }
       }).filter(Boolean),
     )
-    if (!(page_info == null ? void 0 : page_info.has_next_page) && tweets.length > 0) {
-      const now = (/* @__PURE__ */ new Date()).getTime()
+    if (!page_info?.has_next_page && tweets.length > 0) {
+      const now = (new Date()).getTime()
       saveAs(
         { user, tweets },
-        `${user == null ? void 0 : user.username}-${now}.json`,
+        `${user?.username}-${now}.json`,
       )
     }
   }
-  const __vite_glob_0_0 = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
+  const __vite_glob_0_0 = Object.freeze(Object.defineProperty({
     __proto__: null,
     getTweets,
   }, Symbol.toStringTag, { value: 'Module' }))
@@ -290,7 +288,7 @@
     return imgBox
   }
   async function findImgs(imgBox) {
-    const urls = /* @__PURE__ */ new Set()
+    const urls = new Set()
     while (true) {
       const img = $$('img', imgBox)
       img.map(i => urls.add(i.src))
@@ -316,10 +314,9 @@
     saveAs(blob, filename)
   }
   async function main() {
-    let _a
     const imgBox = findImgBox()
     const imgs = await findImgs(imgBox)
-    const time = ((_a = $('time', imgBox.nextElementSibling)) == null ? void 0 : _a.dateTime) || Date.now()
+    const time = $('time', imgBox.nextElementSibling)?.dateTime || Date.now()
     const id = location.pathname.split('/').at(-2)
     console.log({ imgs, time, id })
     let idx = 0
@@ -331,7 +328,7 @@
   }
   _GM_registerMenuCommand('下载媒体', main)
   const enableAllTweets = _GM_getValue('enableAllTweets', false)
-  const modules = /* @__PURE__ */ Object.assign({
+  const modules = Object.assign({
     './modules/user-tweets.ts': __vite_glob_0_0,
   })
   if (enableAllTweets) {

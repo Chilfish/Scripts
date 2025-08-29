@@ -25,12 +25,12 @@
 (function () {
   'use strict'
 
-  const _GM_addStyle = /* @__PURE__ */ (() => typeof GM_addStyle != 'undefined' ? GM_addStyle : void 0)()
-  const _GM_deleteValue = /* @__PURE__ */ (() => typeof GM_deleteValue != 'undefined' ? GM_deleteValue : void 0)()
-  const _GM_download = /* @__PURE__ */ (() => typeof GM_download != 'undefined' ? GM_download : void 0)()
-  const _GM_getValue = /* @__PURE__ */ (() => typeof GM_getValue != 'undefined' ? GM_getValue : void 0)()
-  const _GM_setValue = /* @__PURE__ */ (() => typeof GM_setValue != 'undefined' ? GM_setValue : void 0)()
-  const _unsafeWindow = /* @__PURE__ */ (() => typeof unsafeWindow != 'undefined' ? unsafeWindow : void 0)()
+  const _GM_addStyle = (() => typeof GM_addStyle != 'undefined' ? GM_addStyle : void 0)()
+  const _GM_deleteValue = (() => typeof GM_deleteValue != 'undefined' ? GM_deleteValue : void 0)()
+  const _GM_download = (() => typeof GM_download != 'undefined' ? GM_download : void 0)()
+  const _GM_getValue = (() => typeof GM_getValue != 'undefined' ? GM_getValue : void 0)()
+  const _GM_setValue = (() => typeof GM_setValue != 'undefined' ? GM_setValue : void 0)()
+  const _unsafeWindow = (() => typeof unsafeWindow != 'undefined' ? unsafeWindow : void 0)()
   const store = {
     get(key, fallback) {
       const data = _GM_getValue(key)
@@ -72,12 +72,11 @@
         activeThreads--
     }
     const handleRetry = (task, result) => {
-      let _a, _b
       retryCount++
       if (retryCount === 3)
         activeThreads = 1
-      if (task.retry && task.retry >= MAX_RETRY || ((_a = result.details) == null ? void 0 : _a.current) === 'USER_CANCELED') {
-        (_b = task.onerror) == null ? void 0 : _b.call(task, result)
+      if (task.retry && task.retry >= MAX_RETRY || result.details?.current === 'USER_CANCELED') {
+        task.onerror?.(result)
       }
       else {
         if (activeThreads === 1)
@@ -98,8 +97,7 @@
             name,
             saveAs: isSaveAs,
             onload: () => {
-              let _a;
-              (_a = task.onload) == null ? void 0 : _a.call(task)
+              task.onload?.()
               resolve()
             },
             onerror: (result) => {
@@ -122,22 +120,17 @@
   const config = {
     disclaimer: _GM_getValue('disclaimer', false),
     icon: {
-      // 可选: image/svg/font
       image: {
         url: iconBase64,
-        // 图标尺寸
         borderRadius: '50%',
-        // 形状（50%为圆形）
       },
     },
-    // 位置配置
     position: {
       bottom: '8rem',
       left: '2rem',
     },
     animation: {
       duration: 0.35,
-      // 动画时长(s)
       easing: 'cubic-bezier(0.4, 0, 0.2, 1)',
     },
   }
@@ -331,8 +324,7 @@
       item.appendChild(label)
       item.appendChild(img)
       item.addEventListener('click', (e) => {
-        let _a
-        if (((_a = e.target) == null ? void 0 : _a.tagName) !== 'INPUT') {
+        if (e.target?.tagName !== 'INPUT') {
           checkbox.checked = !checkbox.checked
           item.classList.toggle('selected', checkbox.checked)
         }
@@ -357,11 +349,10 @@
     document.body.appendChild(overlay)
     confirmBtn.addEventListener('click', async () => {
       const selectedImages = Array.from(document.querySelectorAll('.image-checkbox:checked')).map((checkbox) => {
-        let _a, _b
-        const item = (_b = (_a = checkbox.parentElement) == null ? void 0 : _a.querySelector('img')) == null ? void 0 : _b.dataset
+        const item = checkbox.parentElement?.querySelector('img')?.dataset
         return {
-          index: item == null ? void 0 : item.index,
-          url: item == null ? void 0 : item.url,
+          index: item?.index,
+          url: item?.url,
         }
       })
       if (selectedImages.length === 0) {

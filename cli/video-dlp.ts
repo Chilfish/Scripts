@@ -1,4 +1,4 @@
-import type { ArgsOptions, VideoProgress } from 'ytdlp-nodejs'
+import type { ArgsOptions, VideoInfo, VideoProgress } from 'ytdlp-nodejs'
 import { homedir } from 'node:os'
 import path from 'node:path'
 import { YtDlp } from 'ytdlp-nodejs'
@@ -53,7 +53,7 @@ const videoId = url.searchParams.get('v')
 
 const cacheId = `${url.hostname}/${videoId}`
 
-const videoInfo = await cachedData(`data/ytd/${cacheId}.json`, () => ytDlp.getInfoAsync(args.url))
+const videoInfo = await cachedData(`data/ytd/${cacheId}.json`, () => ytDlp.getInfoAsync(args.url) as Promise<VideoInfo>)
 
 const isTwitter = /(x|twitter)\.com/.test(args.url)
 const isWeibo = /weibo\.com/.test(args.url)
@@ -84,7 +84,8 @@ const commonOptions: ArgsOptions & {
 } = {
   paths: args.path,
   embedThumbnail: true,
-  cookies: cookiesPath,
+  // cookies: cookiesPath,
+  cookiesFromBrowser: 'firefox',
   onProgress,
 }
 
@@ -124,7 +125,7 @@ await ytDlp.downloadAsync(args.url, {
   output: fileName,
   format: {
     filter: 'mergevideo',
-    type: 'mkv',
+    type: 'mp4',
     quality: 'highest',
   },
 }).catch(async (error) => {

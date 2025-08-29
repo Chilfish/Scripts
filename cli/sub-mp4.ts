@@ -31,7 +31,7 @@ if (!subtitle) {
   subtitle = path.resolve(inputDir, `${inputName}.ass`)
 }
 
-const output = path.resolve(inputDir, `${inputName} - subtitle.mkv`)
+const output = path.resolve(inputDir, `${inputName} - subtitle.mp4`)
 const subtitleTmp = 'tmp.ass'
 const subtitleTmpPath = path.resolve(process.cwd(), subtitleTmp)
 
@@ -49,10 +49,11 @@ await cp(
 const ffmpegBin = await which('ffmpeg')
 
 const ffmpegArgs = [
+  // '-itsoffset', '1.5', // 假设字幕比视频慢2秒，这里让字幕早2秒开始处理
   '-i',
   `"${input}"`,
   '-vf',
-  `ass="${subtitleTmp}"`,
+  `subtitles="${subtitleTmp}"`,
   '-c:v libx264',
   '-c:a aac',
   '-b:a 192k',

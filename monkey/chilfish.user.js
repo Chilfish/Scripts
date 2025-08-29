@@ -2,7 +2,7 @@
 // @name         Chilfish's script
 // @namespace    chilfish/monkey
 // @version      2025.06.01
-// @author       monkey
+// @author       Chilfish
 // @description  Chilfish's script
 // @icon         https://unavatar.io/chilfish
 // @downloadURL  https://github.com/Chilfish/Scripts/raw/main/monkey/chilfish.user.js
@@ -19,12 +19,11 @@
 (function () {
   'use strict'
 
-  let _a
-  const _GM_addStyle = /* @__PURE__ */ (() => typeof GM_addStyle != 'undefined' ? GM_addStyle : void 0)()
-  const _GM_deleteValue = /* @__PURE__ */ (() => typeof GM_deleteValue != 'undefined' ? GM_deleteValue : void 0)()
-  const _GM_download = /* @__PURE__ */ (() => typeof GM_download != 'undefined' ? GM_download : void 0)()
-  const _GM_getValue = /* @__PURE__ */ (() => typeof GM_getValue != 'undefined' ? GM_getValue : void 0)()
-  const _GM_setValue = /* @__PURE__ */ (() => typeof GM_setValue != 'undefined' ? GM_setValue : void 0)()
+  const _GM_addStyle = (() => typeof GM_addStyle != 'undefined' ? GM_addStyle : void 0)()
+  const _GM_deleteValue = (() => typeof GM_deleteValue != 'undefined' ? GM_deleteValue : void 0)()
+  const _GM_download = (() => typeof GM_download != 'undefined' ? GM_download : void 0)()
+  const _GM_getValue = (() => typeof GM_getValue != 'undefined' ? GM_getValue : void 0)()
+  const _GM_setValue = (() => typeof GM_setValue != 'undefined' ? GM_setValue : void 0)()
   function $(selector, root) {
     return (root || document).querySelector(selector)
   }
@@ -110,12 +109,11 @@
         activeThreads--
     }
     const handleRetry = (task, result) => {
-      let _a2, _b
       retryCount++
       if (retryCount === 3)
         activeThreads = 1
-      if (task.retry && task.retry >= MAX_RETRY || ((_a2 = result.details) == null ? void 0 : _a2.current) === 'USER_CANCELED') {
-        (_b = task.onerror) == null ? void 0 : _b.call(task, result)
+      if (task.retry && task.retry >= MAX_RETRY || result.details?.current === 'USER_CANCELED') {
+        task.onerror?.(result)
       }
       else {
         if (activeThreads === 1)
@@ -136,8 +134,7 @@
             name,
             saveAs: isSaveAs,
             onload: () => {
-              let _a2;
-              (_a2 = task.onload) == null ? void 0 : _a2.call(task)
+              task.onload?.()
               resolve()
             },
             onerror: (result) => {
@@ -175,7 +172,7 @@
       })
     },
   }
-  const __vite_glob_0_0 = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
+  const __vite_glob_0_0 = Object.freeze(Object.defineProperty({
     __proto__: null,
     default: bilibili,
   }, Symbol.toStringTag, { value: 'Module' }))
@@ -226,7 +223,7 @@
       })
     },
   }
-  const __vite_glob_0_1 = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
+  const __vite_glob_0_1 = Object.freeze(Object.defineProperty({
     __proto__: null,
     default: meogirl,
   }, Symbol.toStringTag, { value: 'Module' }))
@@ -255,7 +252,7 @@
     action() {
     },
   }
-  const __vite_glob_0_2 = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
+  const __vite_glob_0_2 = Object.freeze(Object.defineProperty({
     __proto__: null,
     default: twitter,
   }, Symbol.toStringTag, { value: 'Module' }))
@@ -269,7 +266,7 @@
     action: () => {
     },
   }
-  const __vite_glob_0_3 = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
+  const __vite_glob_0_3 = Object.freeze(Object.defineProperty({
     __proto__: null,
     default: weibo,
   }, Symbol.toStringTag, { value: 'Module' }))
@@ -283,7 +280,7 @@
     action: () => {
     },
   }
-  const __vite_glob_0_4 = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
+  const __vite_glob_0_4 = Object.freeze(Object.defineProperty({
     __proto__: null,
     default: youtube,
   }, Symbol.toStringTag, { value: 'Module' }))
@@ -304,7 +301,7 @@
     action: () => {
     },
   }
-  const __vite_glob_0_5 = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
+  const __vite_glob_0_5 = Object.freeze(Object.defineProperty({
     __proto__: null,
     default: zhihu,
   }, Symbol.toStringTag, { value: 'Module' }))
@@ -334,7 +331,7 @@ body {
 `
   _GM_addStyle(baseCss)
   const url = document.location.href
-  const modules = /* @__PURE__ */ Object.assign({
+  const modules = Object.assign({
     './modules/bilibili.ts': __vite_glob_0_0,
     './modules/meogirl.ts': __vite_glob_0_1,
     './modules/twitter.ts': __vite_glob_0_2,
@@ -346,7 +343,7 @@ body {
     const module = modules[path].default
     if (module.pattern.test(url)) {
       module.action()
-      _GM_addStyle(((_a = module.css) == null ? void 0 : _a.call(module)) ?? '')
+      _GM_addStyle(module.css?.() ?? '')
     }
   }
   Object.assign(window, {

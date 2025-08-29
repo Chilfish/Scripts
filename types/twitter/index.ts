@@ -94,13 +94,13 @@ export interface TimelineMessagePrompt {
   __typename: 'TimelineMessagePrompt'
 }
 
-export type ItemContentUnion =
-  | TimelineTweet
-  | TimelineUser
-  | TimelinePrompt
-  | TimelineMessagePrompt
-  | TimelineTimelineCursor
-  | TimelineTwitterList
+export type ItemContentUnion
+  = | TimelineTweet
+    | TimelineUser
+    | TimelinePrompt
+    | TimelineMessagePrompt
+    | TimelineTimelineCursor
+    | TimelineTwitterList
 
 // TimelineEntry.entryId: "who-to-follow-{id}"
 // TimelineEntry.entryId: "profile-conversation-{id}"
