@@ -49,7 +49,6 @@ await cp(
 const ffmpegBin = await which('ffmpeg')
 
 const ffmpegArgs = [
-  // '-itsoffset', '1.5', // 假设字幕比视频慢2秒，这里让字幕早2秒开始处理
   '-i',
   `"${input}"`,
   '-vf',
@@ -57,7 +56,7 @@ const ffmpegArgs = [
   '-c:v libx264',
   '-c:a aac',
   '-b:a 192k',
-  '-crf 25',
+  '-crf 20',
   '-preset superfast',
   '-movflags faststart',
   '-y',

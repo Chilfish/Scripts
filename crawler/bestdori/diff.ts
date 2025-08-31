@@ -2,7 +2,7 @@
  * 查看是否有新数据，有则更新
  */
 
-import { diff } from 'ohash'
+import { diff } from 'ohash/utils'
 import { formatDate, now } from '~/utils'
 import { dir, readJson, writeJson } from '~/utils/nodejs'
 import { explorerUrl, getFileDir } from '.'
