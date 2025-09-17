@@ -1,6 +1,7 @@
 import { pubTime } from '@/utils/common'
 import { formatDate } from '~/utils/date'
-import { $, $$, downloader, store } from '~/utils/dom'
+import { $, $$ } from '~/utils/dom'
+import { downloader, store } from '~/utils/monkey'
 import style from './style.css?raw'
 
 const downloadStatus = ['download', 'completed', 'loading', 'failed'] as const

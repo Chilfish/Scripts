@@ -9,21 +9,12 @@
 // @updateURL    https://github.com/Chilfish/Scripts/raw/main/monkey/meta/chilfish.meta.js
 // @match        *://*/*
 // @grant        GM_addStyle
-// @grant        GM_deleteValue
-// @grant        GM_download
-// @grant        GM_getValue
-// @grant        GM_setValue
 // @run-at       document-end
 // ==/UserScript==
 
 (function () {
   'use strict'
 
-  const _GM_addStyle = (() => typeof GM_addStyle != 'undefined' ? GM_addStyle : void 0)()
-  const _GM_deleteValue = (() => typeof GM_deleteValue != 'undefined' ? GM_deleteValue : void 0)()
-  const _GM_download = (() => typeof GM_download != 'undefined' ? GM_download : void 0)()
-  const _GM_getValue = (() => typeof GM_getValue != 'undefined' ? GM_getValue : void 0)()
-  const _GM_setValue = (() => typeof GM_setValue != 'undefined' ? GM_setValue : void 0)()
   function $(selector, root) {
     return (root || document).querySelector(selector)
   }
@@ -68,89 +59,6 @@
       }
     })
   }
-  const store = {
-    get(key, fallback) {
-      const data = _GM_getValue(key)
-      if (!data) {
-        this.set(key, fallback)
-        return fallback
-      }
-      return data
-    },
-    set(key, value) {
-      _GM_setValue(key, value)
-    },
-    remove(key) {
-      _GM_deleteValue(key)
-    },
-  };
-  (() => {
-    const tasks = []
-    const MAX_RETRY = 2
-    const MAX_THREADS = 2
-    let activeThreads = 0
-    let retryCount = 0
-    const isSaveAs = store.get('saveAs', false)
-    function addTask(task) {
-      tasks.push(task)
-      if (activeThreads < MAX_THREADS) {
-        activeThreads++
-        processNextTask()
-      }
-    }
-    async function processNextTask() {
-      const task = tasks.shift()
-      if (!task)
-        return
-      await executeTask(task)
-      if (tasks.length > 0 && activeThreads <= MAX_THREADS)
-        processNextTask()
-      else
-        activeThreads--
-    }
-    const handleRetry = (task, result) => {
-      retryCount++
-      if (retryCount === 3)
-        activeThreads = 1
-      if (task.retry && task.retry >= MAX_RETRY || result.details?.current === 'USER_CANCELED') {
-        task.onerror?.(result)
-      }
-      else {
-        if (activeThreads === 1)
-          task.retry = (task.retry || 0) + 1
-        addTask(task)
-      }
-    }
-    function executeTask(task) {
-      return new Promise(
-        (resolve) => {
-          let downloadUrl = task.url
-          const name = encodeURIComponent(task.name)
-          if (isSaveAs) {
-            downloadUrl = `https://proxy.chilfish.top/${name}?url=${downloadUrl}`
-          }
-          return _GM_download({
-            url: downloadUrl,
-            name,
-            saveAs: isSaveAs,
-            onload: () => {
-              task.onload?.()
-              resolve()
-            },
-            onerror: (result) => {
-              handleRetry(task, result)
-              resolve()
-            },
-            ontimeout: () => {
-              handleRetry(task, { details: { current: 'TIMEOUT' } })
-              resolve()
-            },
-          })
-        },
-      )
-    }
-    return { add: addTask }
-  })()
   function numFmt(num) {
     return num.toString().replace(/\B(?=(\d{4})+(?!\d))/g, ',')
   }
@@ -305,6 +213,7 @@
     __proto__: null,
     default: zhihu,
   }, Symbol.toStringTag, { value: 'Module' }))
+  const _GM_addStyle = (() => typeof GM_addStyle != 'undefined' ? GM_addStyle : void 0)()
   const baseCss = css`
 html::-webkit-scrollbar {
   width: 8px;height: 8px;

@@ -1,5 +1,4 @@
 import winston from 'winston'
-import { dir } from './file'
 
 export function createLogger(filename?: string) {
   const transports: winston.transport[] = [
@@ -13,18 +12,6 @@ export function createLogger(filename?: string) {
       silent: process.env.NODE_ENV === 'test',
     }),
   ]
-
-  if (filename) {
-    transports.push(...[
-      new winston.transports.File({
-        filename: dir(`D:/logs/${filename}.log`),
-      }),
-      new winston.transports.File({
-        filename: dir(`D:/logs/${filename}.error.log`),
-        level: 'error',
-      }),
-    ])
-  }
 
   return winston.createLogger({
     level: 'debug',

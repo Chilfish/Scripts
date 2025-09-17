@@ -1,5 +1,5 @@
 import { GM_addStyle, GM_getValue, unsafeWindow } from '$'
-import { downloader } from '~/utils/dom'
+import { downloader } from '~/utils/monkey'
 import { iconBase64 } from './constants'
 import style from './style.css?raw'
 
