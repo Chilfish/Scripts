@@ -56,7 +56,7 @@ const ffmpegArgs = [
   '-c:v libx264',
   '-c:a aac',
   '-b:a 192k',
-  '-crf 20',
+  '-crf 22',
   '-preset superfast',
   '-movflags faststart',
   '-y',
